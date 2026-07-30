@@ -55,7 +55,7 @@ private final class MTIStubMetalLayer: CALayer, MTICAMetalLayer {
 extension CAMetalLayer: MTICAMetalLayer {}
 
 /// An image view that immediately draws its `image` on the calling thread. Most of the custom
-/// properties can be accessed from any thread safely. It's recommanded to use the `MTIImageView`
+/// properties can be accessed from any thread safely. It's recommended to use the `MTIImageView`
 /// which draws it's content on the main thread instead of this view.
 public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     override public static var layerClass: AnyClass {

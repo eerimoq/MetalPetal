@@ -39,7 +39,7 @@ public struct MTIColorLookupTableInfo {
             let width = Int(dimensions.width)
             let height = Int(dimensions.height)
             if width == height {
-                // may be a 2d squre
+                // may be a 2d square
                 let possibleDimension = Int(round(pow(Double(width * height), 1.0 / 3.0)))
                 if possibleDimension * possibleDimension * possibleDimension == width * height {
                     dimension = possibleDimension

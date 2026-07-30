@@ -15,7 +15,7 @@ public final class MTIRenderTask: NSObject {
         super.init()
     }
 
-    /// Status of the underlaying command buffer.
+    /// Status of the underlying command buffer.
     public var commandBufferStatus: MTLCommandBufferStatus {
         commandBuffer.status
     }

@@ -361,7 +361,7 @@ extension MTIContext: MTIMemoryWarningHandling {
 // MARK: - Internal
 
 private let MTIContextRenderingLockNotLockedErrorDescription =
-    "Context is performing a render-releated operation without aquiring the renderingLock."
+    "Context is performing a render-releated operation without acquiring the renderingLock."
 
 public extension MTIContext {
     // MARK: Render Target
