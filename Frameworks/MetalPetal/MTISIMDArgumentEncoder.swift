@@ -13,18 +13,15 @@ import MetalPetalObjectiveC.Core
 #endif
 
 @objc(MTISIMDArgumentEncoder) public class MTISIMDArgumentEncoder: NSObject, MTIFunctionArgumentEncoding {
+    
     public enum Error: String, Swift.Error, LocalizedError {
         case argumentTypeMismatch
         public var errorDescription: String? {
-            rawValue
+            return self.rawValue
         }
     }
-
-    public static func encodeValue(
-        _ value: Any,
-        argument: MTLArgument,
-        proxy: MTIFunctionArgumentEncodingProxy
-    ) throws {
+    
+    public static func encodeValue(_ value: Any, argument: MTLArgument, proxy: MTIFunctionArgumentEncodingProxy) throws {
         switch value {
         case let v as SIMD2<Float>:
             guard argument.bufferDataType == .float2 else {
@@ -176,19 +173,19 @@ import MetalPetalObjectiveC.Core
                 throw Error.argumentTypeMismatch
             }
             encode(v, proxy: proxy)
-        #if !os(tvOS)
+#if !os(tvOS)
         case let v as MTLPackedFloat3:
             guard argument.bufferDataType == .float3 else {
                 throw Error.argumentTypeMismatch
             }
             encode(v, proxy: proxy)
-        #endif
+#endif
         default:
             break
         }
     }
 
-    private static func encode(_ value: some Any, proxy: MTIFunctionArgumentEncodingProxy) {
+    private static func encode<T>(_ value: T, proxy: MTIFunctionArgumentEncodingProxy) {
         withUnsafePointer(to: value) { ptr in
             proxy.encodeBytes(ptr, length: UInt(MemoryLayout.size(ofValue: value)))
         }

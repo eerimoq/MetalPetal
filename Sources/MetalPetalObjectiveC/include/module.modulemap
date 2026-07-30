@@ -3,9 +3,4 @@ module MetalPetalObjectiveC {
         header "MetalPetal.h"
         export *
     }
-    explicit module Extension {
-        header "MTIBlendFormulaSupport.h"
-        header "MTISwiftPMBuiltinLibrarySupport.h"
-        export *
-    }
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 import Metal
-import MetalPetalObjectiveC.Extension
 
 /// Modes that describe how source colors blend with destination colors.
 /// See also: https://www.w3.org/TR/compositing-1/

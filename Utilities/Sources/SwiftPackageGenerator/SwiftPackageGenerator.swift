@@ -20,11 +20,6 @@ public struct SwiftPackageGenerator: ParsableCommand {
             header "MetalPetal.h"
             export *
         }
-        explicit module Extension {
-            header "MTIBlendFormulaSupport.h"
-            header "MTISwiftPMBuiltinLibrarySupport.h"
-            export *
-        }
     }
 
     """
@@ -52,42 +47,47 @@ public struct SwiftPackageGenerator: ParsableCommand {
         try processSources(in: sourcesDirectory, fileHandlers: fileHandlers)
         
         //TODO: remove this in swift 5.3
-        try generateBuiltinMetalLibrarySupportCode(headerDirectory: objectiveCHeaderDirectory, sourceDirectory: objectiveCTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
+        try generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: swiftTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
         
         try objectiveCModuleMapContents.write(to: objectiveCHeaderDirectory.appendingPathComponent("module.modulemap"), atomically: true, encoding: .utf8)
     }
     
-    public func generateBuiltinMetalLibrarySupportCode(headerDirectory: URL, sourceDirectory: URL, shadersDirectory: URL) throws {
-        try """
+    public func generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: URL, shadersDirectory: URL) throws {
+        let source = try collectBuiltinMetalLibrarySource(shadersDirectory: shadersDirectory)
+        // The shader source is embedded verbatim using a raw string literal (`#"""..."""#`), so it needs no
+        // escaping. `\##(source)` is the interpolation for the outer `##"""..."""##` raw string.
+        let generatedSwift = ##"""
         // Auto generated.
-        #import <Foundation/Foundation.h>
+        import Foundation
+        import Metal
 
-        FOUNDATION_EXPORT NSURL * _MTISwiftPMBuiltinLibrarySourceURL(void);
+        private let MTIBuiltinLibrarySource = #"""
+        \##(source)
+        """#
 
-        """.write(to: headerDirectory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.h"), atomically: true, encoding: .utf8)
-        
-        try """
-        #import "MTISwiftPMBuiltinLibrarySupport.h"
-        #import "MTILibrarySource.h"
-        #import <Metal/Metal.h>
-
-        static const char *MTIBuiltinLibrarySource = R"mtirawstring(
-        \(try collectBuiltinMetalLibrarySource(shadersDirectory: shadersDirectory))
-        )mtirawstring";
-
-        NSURL * _MTISwiftPMBuiltinLibrarySourceURL(void) {
-            static NSURL *url;
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
-                NSString *targetConditionals = [NSString stringWithFormat:@"#ifndef TARGET_OS_SIMULATOR\\n#define TARGET_OS_SIMULATOR %@\\n#endif",@(TARGET_OS_SIMULATOR)];
-                NSString *librarySource = [targetConditionals stringByAppendingString:[NSString stringWithCString:MTIBuiltinLibrarySource encoding:NSUTF8StringEncoding]];
-                MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
-                options.fastMathEnabled = YES;
-                url = [MTILibrarySourceRegistration.sharedRegistration registerLibraryWithSource:librarySource compileOptions:options];
-            });
-            return url;
+        func _MTISwiftPMBuiltinLibrarySourceURL() -> URL {
+            enum Static {
+                static let url: URL = {
+                    #if targetEnvironment(simulator)
+                    let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR 1\n#endif"
+                    #else
+                    let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR 0\n#endif"
+                    #endif
+                    let librarySource = targetConditionals + MTIBuiltinLibrarySource
+                    let options = MTLCompileOptions()
+                    options.fastMathEnabled = true
+                    return MTILibrarySourceRegistration.shared.registerLibrary(source: librarySource, compileOptions: options)
+                }()
+            }
+            return Static.url
         }
-        """.write(to: sourceDirectory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.mm"), atomically: true, encoding: .utf8)
+
+        """##
+        try generatedSwift.write(
+            to: swiftTargetDirectory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.swift"),
+            atomically: true,
+            encoding: .utf8
+        )
     }
     
     public func collectBuiltinMetalLibrarySource(shadersDirectory: URL) throws -> String {

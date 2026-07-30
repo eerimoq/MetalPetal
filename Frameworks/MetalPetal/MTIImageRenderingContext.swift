@@ -5,7 +5,6 @@
 
 import Foundation
 import Metal
-import MetalPetalObjectiveC.Extension
 
 public let MTIContextImagePersistentResolutionHolderTableName = "MTIContextImagePersistentResolutionHolderTable"
 

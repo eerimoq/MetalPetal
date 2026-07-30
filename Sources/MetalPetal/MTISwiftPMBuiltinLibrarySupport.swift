@@ -1,8 +1,8 @@
-#import "MTISwiftPMBuiltinLibrarySupport.h"
-#import "MTILibrarySource.h"
-#import <Metal/Metal.h>
+// Auto generated.
+import Foundation
+import Metal
 
-static const char *MTIBuiltinLibrarySource = R"mtirawstring(
+private let MTIBuiltinLibrarySource = #"""
 //
 //  MTIShader.h
 //  Pods
@@ -1834,10 +1834,10 @@ namespace metalpetal {
             float2 texcoord;
         } Varyings;
 
-        vertex Varyings colorConversionVertex(const device Vertex * verticies [[ buffer(0) ]],
+        vertex Varyings colorConversionVertex(const device Vertex * vertices [[ buffer(0) ]],
                                               unsigned int vid [[ vertex_id ]]) {
             Varyings out;
-            Vertex v = verticies[vid];
+            Vertex v = vertices[vid];
             out.position = float4(float2(v.position), 0.0, 1.0);
             out.texcoord = v.texcoord;
             return out;
@@ -5693,17 +5693,21 @@ namespace metalpetal {
     }
 }
 
-)mtirawstring";
+"""#
 
-NSURL * _MTISwiftPMBuiltinLibrarySourceURL(void) {
-    static NSURL *url;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSString *targetConditionals = [NSString stringWithFormat:@"#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR %@\n#endif",@(TARGET_OS_SIMULATOR)];
-        NSString *librarySource = [targetConditionals stringByAppendingString:[NSString stringWithCString:MTIBuiltinLibrarySource encoding:NSUTF8StringEncoding]];
-        MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
-        options.fastMathEnabled = YES;
-        url = [MTILibrarySourceRegistration.sharedRegistration registerLibraryWithSource:librarySource compileOptions:options];
-    });
-    return url;
+func _MTISwiftPMBuiltinLibrarySourceURL() -> URL {
+    enum Static {
+        static let url: URL = {
+            #if targetEnvironment(simulator)
+            let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR 1\n#endif"
+            #else
+            let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR 0\n#endif"
+            #endif
+            let librarySource = targetConditionals + MTIBuiltinLibrarySource
+            let options = MTLCompileOptions()
+            options.fastMathEnabled = true
+            return MTILibrarySourceRegistration.shared.registerLibrary(source: librarySource, compileOptions: options)
+        }()
+    }
+    return Static.url
 }

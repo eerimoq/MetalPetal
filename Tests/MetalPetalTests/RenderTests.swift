@@ -8,7 +8,6 @@
 import XCTest
 import MetalPetal
 import MetalPetalTestHelpers
-import MetalPetalObjectiveC.Extension
 import VideoToolbox
 
 final class RenderTests: XCTestCase {

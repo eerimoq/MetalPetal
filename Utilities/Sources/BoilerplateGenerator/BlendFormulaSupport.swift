@@ -16,54 +16,45 @@ struct BlendFormulaSupport {
         let functionConstantsHeaderFile = sourceDirectory.appendingPathComponent("Shaders/MTIShaderFunctionConstants.h")
         let functionConstantsContent = try! String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
         
-        let header = """
+        // The shader template is embedded verbatim in a raw string literal (`#"""..."""#`) so it needs no
+        // escaping. In the outer `##"""..."""##` raw string, `\##(...)` is interpolation, while `\(...)` and
+        // `\n` are emitted literally into the generated file's own (regular) string literals.
+        let imp = ##"""
         //
         // This is an auto-generated source file.
         //
-        
-        #import <Foundation/Foundation.h>
 
-        FOUNDATION_EXPORT NSString * MTIBuildBlendFormulaShaderSource(NSString *formula);
-        
-        """
-        
-        let imp = """
-        //
-        // This is an auto-generated source file.
-        //
-        
-        #import "MTIBlendFormulaSupport.h"
-        
-        static const char *MTIBlendFormulaSupportShaderTemplate = R"mtirawstring(
-        \(shaderHeaderContent)
-        \(functionConstantsContent)
+        import Foundation
+
+        private let MTIBlendFormulaSupportShaderTemplate = #"""
+        \##(shaderHeaderContent)
+        \##(functionConstantsContent)
 
         using namespace metalpetal;
-        
+
         {MTIBlendFormula}
-        
-        \(MetalPetalBlendingShadersCodeGenerator.generateBlendFilterFragmentShader(shaderFunctionName: "customBlend", blendFunctionName: "blend"))
-        
-        \(MetalPetalBlendingShadersCodeGenerator.generateMultilayerCompositeFilterFragmentShader(shaderFunctionName: "multilayerCompositeCustomBlend", blendFunctionName: "blend"))
-        
-        )mtirawstring";
 
-        NSString * MTIBuildBlendFormulaShaderSource(NSString *formula) {
-            static NSString *t;
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
-                t = [NSString stringWithCString:MTIBlendFormulaSupportShaderTemplate encoding:NSUTF8StringEncoding];
-            });
-            NSString *targetConditionals = [NSString stringWithFormat:@"#ifndef TARGET_OS_SIMULATOR\\n#define TARGET_OS_SIMULATOR %@\\n#endif\\n\\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER %@\\n\\n",@(TARGET_OS_SIMULATOR),@([formula containsString:@"modify_source_texture_coordinates"])];
-        
-            return [t stringByReplacingOccurrencesOfString:@"{MTIBlendFormula}" withString:[targetConditionals stringByAppendingString:formula]];
-        };
+        \##(MetalPetalBlendingShadersCodeGenerator.generateBlendFilterFragmentShader(shaderFunctionName: "customBlend", blendFunctionName: "blend"))
 
-        """
-        
+        \##(MetalPetalBlendingShadersCodeGenerator.generateMultilayerCompositeFilterFragmentShader(shaderFunctionName: "multilayerCompositeCustomBlend", blendFunctionName: "blend"))
+
+        """#
+
+        func MTIBuildBlendFormulaShaderSource(_ formula: String) -> String {
+            #if targetEnvironment(simulator)
+            let targetOSSimulator = 1
+            #else
+            let targetOSSimulator = 0
+            #endif
+            let hasTextureCoordinatesModifier = formula.contains("modify_source_texture_coordinates") ? 1 : 0
+            let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR \(targetOSSimulator)\n#endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)\n\n"
+            return MTIBlendFormulaSupportShaderTemplate.replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
+        }
+
+        """##
+
         return [
-            "MTIBlendFormulaSupport.h": header,
-            "MTIBlendFormulaSupport.mm": imp,
+            "MTIBlendFormulaSupport.swift": imp,
         ]
     }
 }

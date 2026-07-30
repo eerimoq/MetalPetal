@@ -2,9 +2,9 @@
 // This is an auto-generated source file.
 //
 
-#import "MTIBlendFormulaSupport.h"
+import Foundation
 
-static const char *MTIBlendFormulaSupportShaderTemplate = R"mtirawstring(
+private let MTIBlendFormulaSupportShaderTemplate = #"""
 //
 //  MTIShader.h
 //  Pods
@@ -980,15 +980,15 @@ fragment float4 multilayerCompositeCustomBlend(
 
 
 
-)mtirawstring";
+"""#
 
-NSString * MTIBuildBlendFormulaShaderSource(NSString *formula) {
-    static NSString *t;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        t = [NSString stringWithCString:MTIBlendFormulaSupportShaderTemplate encoding:NSUTF8StringEncoding];
-    });
-    NSString *targetConditionals = [NSString stringWithFormat:@"#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR %@\n#endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER %@\n\n",@(TARGET_OS_SIMULATOR),@([formula containsString:@"modify_source_texture_coordinates"])];
-
-    return [t stringByReplacingOccurrencesOfString:@"{MTIBlendFormula}" withString:[targetConditionals stringByAppendingString:formula]];
-};
+func MTIBuildBlendFormulaShaderSource(_ formula: String) -> String {
+    #if targetEnvironment(simulator)
+    let targetOSSimulator = 1
+    #else
+    let targetOSSimulator = 0
+    #endif
+    let hasTextureCoordinatesModifier = formula.contains("modify_source_texture_coordinates") ? 1 : 0
+    let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR \(targetOSSimulator)\n#endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)\n\n"
+    return MTIBlendFormulaSupportShaderTemplate.replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
+}

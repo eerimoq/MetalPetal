@@ -8,7 +8,6 @@
 import XCTest
 import MetalPetal
 import MetalPetalTestHelpers
-import MetalPetalObjectiveC.Extension
 
 fileprivate func listMetalDevices() -> String {
     #if os(macOS)

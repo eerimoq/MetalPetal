@@ -11,7 +11,6 @@ import Foundation
 import Metal
 import MetalKit
 import MetalPerformanceShaders
-import MetalPetalObjectiveC.Extension
 
 public let MTIContextDefaultLabel = "MetalPetal"
 

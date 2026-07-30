@@ -9,7 +9,6 @@ import Foundation
 import XCTest
 import MetalPetal
 import MetalPetalTestHelpers
-import MetalPetalObjectiveC.Extension
 
 final class UtilitiesTests: XCTestCase {
     
