@@ -43,4 +43,4 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
-      run: build-tvos
+      run: make build-tvos
