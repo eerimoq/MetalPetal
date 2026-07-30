@@ -60,7 +60,8 @@ struct BouncingBallsView: View {
             }
             return MTIDataBuffer(
                 bytes: particles,
-                length: UInt(MemoryLayout<ParticleData>.size * BouncingBallsView.numberOfParticles)
+                length: UInt(MemoryLayout<ParticleData>.size * BouncingBallsView.numberOfParticles),
+                options: .init()
             )!
         }
     }
