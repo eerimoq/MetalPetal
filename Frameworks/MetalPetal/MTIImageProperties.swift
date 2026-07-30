@@ -37,7 +37,11 @@ public final class MTIImageProperties: NSObject, NSCopying {
         ]
     }
 
-    private static func displaySize(pixelWidth: UInt, pixelHeight: UInt, orientation: CGImagePropertyOrientation)
+    private static func displaySize(
+        pixelWidth: UInt,
+        pixelHeight: UInt,
+        orientation: CGImagePropertyOrientation
+    )
         -> (width: UInt, height: UInt)
     {
         switch orientation {
@@ -55,8 +59,9 @@ public final class MTIImageProperties: NSObject, NSCopying {
             return nil
         }
         let options = MTIImageProperties.imageSourceOptions as CFDictionary
-        guard let properties = CGImageSourceCopyPropertiesAtIndex(imageSource, index, options) as? [AnyHashable: Any],
-              let image = CGImageSourceCreateImageAtIndex(imageSource, index, options)
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(imageSource, index,
+                                                                  options) as? [AnyHashable: Any],
+            let image = CGImageSourceCreateImageAtIndex(imageSource, index, options)
         else {
             return nil
         }
@@ -69,7 +74,8 @@ public final class MTIImageProperties: NSObject, NSCopying {
         pixelHeight = UInt(image.height)
         bitsPerComponent = UInt(image.bitsPerComponent)
 
-        let orientationRawValue = (properties[kCGImagePropertyOrientation as String] as? NSNumber)?.uint32Value
+        let orientationRawValue = (properties[kCGImagePropertyOrientation as String] as? NSNumber)?
+            .uint32Value
         let orientation = orientationRawValue.flatMap { CGImagePropertyOrientation(rawValue: $0) } ?? .up
         self.orientation = orientation
 

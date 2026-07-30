@@ -122,7 +122,8 @@ public final class MTIVertices: NSObject, MTIGeometry {
     ) {
         assert(vertexCount > 0)
         assert(Int(vertexBuffer.length) == Int(vertexCount) * MemoryLayout<MTIVertex>.stride)
-        assert(indexBuffer == nil || Int(indexBuffer!.length) == Int(indexCount) * MemoryLayout<UInt32>.stride)
+        assert(indexBuffer == nil || Int(indexBuffer!.length) == Int(indexCount) * MemoryLayout<UInt32>
+            .stride)
         self.vertexCount = Int(vertexCount)
         self.indexCount = Int(indexCount)
         self.primitiveType = primitiveType

@@ -17,7 +17,8 @@ public final class MTIWeakToStrongObjectsMapTable<KeyType: AnyObject, ObjectType
     private let items = NSPointerArray(options: [.weakMemory, .objectPointerPersonality])
     private var compactableItemCount = 0
 
-    // Safe to use `self`'s address as the association key, since we remove all the associations on deallocation.
+    // Safe to use `self`'s address as the association key, since we remove all the associations on
+    // deallocation.
     private var associationKey: UnsafeRawPointer {
         UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque())
     }

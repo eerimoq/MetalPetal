@@ -17,7 +17,9 @@ public struct MTIError: CustomNSError, Hashable, _BridgedStoredNSError {
         _nsError = error
     }
 
-    public static var errorDomain: String { MTIErrorDomain }
+    public static var errorDomain: String {
+        MTIErrorDomain
+    }
 
     public enum Code: Int, _ErrorCodeProtocol {
         public typealias _ErrorType = MTIError

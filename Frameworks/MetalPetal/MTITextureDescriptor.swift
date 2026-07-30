@@ -66,7 +66,13 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
         height: UInt,
         usage: MTLTextureUsage
     ) -> MTITextureDescriptor {
-        MTITextureDescriptor(pixelFormat: pixelFormat, width: width, height: height, mipmapped: false, usage: usage)
+        MTITextureDescriptor(
+            pixelFormat: pixelFormat,
+            width: width,
+            height: height,
+            mipmapped: false,
+            usage: usage
+        )
     }
 
     public static func texture2DDescriptor(

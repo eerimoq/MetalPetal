@@ -9,6 +9,7 @@ import CoreImage
 import CoreVideo
 import Foundation
 import Metal
+
 // MetalKit is part of MetalPetal's public API (e.g. `MTKTextureLoader.Option`), and the Objective-C
 // umbrella used to re-export it. Preserve that so consumers importing MetalPetal keep seeing MetalKit.
 @_exported import MetalKit
@@ -28,7 +29,8 @@ public protocol MTITextureLoader: AnyObject {
         options: [MTKTextureLoader.Option: Any]?
     ) throws -> MTLTexture
 
-    func newTexture(with mdlTexture: MDLTexture, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    func newTexture(with mdlTexture: MDLTexture, options: [MTKTextureLoader.Option: Any]?) throws
+        -> MTLTexture
 }
 
 extension MTKTextureLoader: MTITextureLoader {
@@ -36,11 +38,15 @@ extension MTKTextureLoader: MTITextureLoader {
         MTKTextureLoader(device: device)
     }
 
-    public func newTexture(with cgImage: CGImage, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(with cgImage: CGImage,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         try newTexture(cgImage: cgImage, options: options)
     }
 
-    public func newTexture(withContentsOf url: URL, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(withContentsOf url: URL,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         try newTexture(URL: url, options: options)
     }
 
@@ -53,13 +59,17 @@ extension MTKTextureLoader: MTITextureLoader {
         try newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
     }
 
-    public func newTexture(with mdlTexture: MDLTexture, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(with mdlTexture: MDLTexture,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         try newTexture(texture: mdlTexture, options: options)
     }
 }
 
-/// The default texture loader. A `MTIDefaultTextureLoader` object uses a `MTKTextureLoader` internally to load
-/// textures. When an image cannot be loaded with `MTKTextureLoader`, `MTIDefaultTextureLoader` draws the image
+/// The default texture loader. A `MTIDefaultTextureLoader` object uses a `MTKTextureLoader` internally to
+/// load
+/// textures. When an image cannot be loaded with `MTKTextureLoader`, `MTIDefaultTextureLoader` draws the
+/// image
 /// to a 32bits/pixel BGRA `CVPixelBuffer` and creates a texture from that pixel buffer.
 public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
     private let internalLoader: MTKTextureLoader
@@ -161,9 +171,15 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         }
         #endif
 
-        let imageRect = CGRect(x: 0, y: 0, width: Int(properties.pixelWidth), height: Int(properties.pixelHeight))
+        let imageRect = CGRect(
+            x: 0,
+            y: 0,
+            width: Int(properties.pixelWidth),
+            height: Int(properties.pixelHeight)
+        )
         let placeholder = CIImage(color: CIColor.black).cropped(to: imageRect)
-        let orientationTransform = placeholder.orientationTransform(forExifOrientation: Int32(properties.orientation.rawValue))
+        let orientationTransform = placeholder
+            .orientationTransform(forExifOrientation: Int32(properties.orientation.rawValue))
 
         if shouldFallbackToMTKTextureLoader {
             // We do not currently support these features, so fallback to `MTKTextureLoader`. This may degrade
@@ -185,7 +201,14 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
             if let origin = options?[.origin] as? MTKTextureLoader.Origin,
                origin == .bottomLeft || origin == .flippedVertically
             {
-                cgContext.concatenate(CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: CGFloat(properties.displayHeight)))
+                cgContext.concatenate(CGAffineTransform(
+                    a: 1,
+                    b: 0,
+                    c: 0,
+                    d: -1,
+                    tx: 0,
+                    ty: CGFloat(properties.displayHeight)
+                ))
             }
             cgContext.concatenate(orientationTransform)
             cgContext.draw(cgImage, in: imageRect)
@@ -227,7 +250,9 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         }
     }
 
-    public func newTexture(with cgImage: CGImage, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(with cgImage: CGImage,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         let properties = MTIImageProperties(cgImage: cgImage)
         if prefersCVPixelBufferLoader(for: properties) {
             return try newTextureWithCVPixelBuffer(from: cgImage, properties: properties, options: options)
@@ -236,7 +261,9 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         }
     }
 
-    public func newTexture(withContentsOf url: URL, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(withContentsOf url: URL,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         let imageSourceOptions: [CFString: Any] = [
             kCGImageSourceShouldCache: false,
             kCGImageSourceShouldCacheImmediately: false,
@@ -253,7 +280,9 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         return try internalLoader.newTexture(URL: url, options: options)
     }
 
-    public func newTexture(with mdlTexture: MDLTexture, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture {
+    public func newTexture(with mdlTexture: MDLTexture,
+                           options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
+    {
         try internalLoader.newTexture(texture: mdlTexture, options: options)
     }
 

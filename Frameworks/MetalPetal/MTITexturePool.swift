@@ -179,10 +179,6 @@ private struct MTIHeapTextureReuseKey: Hashable {
         hasher.combine(size)
         hasher.combine(resourceOptions.rawValue)
     }
-
-    static func == (lhs: MTIHeapTextureReuseKey, rhs: MTIHeapTextureReuseKey) -> Bool {
-        lhs.size == rhs.size && lhs.resourceOptions == rhs.resourceOptions
-    }
 }
 
 /// Heap texture pool. **May** have a smaller memory footprint than `MTIDeviceTexturePool` depending on your
@@ -196,7 +192,10 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
     public init(device: MTLDevice) {
         assert(
             MTIHeapTexturePool.isSupported(on: device),
-            "MTIHeapTexturePool is not supported on device: \(device). See +[MTIHeapTexturePool isSupportedOnDevice:] for detail."
+            """
+            MTIHeapTexturePool is not supported on device: \(device). \
+            See +[MTIHeapTexturePool isSupportedOnDevice:] for detail.
+            """
         )
         self.device = device
         super.init()
