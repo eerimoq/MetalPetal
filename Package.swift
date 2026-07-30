@@ -17,9 +17,6 @@ let package = Package(
     targets: [
         .target(
             name: "MetalPetal",
-            dependencies: ["MetalPetalObjectiveC"]),
-        .target(
-            name: "MetalPetalObjectiveC",
             dependencies: []),
         .target(
             name: "MetalPetalTestHelpers",
@@ -28,6 +25,5 @@ let package = Package(
         .testTarget(
             name: "MetalPetalTests",
             dependencies: ["MetalPetal", "MetalPetalTestHelpers"]),
-    ],
-    cxxLanguageStandard: .cxx14
+    ]
 )

@@ -8,11 +8,6 @@
 
 import Foundation
 import simd
-
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
-
 // WARNING: MTIVector.isEqual(_:) may not work on MTIVector which contains a simd_type3 or simd_typeNx3 value.
 
 extension MTIVector {

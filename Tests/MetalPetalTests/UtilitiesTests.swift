@@ -13,8 +13,9 @@ import MetalPetalTestHelpers
 final class UtilitiesTests: XCTestCase {
     
     static let mtiShaderLibrarySource: String = {
-        let sourceFileDirectory = URL(fileURLWithPath: String(#file)).deletingLastPathComponent().appendingPathComponent("../../Sources/MetalPetalObjectiveC")
-        let headerURL = sourceFileDirectory.appendingPathComponent("include/MTIShaderLib.h")
+        let headerURL = URL(fileURLWithPath: String(#file))
+            .deletingLastPathComponent()
+            .appendingPathComponent("../../Frameworks/MetalPetal/Shaders/MTIShaderLib.h")
         return try! String(contentsOf: headerURL)
     }()
     

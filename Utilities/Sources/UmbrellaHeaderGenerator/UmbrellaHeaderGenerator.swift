@@ -40,11 +40,7 @@ public struct UmbrellaHeaderGenerator: ParsableCommand {
     }
     
     private static let privateHeaderFileNames = [
-        "MTIPrint.h",
-        "MTIDefer.h",
-        "MTIHasher.h",
-        "MTIImageRenderingContext+Internal.h",
-        "MTIBlendFormulaSupport.h"
+        "MTIPrint.h"
     ]
 
     private func exludesHeaderFileNames() throws -> [String] {

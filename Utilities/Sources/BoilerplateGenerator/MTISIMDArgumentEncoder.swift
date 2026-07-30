@@ -18,11 +18,6 @@ fileprivate let template: String = """
 
 import Foundation
 import Metal
-
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
-
 @objc(MTISIMDArgumentEncoder) public class MTISIMDArgumentEncoder: NSObject, MTIFunctionArgumentEncoding {
     
     public enum Error: String, Swift.Error, LocalizedError {

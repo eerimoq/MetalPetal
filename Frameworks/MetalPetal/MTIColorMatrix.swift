@@ -9,7 +9,17 @@ import Accelerate
 import Foundation
 import simd
 
-extension MTIColorMatrix: @retroactive Equatable {
+public struct MTIColorMatrix {
+    public var matrix: simd_float4x4
+    public var bias: simd_float4
+
+    public init(matrix: simd_float4x4, bias: simd_float4) {
+        self.matrix = matrix
+        self.bias = bias
+    }
+}
+
+extension MTIColorMatrix: Equatable {
     public static func == (lhs: MTIColorMatrix, rhs: MTIColorMatrix) -> Bool {
         lhs.isEqual(to: rhs)
     }

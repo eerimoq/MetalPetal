@@ -10,6 +10,16 @@ import Foundation
 import Metal
 import simd
 
+public struct MTIVertex {
+    public var position: SIMD4<Float>
+    public var textureCoordinate: SIMD2<Float>
+
+    public init() {
+        position = SIMD4<Float>()
+        textureCoordinate = SIMD2<Float>()
+    }
+}
+
 public extension MTIVertex {
     init(x: Float, y: Float, z: Float, w: Float, u: Float, v: Float) {
         self.init()
@@ -28,13 +38,13 @@ public extension MTIVertex {
     }
 }
 
-extension MTIVertex: @retroactive Equatable {
+extension MTIVertex: Equatable {
     public static func == (lhs: MTIVertex, rhs: MTIVertex) -> Bool {
         lhs.isEqual(to: rhs)
     }
 }
 
-extension MTIVertex: @retroactive Hashable {
+extension MTIVertex: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(position)
         hasher.combine(textureCoordinate)

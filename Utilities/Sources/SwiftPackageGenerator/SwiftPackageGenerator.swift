@@ -13,17 +13,7 @@ public struct SwiftPackageGenerator: ParsableCommand {
     }
     
     private let fileManager = FileManager()
-    
-    private let objectiveCModuleMapContents = """
-    module MetalPetalObjectiveC {
-        explicit module Core {
-            header "MetalPetal.h"
-            export *
-        }
-    }
 
-    """
-    
     public init() { }
     
     public func run() throws {
@@ -32,24 +22,18 @@ public struct SwiftPackageGenerator: ParsableCommand {
         try? fileManager.removeItem(at: packageSourcesDirectory)
         try fileManager.createDirectory(at: packageSourcesDirectory, withIntermediateDirectories: true, attributes: nil)
         let swiftTargetDirectory = packageSourcesDirectory.appendingPathComponent("MetalPetal/")
-        let objectiveCTargetDirectory = packageSourcesDirectory.appendingPathComponent("MetalPetalObjectiveC/")
-        let objectiveCHeaderDirectory = packageSourcesDirectory.appendingPathComponent("MetalPetalObjectiveC/include/")
         try fileManager.createDirectory(at: swiftTargetDirectory, withIntermediateDirectories: true, attributes: nil)
-        try fileManager.createDirectory(at: objectiveCTargetDirectory, withIntermediateDirectories: true, attributes: nil)
-        try fileManager.createDirectory(at: objectiveCHeaderDirectory, withIntermediateDirectories: true, attributes: nil)
-        
+
+        // MetalPetal is now an all-Swift target; only `.swift` sources are mirrored into the package. The
+        // shader source headers (Shaders/MTIShaderLib.h etc.) stay in the authoritative Frameworks tree and
+        // are read directly when generating the builtin library support code below.
         let fileHandlers = [
-            SourceFileHandler(fileTypes: ["h"], projectRoot: projectRoot, targetURL: objectiveCHeaderDirectory, fileManager: fileManager),
-            SourceFileHandler(fileTypes: ["m", "mm"], projectRoot: projectRoot, targetURL: objectiveCTargetDirectory, fileManager: fileManager),
             SourceFileHandler(fileTypes: ["swift"], projectRoot: projectRoot, targetURL: swiftTargetDirectory, fileManager: fileManager)
         ]
-        
+
         try processSources(in: sourcesDirectory, fileHandlers: fileHandlers)
-        
-        //TODO: remove this in swift 5.3
+
         try generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: swiftTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
-        
-        try objectiveCModuleMapContents.write(to: objectiveCHeaderDirectory.appendingPathComponent("module.modulemap"), atomically: true, encoding: .utf8)
     }
     
     public func generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: URL, shadersDirectory: URL) throws {
