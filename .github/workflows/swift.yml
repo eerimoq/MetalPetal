@@ -2,17 +2,12 @@ name: Swift
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
 
 jobs:
   target_macOS:
-
     name: Smoke Test (macOS)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode
@@ -23,11 +18,8 @@ jobs:
       run: swift test -v
 
   target_iOS_simulator:
-
     name: Smoke Test (iOS Simulator)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode
@@ -38,11 +30,8 @@ jobs:
       run: xcodebuild test -scheme MetalPetal -destination 'platform=iOS Simulator,name=iPhone 11' -workspace .
 
   target_tvOS_simulator:
-
     name: Smoke Test (tvOS Simulator)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode
@@ -53,11 +42,8 @@ jobs:
       run: xcodebuild test -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
 
   target_iOS_device:
-
     name: Build (iOS Device)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode
@@ -66,11 +52,8 @@ jobs:
       run: xcodebuild build -scheme MetalPetal -destination generic/platform=iOS -workspace .
 
   target_tvOS_device:
-
     name: Build (tvOS Device)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode
@@ -79,11 +62,8 @@ jobs:
       run: xcodebuild build -scheme MetalPetal -destination generic/platform=tvOS -workspace .
 
   target_macCatalyst:
-
     name: Smoke Test (macCatalyst)
-    
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Select Xcode

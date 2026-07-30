@@ -22,7 +22,7 @@ public struct SwiftPackageGenerator: ParsableCommand {
         }
         explicit module Extension {
             header "MTIContext+Internal.h"
-            header "MTIImage+Promise.h"
+            header "MTIBlendFormulaSupport.h"
             export *
         }
     }

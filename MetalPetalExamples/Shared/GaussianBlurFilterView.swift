@@ -6,18 +6,23 @@
 //
 
 import Foundation
-import SwiftUI
 import MetalPetal
+import SwiftUI
 
 struct GaussianBlurFilterView: View {
     var body: some View {
         ImageFilterView(filter: MTIMPSGaussianBlurFilter(),
                         filterInputKeyPath: \.inputImage,
                         parameters: [
-                            FilterParameter(name: "Radius", defaultValue: 20, sliderRange: 0...100, updater: { filter, radius in
-                                filter.radius = radius
-                            })
+                            FilterParameter(
+                                name: "Radius",
+                                defaultValue: 20,
+                                sliderRange: 0 ... 100,
+                                updater: { filter, radius in
+                                    filter.radius = radius
+                                }
+                            ),
                         ])
-            .inlineNavigationBarTitle("MPS Gaussian Blur")
+                        .inlineNavigationBarTitle("MPS Gaussian Blur")
     }
 }

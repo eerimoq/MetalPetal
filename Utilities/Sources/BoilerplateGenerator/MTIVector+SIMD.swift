@@ -2,7 +2,7 @@ import Foundation
 import SIMDType
 
 extension SIMDType {
-    
+
     var getterForMTIVector: String {
         switch self.dimension {
         case .vector(let c):
@@ -11,56 +11,76 @@ extension SIMDType {
             return "\(self.scalarType.description(capitalized: false))\(c)x\(r)Value"
         }
     }
-    
-    var initializerForMTIVector: String {
-        switch self.dimension {
-        case .vector(let c):
-            return "vectorWith\(self.scalarType.description(capitalized: true))\(c):"
-        case .matrix(let c, let r):
-            return "vectorWith\(self.scalarType.description(capitalized: true))\(c)x\(r):"
-        }
+
+    /// The label of the `MTIVector` designated initializer for this type's scalar, e.g. `floatValues`.
+    var scalarValuesInitializerLabel: String {
+        return "\(self.scalarType.description(capitalized: false))Values"
+    }
+
+    /// The Swift name of the `MTIVector.ScalarType` case for this type's scalar, e.g. `float`.
+    var scalarTypeCaseName: String {
+        return self.scalarType.description(capitalized: false)
+    }
+
+    /// The Swift simd type name, e.g. `simd_float2` / `simd_float3x3`.
+    var swiftSIMDTypeName: String {
+        return self.description(prefix: "simd_")
     }
 }
 
 public struct MTIVectorSIMDTypeSupportCodeGenerator {
 
-    struct HeaderTemplate {
+    struct SwiftTemplate {
         private let template =
         """
         //
-        //  MTIVector+SIMD.h
+        //  MTIVector+SIMD.swift
         //  MetalPetal
         //
         //  Created by Yu Ao on 2018/6/30.
         //
         //  Auto generated.
-        
-        #import <simd/simd.h>
-        #if __has_include(<MetalPetal/MetalPetal.h>)
-        #import <MetalPetal/MTIVector.h>
-        #else
-        #import "MTIVector.h"
+
+        import Foundation
+        import simd
+
+        #if SWIFT_PACKAGE
+        import MetalPetalObjectiveC.Core
         #endif
 
-        NS_ASSUME_NONNULL_BEGIN
+        // WARNING: MTIVector.isEqual(_:) may not work on MTIVector which contains a simd_type3 or simd_typeNx3 value.
 
-        // WARNING: -[MTIVector isEqual:] may not work on MTIVector which contains a simd_type3 or simd_typeNx3 value.
-
-        @interface MTIVector (SIMD)
+        extension MTIVector {
 
         {MTIVectorSIMDSupport}
-
-        @end
-
-        NS_ASSUME_NONNULL_END
+        }
 
         """
 
         private var lines: [String] = []
 
         mutating func append(type: SIMDType) {
-            lines.append("+ (instancetype)\(type.initializerForMTIVector)(\(type.description()))value NS_SWIFT_NAME(init(value:));")
-            lines.append("@property (nonatomic, readonly) \(type.description()) \(type.getterForMTIVector);");
+            let swiftType = type.swiftSIMDTypeName
+            let scalarType = type.scalarType.swiftTypeName
+            lines.append(
+                """
+                    public convenience init(value: \(swiftType)) {
+                        var v = value
+                        let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
+                        let scalars: [\(scalarType)] = withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(scalarType).self)) }
+                        self.init(\(type.scalarValuesInitializerLabel): scalars, count: UInt(count))
+                    }
+
+                    public var \(type.getterForMTIVector): \(swiftType) {
+                        var value = \(swiftType)()
+                        if scalarType == .\(type.scalarTypeCaseName) && byteLength == MemoryLayout<\(swiftType)>.size {
+                            withUnsafeMutableBytes(of: &value) { memcpy($0.baseAddress!, bytes(), MemoryLayout<\(swiftType)>.size) }
+                        } else {
+                            assertionFailure("Cannot get a \(swiftType) value from \\(self)")
+                        }
+                        return value
+                    }
+                """)
         }
 
         func makeContent() -> String {
@@ -70,86 +90,15 @@ public struct MTIVectorSIMDTypeSupportCodeGenerator {
         }
     }
 
-    struct ImplementationTemplate {
-        private let template =
-        """
-        //
-        //  MTIVector+SIMD.m
-        //  MetalPetal
-        //
-        //  Created by Yu Ao on 2018/6/30.
-        //
-        //  Auto generated.
-
-        #import "MTIVector+SIMD.h"
-
-        @implementation MTIVector (SIMD)
-
-        {MTIVectorSIMDSupport}
-
-        @end
-
-        """
-
-        private var lines: [String] = []
-
-        mutating func append(type: SIMDType) {
-            let getterIMP =
-            """
-                \(type.description()) value = {0};
-                if (self.scalarType == MTIVectorScalarType\(type.scalarType.description(capitalized: true)) && self.byteLength == sizeof(\(type.description()))) {
-                    memcpy(&value, self.bytes, sizeof(\(type.description())));
-                } else {
-                    NSAssert(NO, @"Cannot get a \(type.description()) value from %@", self);
-                }
-                return value;
-            """
-
-            let initializerIMP: String =
-            """
-                NSParameterAssert(sizeof(value) == sizeof(\(type.description())));
-                const \(type.scalarType.cTypeName) * valuePtr = (void *)&value;
-                return [[MTIVector alloc] initWith\(type.scalarType.description(capitalized: true))Values:valuePtr count:sizeof(value)/sizeof(\(type.scalarType.cTypeName))];
-            """
-
-            lines.append(
-                """
-                + (instancetype)\(type.initializerForMTIVector)(\(type.description()))value {
-                \(initializerIMP)
-                }
-
-                """)
-
-            lines.append(
-                """
-                - (\(type.description()))\(type.getterForMTIVector) {
-                \(getterIMP)
-                }
-
-                """);
-
-        }
-
-        func makeContent() -> String {
-            return self.template.replacingOccurrences(of: "{MTIVectorSIMDSupport}", with: self.lines.reduce("", {
-                $0.count > 0 ? ($0 + "\n" + $1) : $1
-            }))
-        }
-    }
-
     public static func generate() -> [String: String] {
-        var headerTemplate = HeaderTemplate()
-        var implementationTemplate = ImplementationTemplate()
+        var swiftTemplate = SwiftTemplate()
 
         for type in SIMDType.metalSupportedSIMDTypes {
-            headerTemplate.append(type: type)
-            implementationTemplate.append(type: type)
+            swiftTemplate.append(type: type)
         }
-        
+
         return [
-            "MTIVector+SIMD.h": headerTemplate.makeContent(),
-            "MTIVector+SIMD.m": implementationTemplate.makeContent()
+            "MTIVector+SIMD.swift": swiftTemplate.makeContent()
         ]
     }
 }
-

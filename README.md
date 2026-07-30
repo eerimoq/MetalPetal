@@ -1,16 +1,6 @@
 # MetalPetal
 
-[![Swift](https://github.com/MetalPetal/MetalPetal/workflows/Swift/badge.svg)](https://github.com/MetalPetal/MetalPetal/actions?query=workflow%3ASwift)
-<br/>
-[![Platforms](https://img.shields.io/badge/Platforms-iOS%2011%2B%20%7C%20tvOS%2013%2B%20%7C%20macOS%2010.13%2B-blue.svg)](#)
-[![Version](https://img.shields.io/github/v/release/MetalPetal/MetalPetal?label=Release)](https://github.com/MetalPetal/MetalPetal/releases)
-<br/>
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-%E2%80%8B%20%E2%9C%94-eee)](#)
-[![Mac Catalyst](https://img.shields.io/badge/Mac%20Catalyst-%E2%80%8B%20%E2%9C%94-eee)](#)
-[![Simulator](https://img.shields.io/badge/Simulator-%E2%80%8B%20%E2%9C%94-eee)](#)
-<br/>
-[![CocoaPods](https://img.shields.io/static/v1?label=CocoaPods&message=%E2%80%8B%20%E2%9C%94&color=eee&logo=CocoaPods&logoColor=white)](#cocoapods)
-[![Swift PM](https://img.shields.io/static/v1?label=Swift%20PM&message=%E2%80%8B%20%E2%9C%94&color=eee&logo=Swift&logoColor=white)](#swift-package-manager)
+> A Swift only fork, for the simple reason I like Swift a lot more than Objective-C. Claude was used to convert the Objective-C code to Swift.
 
 An image processing framework based on Metal.
 
@@ -57,9 +47,6 @@ An image processing framework based on Metal.
     - [Working with JavaScript](#working-with-javascript)
     - [Texture Loader](#texture-loader)
 - [Install](#install)
-    - [CocoaPods](#cocoapods)
-        - [Sub-pod `Swift`](#sub-pod-swift)
-        - [Sub-pod `AppleSilicon`](#sub-pod-applesilicon)
     - [Swift Package Manager](#swift-package-manager)
 - [iOS Simulator Support](#ios-simulator-support)
 - [Quick Look Debug Support](#quick-look-debug-support)
@@ -90,10 +77,6 @@ MetalPetal is designed with the following goals in mind.
 - Extensibility
 
     Easy to create custom filters as well as plugin your custom image processing unit.
-
-- Swifty
-
-    Provides a fluid experience for Swift programmers.
 
 ### Core Components
 
@@ -259,13 +242,9 @@ You can create a `MTIImage` object from nearly any source of image data, includi
 
 ```Swift
 let imageFromCGImage = MTIImage(cgImage: cgImage, isOpaque: true)
-
 let imageFromCIImage = MTIImage(ciImage: ciImage)
-
 let imageFromCoreVideoPixelBuffer = MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .alphaIsOne)
-
 let imageFromContentsOfURL = MTIImage(contentsOf: url)
-
 // unpremultiply alpha if needed
 let unpremultipliedAlphaImage = image.unpremultiplyingAlpha()
 ```
@@ -274,11 +253,9 @@ let unpremultipliedAlphaImage = image.unpremultiplyingAlpha()
 
 ```Swift
 let inputImage = ...
-
 let filter = MTISaturationFilter()
 filter.saturation = 0
 filter.inputImage = inputImage
-
 let outputImage = filter.outputImage
 ```
 
@@ -286,18 +263,13 @@ let outputImage = filter.outputImage
 
 ```Swift
 let options = MTIContextOptions()
-
 guard let device = MTLCreateSystemDefaultDevice(), let context = try? MTIContext(device: device, options: options) else {
     return
 }
-
 let image: MTIImage = ...
-
 do {
     try context.render(image, to: pixelBuffer) 
-    
     //context.makeCIImage(from: image)
-    
     //context.makeCGImage(from: image)
 } catch {
     print(error)
@@ -308,18 +280,16 @@ do {
 
 ```Swift
 let imageView = MTIImageView(frame: self.view.bounds)
-
 // You can optionally assign a `MTIContext` to the image view. If no context is assigned and `automaticallyCreatesContext` is set to `true` (the default value), a `MTIContext` is created automatically when the image view renders its content.
 imageView.context = ...
-
 imageView.image = image
 ```
 
 If you'd like to move the GPU command encoding process out of the main thread, you can use a `MTIThreadSafeImageView`. You may assign a `MTIImage` to a `MTIThreadSafeImageView` in any thread.
 
-### Connect Filters (Swift)
+### Connect Filters
 
-MetalPetal has a type-safe Swift API for connecting filters. You can use `=>` operator in `FilterGraph.makeImage` function to connect filters and get the output image.
+You can use `=>` operator in `FilterGraph.makeImage` function to connect filters and get the output image.
 
 Here are some examples:
 
@@ -357,7 +327,6 @@ let composition = MTIVideoComposition(asset: asset, context: context, queue: Dis
         request.anySourceImage! => filterA => filterB => output
     }!
 }
-
 let playerItem = AVPlayerItem(asset: asset)
 playerItem.videoComposition = composition.makeAVVideoComposition()
 player.replaceCurrentItem(with: playerItem)
@@ -375,9 +344,7 @@ var configuration = AssetExportSession.Configuration(fileType: .mp4, videoSettin
 configuration.videoComposition = composition.makeAVVideoComposition()
 self.exporter = try! AssetExportSession(asset: asset, outputURL: outputURL, configuration: configuration)
 exporter.export(progress: { progress in
-    
-}, completion: { error in
-    
+}, completion: { error in    
 })
 ```
 
@@ -464,7 +431,7 @@ Please refer to the `CameraFilterView.swift` in the example project for more abo
 
 If you want to include the `MTIShaderLib.h` in your `.metal` file, you need to add the path of `MTIShaderLib.h` file to the `Metal Compiler - Header Search Paths` (`MTL_HEADER_SEARCH_PATHS`) setting.
 
-For example, if you use CocoaPods you can set the `MTL_HEADER_SEARCH_PATHS` to  `${PODS_CONFIGURATION_BUILD_DIR}/MetalPetal/MetalPetal.framework/Headers` or `${PODS_ROOT}/MetalPetal/Frameworks/MetalPetal/Shaders`. If you use Swift Package Manager, set the `MTL_HEADER_SEARCH_PATHS` to `$(HEADER_SEARCH_PATHS)`
+For example, if you use Swift Package Manager, set the `MTL_HEADER_SEARCH_PATHS` to `$(HEADER_SEARCH_PATHS)`.
 
 ### Shader Function Arguments Encoding
 
@@ -512,40 +479,10 @@ The shader function argument types and the corresponding types to use in a param
 
 To build a custom unary filter, you can subclass `MTIUnaryImageRenderingFilter` and override the methods in the `SubclassingHooks` category. Examples: `MTIPixellateFilter`, `MTIVibranceFilter`, `MTIUnpremultiplyAlphaFilter`, `MTIPremultiplyAlphaFilter`, etc.
 
-```ObjectiveC
-//Objective-C
-
-@interface MTIPixellateFilter : MTIUnaryImageRenderingFilter
-
-@property (nonatomic) float fractionalWidthOfAPixel;
-
-@end
-
-@implementation MTIPixellateFilter
-
-- (instancetype)init {
-    if (self = [super init]) {
-        _fractionalWidthOfAPixel = 0.05;
-    }
-    return self;
-}
-
-+ (MTIFunctionDescriptor *)fragmentFunctionDescriptor {
-    return [[MTIFunctionDescriptor alloc] initWithName:@"pixellateEffect" libraryURL:[bundle URLForResource:@"default" withExtension:@"metallib"]];
-}
-
-- (NSDictionary<NSString *,id> *)parameters {
-    return @{@"fractionalWidthOfAPixel": @(self.fractionalWidthOfAPixel)};
-}
-
-@end
-```
-
 ```Swift
 //Swift
 
 class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
-    
     var fractionalWidthOfAPixel: Float = 0.05
 
     override var parameters: [String : Any] {
@@ -558,63 +495,6 @@ class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
 }
 ```
 
-### Fully Custom Filters
-
-To build more complex filters, all you need to do is create a kernel (`MTIRenderPipelineKernel`/`MTIComputePipelineKernel`/`MTIMPSKernel`), then apply the kernel to the input image(s). Examples: `MTIChromaKeyBlendFilter`, `MTIBlendWithMaskFilter`, `MTIColorLookupFilter`, etc.
-
-```ObjectiveC
-
-@interface MTIChromaKeyBlendFilter : NSObject <MTIFilter>
-
-@property (nonatomic, strong, nullable) MTIImage *inputImage;
-
-@property (nonatomic, strong, nullable) MTIImage *inputBackgroundImage;
-
-@property (nonatomic) float thresholdSensitivity;
-
-@property (nonatomic) float smoothing;
-
-@property (nonatomic) MTIColor color;
-
-@end
-
-@implementation MTIChromaKeyBlendFilter
-
-@synthesize outputPixelFormat = _outputPixelFormat;
-
-+ (MTIRenderPipelineKernel *)kernel {
-    static MTIRenderPipelineKernel *kernel;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        kernel = [[MTIRenderPipelineKernel alloc] initWithVertexFunctionDescriptor:[[MTIFunctionDescriptor alloc] initWithName:MTIFilterPassthroughVertexFunctionName] fragmentFunctionDescriptor:[[MTIFunctionDescriptor alloc] initWithName:@"chromaKeyBlend"]];
-    });
-    return kernel;
-}
-
-- (instancetype)init {
-    if (self = [super init]) {
-        _thresholdSensitivity = 0.4;
-        _smoothing = 0.1;
-        _color = MTIColorMake(0.0, 1.0, 0.0, 1.0);
-    }
-    return self;
-}
-
-- (MTIImage *)outputImage {
-    if (!self.inputImage || !self.inputBackgroundImage) {
-        return nil;
-    }
-    return [self.class.kernel applyToInputImages:@[self.inputImage, self.inputBackgroundImage]
-                                      parameters:@{@"color": [MTIVector vectorWithFloat4:(simd_float4){self.color.red, self.color.green, self.color.blue,self.color.alpha}],
-                                    @"thresholdSensitivity": @(self.thresholdSensitivity),
-                                               @"smoothing": @(self.smoothing)}
-                         outputTextureDimensions:MTITextureDimensionsMake2DFromCGSize(self.inputImage.size)
-                               outputPixelFormat:self.outputPixelFormat];
-}
-
-@end
-```
-
 ### Multiple Draw Calls in One Render Pass
 
 You can use `MTIRenderCommand` to issue multiple draw calls in one render pass.
@@ -622,13 +502,10 @@ You can use `MTIRenderCommand` to issue multiple draw calls in one render pass.
 ```Swift
 // Create a draw call with kernelA, geometryA, and imageA.
 let renderCommandA = MTIRenderCommand(kernel: self.kernelA, geometry: self.geometryA, images: [imageA], parameters: [:])
-
 // Create a draw call with kernelB, geometryB, and imageB.
 let renderCommandB = MTIRenderCommand(kernel: self.kernelB, geometry: self.geometryB, images: [imageB], parameters: [:])
-
 // Create an output descriptor
 let outputDescriptor = MTIRenderPassOutputDescriptor(dimensions: MTITextureDimensions(width: outputWidth, height: outputHeight, depth: 1), pixelFormat: .bgra8Unorm, loadAction: .clear, storeAction: .store)
-
 // Get the output images, the output image count is equal to the output descriptor count.
 let images = MTIRenderCommand.images(byPerforming: [renderCommandA, renderCommandB], outputDescriptors: [outputDescriptor])
 ```
@@ -649,19 +526,7 @@ In rare scenarios, you may want to access the underlying texture directly, use m
 
 You can create new input sources or fully custom processing units by implementing the `MTIImagePromise` protocol. You will need to import an additional module to do so. 
 
-Objective-C
-
-```
-@import MetalPetal.Extension;
-```
-
-Swift
-
-```
-// CocoaPods
-import MetalPetal.Extension
-
-// Swift Package Manager
+```Swift
 import MetalPetalObjectiveC.Extension
 ```
 
@@ -766,12 +631,6 @@ You can render a `MTIImage` to a `CIImage` using a `MTIContext`.
 
 You can use a `CIFilter` directly with `MTICoreImageKernel` or the `MTICoreImageUnaryFilter` class. (Swift Only)
 
-### Working with JavaScript
-
-See [MetalPetalJS](https://github.com/MetalPetal/MetalPetalJS)
-
-With MetalPetalJS you can create render pipelines and filters using JavaScript, making it possible to download your filters/renderers from "the cloud".
-
 ### Texture Loader
 
 It is recommended that you use APIs that accept `MTICGImageLoadingOptions` to load `CGImage`s and images from `URL`, instead of using APIs that accept `MTKTextureLoaderOption`.
@@ -779,31 +638,6 @@ It is recommended that you use APIs that accept `MTICGImageLoadingOptions` to lo
 When you use APIs that accept `MTKTextureLoaderOption`, MetalPetal, by default, uses `MTIDefaultTextureLoader` to load `CGImage`s, images from `URL`, and named images. `MTIDefaultTextureLoader` uses `MTKTextureLoader` internally and has some workarounds for `MTKTextureLoader`'s inconsistencies and bugs at a small performance cost. You can also create your own texture loader by implementing the `MTITextureLoader` protocol. Then assign your texture loader class to `MTIContextOptions.textureLoaderClass` when creating a `MTIContext`.
 
 ## Install
-
-### CocoaPods
-
-You can use [CocoaPods](https://cocoapods.org/) to install the latest version.
-
-```
-use_frameworks!
-
-pod 'MetalPetal'
-
-# Required if you are using Swift.
-pod 'MetalPetal/Swift'
-
-# Recommended if you'd like to run MetalPetal on Apple silicon Macs.
-pod 'MetalPetal/AppleSilicon'
-
-```
-
-#### Sub-pod `Swift`
-
-Provides Swift-specific additions and modifications to the Objective-C APIs to improve their mapping into Swift. Highly recommended if you are using Swift.
-
-#### Sub-pod `AppleSilicon`
-
-Provides the default shader library compiled in Metal Shading Language v2.3 which is required for enabling programmable blending support on Apple silicon Macs.
 
 ### Swift Package Manager
 
@@ -822,10 +656,6 @@ Simulator supports fewer features or different implementation limits than an act
 If you do a Quick Look on a `MTIImage`, it'll show you the image graph that you constructed to produce that image.
 
 ![Quick Look Debug Preview](https://user-images.githubusercontent.com/1234944/116965587-c6a0a280-ace0-11eb-8918-2f36d1d6114c.jpg)
-
-## Trivia
-
-[Why Objective-C?](https://github.com/MetalPetal/MetalPetal/issues/52)
 
 ## Contribute
 

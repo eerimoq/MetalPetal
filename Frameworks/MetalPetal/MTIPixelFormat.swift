@@ -7,14 +7,10 @@
 
 import Metal
 
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
-
-extension MTLPixelFormat {
-    public static let unspecified = MTLPixelFormat.invalid
-    public static let yCbCr8_420_2p = __MTIPixelFormatYCBCR8_420_2P
-    public static let yCbCr8_420_2p_srgb = __MTIPixelFormatYCBCR8_420_2P_sRGB
-    public static let yCbCr10_420_2p = __MTIPixelFormatYCBCR10_420_2P
-    public static let yCbCr10_420_2p_srgb = __MTIPixelFormatYCBCR10_420_2P_sRGB
+public extension MTLPixelFormat {
+    static let unspecified = MTLPixelFormat.invalid
+    static let yCbCr8_420_2p = __MTIPixelFormatYCBCR8_420_2P
+    static let yCbCr8_420_2p_srgb = __MTIPixelFormatYCBCR8_420_2P_sRGB
+    static let yCbCr10_420_2p = __MTIPixelFormatYCBCR10_420_2P
+    static let yCbCr10_420_2p_srgb = __MTIPixelFormatYCBCR10_420_2P_sRGB
 }

@@ -7,20 +7,16 @@
 
 import Foundation
 
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
-
-extension MTICornerRadius: Equatable {
+extension MTICornerRadius: @retroactive Equatable {
     public static func == (lhs: MTICornerRadius, rhs: MTICornerRadius) -> Bool {
-        return lhs.topLeft == rhs.topLeft &&
+        lhs.topLeft == rhs.topLeft &&
             lhs.topRight == rhs.topRight &&
             lhs.bottomLeft == rhs.bottomLeft &&
             lhs.bottomRight == rhs.bottomRight
     }
 }
 
-extension MTICornerRadius: Hashable {
+extension MTICornerRadius: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(topLeft)
         hasher.combine(topRight)

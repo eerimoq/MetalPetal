@@ -6,20 +6,18 @@
 //
 
 import Foundation
-import SwiftUI
 import MetalKit
 import MetalPetal
+import SwiftUI
 
 #if os(iOS)
-fileprivate typealias ViewRepresentable = UIViewRepresentable
+private typealias ViewRepresentable = UIViewRepresentable
 #elseif os(macOS)
-fileprivate typealias ViewRepresentable = NSViewRepresentable
+private typealias ViewRepresentable = NSViewRepresentable
 #endif
 
 struct MetalKitView: ViewRepresentable {
-    
     typealias ViewUpdater = (MTKView) -> Void
-    
     private let viewUpdater: ViewUpdater
     private let device: MTLDevice
 
@@ -27,7 +25,7 @@ struct MetalKitView: ViewRepresentable {
         self.viewUpdater = viewUpdater
         self.device = device
     }
-    
+
     func makeUIView(context: Context) -> MTKView {
         let mtkView = MTKView(frame: .zero, device: device)
         mtkView.delegate = context.coordinator
@@ -35,34 +33,30 @@ struct MetalKitView: ViewRepresentable {
         mtkView.colorPixelFormat = .bgra8Unorm
         return mtkView
     }
-    
-    func updateUIView(_ uiView: MTKView, context: Context) {
-        
-    }
-    
+
+    func updateUIView(_: MTKView, context _: Context) {}
+
     func makeNSView(context: Context) -> MTKView {
         makeUIView(context: context)
     }
-    
+
     func updateNSView(_ nsView: MTKView, context: Context) {
         updateUIView(nsView, context: context)
     }
-    
+
     func makeCoordinator() -> Coordinator {
-        Coordinator(viewUpdater: self.viewUpdater)
+        Coordinator(viewUpdater: viewUpdater)
     }
-    
+
     class Coordinator: NSObject, MTKViewDelegate {
         private let viewUpdater: ViewUpdater
-        
+
         init(viewUpdater: @escaping ViewUpdater) {
             self.viewUpdater = viewUpdater
         }
-        
-        func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-            
-        }
-        
+
+        func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {}
+
         func draw(in view: MTKView) {
             viewUpdater(view)
         }

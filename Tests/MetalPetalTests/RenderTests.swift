@@ -1741,7 +1741,21 @@ final class RenderTests: XCTestCase {
                     PixelEnumerator.Coordinates(x: 0, y: 1): PixelEnumerator.Pixel(b: 64, g: 64, r: 64, a: 64),
                     PixelEnumerator.Coordinates(x: 3, y: 0): PixelEnumerator.Pixel(b: 0, g: 0, r: 0, a: 0)]
                 PixelEnumerator.enumeratePixels(in: cgImage) { (pixel, coord) in
-                    XCTAssert(result[coord] == pixel)
+                    guard let expected = result[coord] else {
+                        XCTFail("Unexpected coordinates \(coord)")
+                        return
+                    }
+                    if expected.a == 0 || expected.a == 255 {
+                        XCTAssert(expected == pixel)
+                    } else {
+                        // Partially covered edge pixel. Its color channels depend on the space in
+                        // which the GPU resolves the multisampled sRGB render target: averaging the
+                        // sRGB encoded samples yields 64, converting the samples to linear and
+                        // re-encoding the average yields 137. Both occur in practice.
+                        XCTAssert(pixel.a == expected.a)
+                        XCTAssert(pixel.b == pixel.g && pixel.g == pixel.r)
+                        XCTAssert(pixel.b == expected.b || pixel.b == 137)
+                    }
                 }
                 expection.fulfill()
             }
@@ -1749,7 +1763,7 @@ final class RenderTests: XCTestCase {
         } catch {
             throw error
         }
-        
+
         do {
             let expection = XCTestExpectation()
             renderer.antialiasingMode = .none
@@ -1799,7 +1813,9 @@ final class RenderTests: XCTestCase {
             cgContext?.draw(cgImage, in: CGRect(x: 0, y: 0, width: 4, height: 4))
             for i in 0..<pixels.count {
                 if i % 4 == 0 {
-                    XCTAssert(pixels[i] == 254) //b
+                    // The 10-bit 4:2:0 YCbCr round trip lands on 254 or 255 depending on how the
+                    // conversion rounds, so allow either.
+                    XCTAssert(pixels[i] >= 254) //b
                     XCTAssert(pixels[i + 1] == 0) //g
                     XCTAssert(pixels[i + 2] == 0) //r
                     XCTAssert(pixels[i + 3] == 255) //a
@@ -1997,6 +2013,197 @@ final class RenderTests: XCTestCase {
         } catch {
             XCTAssert((error as? MTIError)?.code == .invalidTextureDimension)
         }
+    }
+
+    // The expected values below were captured from the filter's behavior and pin down the
+    // spline evaluation, the per-channel curves and the intensity blend.
+    private func toneCurveOutput(_ configure: (MTIRGBToneCurveFilter) -> Void) throws -> [UInt8] {
+        let context = try makeContext()
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([[0, 64, 128, 192, 255]]), isOpaque: true)
+        let filter = MTIRGBToneCurveFilter()
+        configure(filter)
+        filter.inputImage = image
+        var values: [UInt8] = []
+        PixelEnumerator.enumeratePixels(in: try context.makeCGImage(from: XCTUnwrap(filter.outputImage))) { pixel, _ in
+            values.append(pixel.r)
+            values.append(pixel.g)
+            values.append(pixel.b)
+        }
+        return values
+    }
+
+    /// A curve lifting the midpoint from 0.5 to 0.75.
+    private var toneCurveLiftingControlPoints: [MTIVector] {
+        return [MTIVector(value: CGPoint(x: 0, y: 0)),
+                MTIVector(value: CGPoint(x: 0.5, y: 0.75)),
+                MTIVector(value: CGPoint(x: 1, y: 1))]
+    }
+
+    func testRGBToneCurveFilter_compositeCurve() throws {
+        let values = try toneCurveOutput { $0.rgbCompositeControlPoints = self.toneCurveLiftingControlPoints }
+        XCTAssertEqual(values, [0, 0, 0,
+                                107, 107, 107,
+                                191, 191, 191,
+                                235, 235, 235,
+                                255, 255, 255])
+    }
+
+    func testRGBToneCurveFilter_perChannelCurves() throws {
+        let red = try toneCurveOutput { $0.redControlPoints = self.toneCurveLiftingControlPoints }
+        XCTAssertEqual(red, [0, 0, 0,
+                             107, 64, 64,
+                             191, 128, 128,
+                             235, 192, 192,
+                             255, 255, 255])
+
+        let green = try toneCurveOutput { $0.greenControlPoints = self.toneCurveLiftingControlPoints }
+        XCTAssertEqual(green, [0, 0, 0,
+                               64, 107, 64,
+                               128, 191, 128,
+                               192, 235, 192,
+                               255, 255, 255])
+
+        let blue = try toneCurveOutput { $0.blueControlPoints = self.toneCurveLiftingControlPoints }
+        XCTAssertEqual(blue, [0, 0, 0,
+                              64, 64, 107,
+                              128, 128, 191,
+                              192, 192, 235,
+                              255, 255, 255])
+    }
+
+    func testRGBToneCurveFilter_intensity() throws {
+        let values = try toneCurveOutput {
+            $0.rgbCompositeControlPoints = self.toneCurveLiftingControlPoints
+            $0.intensity = 0.5
+        }
+        XCTAssertEqual(values, [0, 0, 0,
+                                86, 86, 86,
+                                159, 159, 159,
+                                213, 213, 213,
+                                255, 255, 255])
+    }
+
+    /// A filter with no control points has an identity lookup table and passes the image through.
+    func testRGBToneCurveFilter_noControlPoints() throws {
+        let values = try toneCurveOutput { _ in }
+        XCTAssertEqual(values, [0, 0, 0,
+                                64, 64, 64,
+                                128, 128, 128,
+                                192, 192, 192,
+                                255, 255, 255])
+    }
+
+    /// Control points that do not span the full range are clamped flat outside it.
+    func testRGBToneCurveFilter_partialRangeControlPoints() throws {
+        let values = try toneCurveOutput {
+            $0.redControlPoints = [MTIVector(value: CGPoint(x: 0.25, y: 0)),
+                                   MTIVector(value: CGPoint(x: 0.75, y: 1))]
+        }
+        XCTAssertEqual(values, [0, 0, 0,
+                                0, 64, 64,
+                                128, 128, 128,
+                                255, 192, 192,
+                                255, 255, 255])
+    }
+
+    // The expected values below were captured from the filter's behavior and pin down the tiling,
+    // the clip limit and the LUT interpolation.
+    private func claheOutput(_ configure: (MTICLAHEFilter) -> Void) throws -> [UInt8] {
+        let context = try makeContext()
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([
+            [10, 40, 70, 100],
+            [130, 160, 190, 220],
+            [250, 20, 50, 80],
+            [110, 140, 170, 200],
+        ]), isOpaque: true)
+        let filter = MTICLAHEFilter()
+        configure(filter)
+        filter.inputImage = image
+        var values: [UInt8] = []
+        PixelEnumerator.enumeratePixels(in: try context.makeCGImage(from: XCTUnwrap(filter.outputImage))) { pixel, _ in
+            values.append(pixel.r)
+        }
+        return values
+    }
+
+    func testCLAHEFilter_defaultConfiguration() throws {
+        let values = try claheOutput { _ in }
+        XCTAssertEqual(values, [64, 128, 255, 128,
+                                0, 128, 0, 128,
+                                62, 191, 63, 128,
+                                128, 191, 64, 255])
+    }
+
+    func testCLAHEFilter_clipLimitAndTileGrid() throws {
+        let values = try claheOutput {
+            $0.clipLimit = 1.0
+            $0.tileGridSize = MTICLAHESize(width: 2, height: 2)
+        }
+        XCTAssertEqual(values, [64, 175, 255, 128,
+                                96, 211, 48, 173,
+                                79, 203, 56, 189,
+                                127, 255, 112, 253])
+    }
+
+    func testCLAHEFilter_finerTileGrid() throws {
+        let values = try claheOutput { $0.tileGridSize = MTICLAHESize(width: 4, height: 4) }
+        XCTAssertEqual(values, [255, 253, 255, 255,
+                                255, 254, 255, 243,
+                                249, 255, 253, 244,
+                                251, 255, 255, 246])
+    }
+
+    func testCropFilter_fractionalAndPixelRegions() throws {
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([[0, 85, 170, 255]]), isOpaque: true)
+        let context = try makeContext()
+
+        let filter = MTICropFilter()
+        filter.inputImage = image
+
+        // The right half of the image, expressed both ways, selects the last two samples.
+        for region in [MTICropRegion.fractional(CGRect(x: 0.5, y: 0, width: 0.5, height: 1)),
+                       MTICropRegion.pixel(CGRect(x: 2, y: 0, width: 2, height: 1))] {
+            filter.cropRegion = region
+            let output = try XCTUnwrap(filter.outputImage)
+            XCTAssertEqual(output.size, CGSize(width: 2, height: 1))
+            var values: [UInt8] = []
+            PixelEnumerator.enumeratePixels(in: try context.makeCGImage(from: output)) { pixel, _ in
+                XCTAssert(pixel.r == pixel.g && pixel.g == pixel.b)
+                values.append(pixel.r)
+            }
+            XCTAssertEqual(values, [170, 255])
+        }
+    }
+
+    func testCropFilter_scaleRoundingModes() throws {
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([[0, 85, 170, 255]]), isOpaque: true)
+        let filter = MTICropFilter()
+        filter.inputImage = image
+        filter.cropRegion = .pixel(CGRect(x: 0, y: 0, width: 3, height: 2))
+        filter.scale = 0.5
+
+        // 3 * 0.5 == 1.5, 2 * 0.5 == 1.0
+        filter.roundingMode = .plain
+        XCTAssertEqual(try XCTUnwrap(filter.outputImage).size, CGSize(width: 2, height: 1))
+        filter.roundingMode = .ceiling
+        XCTAssertEqual(try XCTUnwrap(filter.outputImage).size, CGSize(width: 2, height: 1))
+        filter.roundingMode = .floor
+        XCTAssertEqual(try XCTUnwrap(filter.outputImage).size, CGSize(width: 1, height: 1))
+    }
+
+    func testCropFilter_fullRegionPassesInputThrough() throws {
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([[0, 85, 170, 255]]), isOpaque: true)
+        let filter = MTICropFilter()
+        filter.inputImage = image
+        XCTAssert(filter.outputImage === image)
+    }
+
+    func testCropFilter_emptyRegionProducesNoImage() throws {
+        let image = MTIImage(cgImage: try ImageGenerator.makeMonochromeImage([[0, 85, 170, 255]]), isOpaque: true)
+        let filter = MTICropFilter()
+        filter.inputImage = image
+        filter.cropRegion = .pixel(CGRect(x: 0, y: 0, width: 0, height: 1))
+        XCTAssertNil(filter.outputImage)
     }
 }
 

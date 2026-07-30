@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2AF4F087EEBBECD071A474BA /* Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F118E951611EE75B4F2801 /* Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework */; };
 		9D492985261E19E80011E8AF /* MetalPetalExamplesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D492972261E19E70011E8AF /* MetalPetalExamplesApp.swift */; };
 		9D492986261E19E80011E8AF /* MetalPetalExamplesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D492972261E19E70011E8AF /* MetalPetalExamplesApp.swift */; };
 		9D492989261E19E80011E8AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D492974261E19E80011E8AF /* Assets.xcassets */; };
@@ -73,13 +72,11 @@
 		9D492A0C261E1D320011E8AF /* VideoIO in Frameworks */ = {isa = PBXBuildFile; productRef = 9D492A0B261E1D320011E8AF /* VideoIO */; };
 		9D492A10261E1D420011E8AF /* VideoIO in Frameworks */ = {isa = PBXBuildFile; productRef = 9D492A0F261E1D420011E8AF /* VideoIO */; };
 		9D4985AB26454E39003B8281 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D4985AA26454E39003B8281 /* AVKit.framework */; };
-		DC1829C9C2ED99B005622C45 /* Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33BF35C8DC0C16F75B3F1984 /* Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework */; };
+		9DAA0003261E1D320011E8AF /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 9DAA0001261E1D320011E8AF /* MetalPetal */; };
+		9DAA0004261E1D320011E8AF /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 9DAA0002261E1D320011E8AF /* MetalPetal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		06FD16DA7001A42C3776E095 /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetalPetalExamples-MetalPetalExamples (iOS).debug.xcconfig"; path = "Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (iOS)/Pods-MetalPetalExamples-MetalPetalExamples (iOS).debug.xcconfig"; sourceTree = "<group>"; };
-		32F118E951611EE75B4F2801 /* Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		33BF35C8DC0C16F75B3F1984 /* Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D492972261E19E70011E8AF /* MetalPetalExamplesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalPetalExamplesApp.swift; sourceTree = "<group>"; };
 		9D492974261E19E80011E8AF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9D492979261E19E80011E8AF /* MetalPetalExamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalPetalExamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -119,9 +116,6 @@
 		9D4929C1261E1B580011E8AF /* ColorLookupTable.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ColorLookupTable.png; sourceTree = "<group>"; };
 		9D4929C2261E1B580011E8AF /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		9D4985AA26454E39003B8281 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
-		9E1DD1CD19A8033D4E0152B9 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetalPetalExamples-MetalPetalExamples (macOS).release.xcconfig"; path = "Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (macOS)/Pods-MetalPetalExamples-MetalPetalExamples (macOS).release.xcconfig"; sourceTree = "<group>"; };
-		B378FBB57E99C90A34544BF4 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetalPetalExamples-MetalPetalExamples (macOS).debug.xcconfig"; path = "Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (macOS)/Pods-MetalPetalExamples-MetalPetalExamples (macOS).debug.xcconfig"; sourceTree = "<group>"; };
-		C56F5F1EE4A42DDCD7B0159C /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MetalPetalExamples-MetalPetalExamples (iOS).release.xcconfig"; path = "Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (iOS)/Pods-MetalPetalExamples-MetalPetalExamples (iOS).release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,7 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D492A0C261E1D320011E8AF /* VideoIO in Frameworks */,
-				DC1829C9C2ED99B005622C45 /* Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework in Frameworks */,
+				9DAA0003261E1D320011E8AF /* MetalPetal in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,7 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D492A10261E1D420011E8AF /* VideoIO in Frameworks */,
-				2AF4F087EEBBECD071A474BA /* Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework in Frameworks */,
+				9DAA0004261E1D320011E8AF /* MetalPetal in Frameworks */,
 				9D4985AB26454E39003B8281 /* AVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -151,21 +145,8 @@
 			isa = PBXGroup;
 			children = (
 				9D4985AA26454E39003B8281 /* AVKit.framework */,
-				33BF35C8DC0C16F75B3F1984 /* Pods_MetalPetalExamples_MetalPetalExamples__iOS_.framework */,
-				32F118E951611EE75B4F2801 /* Pods_MetalPetalExamples_MetalPetalExamples__macOS_.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		69883E59A7CC7DCAD117F9C0 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				06FD16DA7001A42C3776E095 /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).debug.xcconfig */,
-				C56F5F1EE4A42DDCD7B0159C /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).release.xcconfig */,
-				B378FBB57E99C90A34544BF4 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).debug.xcconfig */,
-				9E1DD1CD19A8033D4E0152B9 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).release.xcconfig */,
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 		9D49296C261E19E70011E8AF = {
@@ -173,7 +154,6 @@
 			children = (
 				9D492996261E1A140011E8AF /* MetalPetalExamples */,
 				9D49297A261E19E80011E8AF /* Products */,
-				69883E59A7CC7DCAD117F9C0 /* Pods */,
 				4D37F1B66F9F6B8D6F99813C /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -277,11 +257,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9D49298D261E19E80011E8AF /* Build configuration list for PBXNativeTarget "MetalPetalExamples (iOS)" */;
 			buildPhases = (
-				EC0C6A29EA15354170BE1734 /* [CP] Check Pods Manifest.lock */,
 				9D492975261E19E80011E8AF /* Sources */,
 				9D492976261E19E80011E8AF /* Frameworks */,
 				9D492977261E19E80011E8AF /* Resources */,
-				733827B47A102D9F7DD82811 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -290,6 +268,7 @@
 			name = "MetalPetalExamples (iOS)";
 			packageProductDependencies = (
 				9D492A0B261E1D320011E8AF /* VideoIO */,
+				9DAA0001261E1D320011E8AF /* MetalPetal */,
 			);
 			productName = "MetalPetalExamples (iOS)";
 			productReference = 9D492979261E19E80011E8AF /* MetalPetalExamples.app */;
@@ -299,11 +278,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9D492990261E19E80011E8AF /* Build configuration list for PBXNativeTarget "MetalPetalExamples (macOS)" */;
 			buildPhases = (
-				C7EF740E4EFACC88E36C3AA0 /* [CP] Check Pods Manifest.lock */,
 				9D49297D261E19E80011E8AF /* Sources */,
 				9D49297E261E19E80011E8AF /* Frameworks */,
 				9D49297F261E19E80011E8AF /* Resources */,
-				B6D8FC13DA05EB290D6CA644 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -312,6 +289,7 @@
 			name = "MetalPetalExamples (macOS)";
 			packageProductDependencies = (
 				9D492A0F261E1D420011E8AF /* VideoIO */,
+				9DAA0002261E1D320011E8AF /* MetalPetal */,
 			);
 			productName = "MetalPetalExamples (macOS)";
 			productReference = 9D492981261E19E80011E8AF /* MetalPetalExamples.app */;
@@ -323,8 +301,9 @@
 		9D49296D261E19E70011E8AF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
 					9D492978261E19E80011E8AF = {
 						CreatedOnToolsVersion = 12.4;
@@ -344,6 +323,7 @@
 			);
 			mainGroup = 9D49296C261E19E70011E8AF;
 			packageReferences = (
+				9DAA0005261E1D320011E8AF /* XCLocalSwiftPackageReference "." */,
 				9D492A0A261E1D320011E8AF /* XCRemoteSwiftPackageReference "VideoIO" */,
 			);
 			productRefGroup = 9D49297A261E19E80011E8AF /* Products */;
@@ -384,87 +364,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		733827B47A102D9F7DD82811 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (iOS)/Pods-MetalPetalExamples-MetalPetalExamples (iOS)-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (iOS)/Pods-MetalPetalExamples-MetalPetalExamples (iOS)-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (iOS)/Pods-MetalPetalExamples-MetalPetalExamples (iOS)-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B6D8FC13DA05EB290D6CA644 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (macOS)/Pods-MetalPetalExamples-MetalPetalExamples (macOS)-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (macOS)/Pods-MetalPetalExamples-MetalPetalExamples (macOS)-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MetalPetalExamples-MetalPetalExamples (macOS)/Pods-MetalPetalExamples-MetalPetalExamples (macOS)-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C7EF740E4EFACC88E36C3AA0 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MetalPetalExamples-MetalPetalExamples (macOS)-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		EC0C6A29EA15354170BE1734 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MetalPetalExamples-MetalPetalExamples (iOS)-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		9D492975261E19E80011E8AF /* Sources */ = {
@@ -569,9 +468,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = L82N7LD4N5;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -593,6 +495,7 @@
 				MTL_HEADER_SEARCH_PATHS = Frameworks/MetalPetal/Shaders;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalPetalExamples/Shared/MetalPetalExamples-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -634,9 +537,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = L82N7LD4N5;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -651,6 +557,7 @@
 				MTL_FAST_MATH = YES;
 				MTL_HEADER_SEARCH_PATHS = Frameworks/MetalPetal/Shaders;
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalPetalExamples/Shared/MetalPetalExamples-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -659,14 +566,13 @@
 		};
 		9D49298E261E19E80011E8AF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 06FD16DA7001A42C3776E095 /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = YWAZZNBUPH;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetalPetalExamples/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -681,14 +587,13 @@
 		};
 		9D49298F261E19E80011E8AF /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C56F5F1EE4A42DDCD7B0159C /* Pods-MetalPetalExamples-MetalPetalExamples (iOS).release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = YWAZZNBUPH;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetalPetalExamples/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -704,14 +609,13 @@
 		};
 		9D492991261E19E80011E8AF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B378FBB57E99C90A34544BF4 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MetalPetalExamples/macOS/macOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = YWAZZNBUPH;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetalPetalExamples/macOS/Info.plist;
@@ -719,6 +623,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_BUNDLE_IDENTIFIER = org.metalpetal.MetalPetalExamples;
 				PRODUCT_NAME = MetalPetalExamples;
 				SDKROOT = macosx;
@@ -728,14 +633,13 @@
 		};
 		9D492992261E19E80011E8AF /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E1DD1CD19A8033D4E0152B9 /* Pods-MetalPetalExamples-MetalPetalExamples (macOS).release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MetalPetalExamples/macOS/macOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = YWAZZNBUPH;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MetalPetalExamples/macOS/Info.plist;
@@ -743,6 +647,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_BUNDLE_IDENTIFIER = org.metalpetal.MetalPetalExamples;
 				PRODUCT_NAME = MetalPetalExamples;
 				SDKROOT = macosx;
@@ -782,6 +687,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		9DAA0005261E1D320011E8AF /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		9D492A0A261E1D320011E8AF /* XCRemoteSwiftPackageReference "VideoIO" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -803,6 +715,14 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9D492A0A261E1D320011E8AF /* XCRemoteSwiftPackageReference "VideoIO" */;
 			productName = VideoIO;
+		};
+		9DAA0001261E1D320011E8AF /* MetalPetal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MetalPetal;
+		};
+		9DAA0002261E1D320011E8AF /* MetalPetal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MetalPetal;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

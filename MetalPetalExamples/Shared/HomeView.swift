@@ -1,15 +1,14 @@
 //
-//  ContentView.swift
+//  HomeView.swift
 //  Shared
 //
 //  Created by YuAo on 2021/4/3.
 //
 
-import SwiftUI
 import MetalPetal
+import SwiftUI
 
 struct HomeView: View {
-    
     var body: some View {
         NavigationView {
             List {
@@ -58,19 +57,11 @@ struct HomeView: View {
             }
             .groupedListStyle()
             .inlineNavigationBarTitle("MetalPetal Examples")
-            
             VStack(spacing: 6) {
                 Text("Welcome to MetalPetal examples.")
                 Text("Select a topic to begin.").font(Font.caption).foregroundColor(.secondary)
             }.toolbar(content: { Spacer() })
         }
         .stackNavigationViewStyle()
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-            .previewDevice("iPad (8th generation)")
     }
 }

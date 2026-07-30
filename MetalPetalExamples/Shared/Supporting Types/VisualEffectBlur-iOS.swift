@@ -1,11 +1,21 @@
 /*
  Copyright © 2020 Apple Inc.
 
- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ software and associated documentation files (the "Software"), to deal in the Software
+ without restriction, including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+ to whom the Software is furnished to do so, subject to the following conditions:
 
- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in all copies
+ or substantial portions of the Software.
 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+ FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ DEALINGS IN THE SOFTWARE.
  */
 
 import SwiftUI
@@ -20,7 +30,11 @@ public struct VisualEffectBlur<Content: View>: View {
 
     var content: Content
 
-    public init(blurStyle: UIBlurEffect.Style = .systemMaterial, vibrancyStyle: UIVibrancyEffectStyle? = nil, @ViewBuilder content: () -> Content) {
+    public init(
+        blurStyle: UIBlurEffect.Style = .systemMaterial,
+        vibrancyStyle: UIVibrancyEffectStyle? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.blurStyle = blurStyle
         self.vibrancyStyle = vibrancyStyle
         self.content = content()
@@ -32,8 +46,6 @@ public struct VisualEffectBlur<Content: View>: View {
     }
 }
 
-// MARK: - Representable
-
 extension VisualEffectBlur {
     struct Representable<Content: View>: UIViewRepresentable {
         var blurStyle: UIBlurEffect.Style
@@ -44,7 +56,7 @@ extension VisualEffectBlur {
             context.coordinator.blurView
         }
 
-        func updateUIView(_ view: UIVisualEffectView, context: Context) {
+        func updateUIView(_: UIVisualEffectView, context: Context) {
             context.coordinator.update(content: content, blurStyle: blurStyle, vibrancyStyle: vibrancyStyle)
         }
 
@@ -53,8 +65,6 @@ extension VisualEffectBlur {
         }
     }
 }
-
-// MARK: - Coordinator
 
 extension VisualEffectBlur.Representable {
     class Coordinator {
@@ -67,7 +77,7 @@ extension VisualEffectBlur.Representable {
             hostingController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             hostingController.view.backgroundColor = nil
             blurView.contentView.addSubview(vibrancyView)
-            
+
             blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             vibrancyView.contentView.addSubview(hostingController.view)
             vibrancyView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -79,7 +89,7 @@ extension VisualEffectBlur.Representable {
             let blurEffect = UIBlurEffect(style: blurStyle)
             blurView.effect = blurEffect
 
-            if let vibrancyStyle = vibrancyStyle {
+            if let vibrancyStyle {
                 vibrancyView.effect = UIVibrancyEffect(blurEffect: blurEffect, style: vibrancyStyle)
             } else {
                 vibrancyView.effect = nil
@@ -89,8 +99,6 @@ extension VisualEffectBlur.Representable {
         }
     }
 }
-
-// MARK: - Content-less Initializer
 
 public extension VisualEffectBlur where Content == EmptyView {
     init(blurStyle: UIBlurEffect.Style = .systemMaterial) {

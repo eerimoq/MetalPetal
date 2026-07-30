@@ -7,28 +7,29 @@
 
 import Foundation
 
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
+public extension MTIFunctionDescriptor {
+    static let passthroughFragment: MTIFunctionDescriptor =
+        .init(name: MTIFilterPassthroughFragmentFunctionName)
 
-extension MTIFunctionDescriptor {
-    public static let passthroughFragment: MTIFunctionDescriptor = MTIFunctionDescriptor(name: MTIFilterPassthroughFragmentFunctionName)
-    
-    public static let passthroughVertex: MTIFunctionDescriptor = MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName)
+    static let passthroughVertex: MTIFunctionDescriptor = .init(name: MTIFilterPassthroughVertexFunctionName)
 }
 
-extension MTIFunctionDescriptor {
-    public convenience init(name: String, constantValues: MTLFunctionConstantValues? = nil, in bundle: Bundle) {
-        self.init(name: name, constantValues: constantValues, libraryURL: MTIDefaultLibraryURLForBundle(bundle))
+public extension MTIFunctionDescriptor {
+    convenience init(name: String, constantValues: MTLFunctionConstantValues? = nil, in bundle: Bundle) {
+        self.init(
+            name: name,
+            constantValues: constantValues,
+            libraryURL: MTIDefaultLibraryURLForBundle(bundle)
+        )
     }
 }
 
-extension URL {
-    public static func defaultMetalLibraryURL(for bundleForClass: AnyClass) -> URL! {
-        return MTIDefaultLibraryURLForBundle(Bundle(for: bundleForClass))
+public extension URL {
+    static func defaultMetalLibraryURL(for bundleForClass: AnyClass) -> URL! {
+        MTIDefaultLibraryURLForBundle(Bundle(for: bundleForClass))
     }
-    
-    public static func defaultMetalLibraryURL(for bundle: Bundle) -> URL! {
-        return MTIDefaultLibraryURLForBundle(bundle)
+
+    static func defaultMetalLibraryURL(for bundle: Bundle) -> URL! {
+        MTIDefaultLibraryURLForBundle(bundle)
     }
 }

@@ -8,4 +8,4 @@
 import Foundation
 import MetalPetal
 
-extension MTIContext: ObservableObject {}
+extension MTIContext: @retroactive ObservableObject {}

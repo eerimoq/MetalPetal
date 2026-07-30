@@ -8,7 +8,6 @@
 
 #import "MTITexturePool.h"
 #import "MTITextureDescriptor.h"
-#import "MTIPrint.h"
 #import "MTILock.h"
 #import "MTIError.h"
 
@@ -210,7 +209,6 @@ __attribute__((objc_subclassing_restricted))
             }
             return nil;
         }
-        MTIPrint(@"%@: new texture - %@x%@x%@/%@", self, @(textureDescriptor.width), @(textureDescriptor.height), @(textureDescriptor.depth),@(textureDescriptor.pixelFormat));
     }
     
     MTIReusableTexture *reusableTexture = [[MTIReusableTexture alloc] initWithTexture:texture descriptor:textureDescriptor pool:self];
@@ -234,7 +232,6 @@ __attribute__((objc_subclassing_restricted))
     [_lock lock];
     [_textureCache removeAllObjects];
     [_lock unlock];
-    MTIPrint(@"%@: flush", self);
 }
 
 - (NSUInteger)idleResourceSize {
@@ -361,7 +358,6 @@ NS_AVAILABLE(10_15, 13_0)
             }
             return nil;
         }
-        MTIPrint(@"%@: new texture - %@x%@x%@/%@", self, @(textureDescriptor.width), @(textureDescriptor.height), @(textureDescriptor.depth),@(textureDescriptor.pixelFormat));
     }
     
     id<MTLTexture> texture = [textureDescriptor newTextureWithHeap:heap];
@@ -398,7 +394,6 @@ NS_AVAILABLE(10_15, 13_0)
     [_lock lock];
     [_heaps removeAllObjects];
     [_lock unlock];
-    MTIPrint(@"%@: flush", self);
 }
 
 - (NSUInteger)idleResourceSize {

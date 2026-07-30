@@ -5,18 +5,30 @@
 //  Created by YuAo on 2021/2/1.
 //
 
+import CoreGraphics
 import Foundation
 
-#if SWIFT_PACKAGE
-import MetalPetalObjectiveC.Core
-#endif
+public enum MTICropRegionUnit: UInt {
+    case pixel
+    case percentage
+}
 
-extension MTICropRegion {
-    public static func pixel(_ rect: CGRect) -> MTICropRegion {
+public struct MTICropRegion {
+    public var bounds: CGRect
+    public var unit: MTICropRegionUnit
+
+    public init(bounds: CGRect, unit: MTICropRegionUnit) {
+        self.bounds = bounds
+        self.unit = unit
+    }
+}
+
+public extension MTICropRegion {
+    static func pixel(_ rect: CGRect) -> MTICropRegion {
         MTICropRegion(bounds: rect, unit: .pixel)
     }
-    
-    public static func fractional(_ rect: CGRect) -> MTICropRegion {
+
+    static func fractional(_ rect: CGRect) -> MTICropRegion {
         MTICropRegion(bounds: rect, unit: .percentage)
     }
 }

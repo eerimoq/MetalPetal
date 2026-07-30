@@ -8,28 +8,28 @@
 import Foundation
 import SwiftUI
 
-struct NoteView<T>: View where T: View{
+struct NoteView<T: View>: View {
     private let text: T
-    
+
     init(@ViewBuilder _ content: () -> T) {
         text = content()
     }
-    
-    init<S>(text: S) where S: StringProtocol, T == Text {
+
+    init(text: some StringProtocol) where T == Text {
         self.text = Text(text)
     }
-    
+
     var body: some View {
         text.font(Font.caption)
             .frame(maxWidth: 180)
             .padding(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
             .background(RoundedRectangle(cornerRadius: 10)
-                            .foregroundColor(Color.secondarySystemBackground))
+                .foregroundColor(Color.secondarySystemBackground))
     }
 }
 
 extension View {
-    func noteOverlay<T>(_ note: NoteView<T>, isHidden: Bool = false) -> some View {
+    func noteOverlay(_ note: NoteView<some Any>, isHidden: Bool = false) -> some View {
         Group {
             if isHidden {
                 self

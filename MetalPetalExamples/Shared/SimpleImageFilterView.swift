@@ -6,49 +6,49 @@
 //
 
 import Foundation
-import SwiftUI
 import MetalPetal
+import SwiftUI
 
 struct SimpleImageFilterView: View {
-    
     @State private var inputImage: MTIImage = DemoImages.p1040808
     @State private var saturation: Float = 1
-    
     @StateObject private var renderContext = try! MTIContext(device: MTLCreateSystemDefaultDevice()!)
 
     private func filter(_ image: MTIImage) throws -> CGImage {
         let filteredImage = image.adjusting(saturation: saturation)
-        let cgImage = try self.renderContext.makeCGImage(from: filteredImage)
-        return cgImage
+        return try renderContext.makeCGImage(from: filteredImage)
     }
-    
+
     var body: some View {
         Group {
             switch Result(catching: {
                 try filter(inputImage)
             }) {
-            case .success(let image):
+            case let .success(image):
                 VStack {
                     Image(cgImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                     VStack(alignment: .leading) {
                         Text("Saturation \(saturation, specifier: "%.2f")")
-                        Slider(value: $saturation, in: 0...2)
+                        Slider(value: $saturation, in: 0 ... 2)
                     }
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 10)
-                                            .foregroundColor(Color.secondarySystemBackground))
+                        .foregroundColor(Color.secondarySystemBackground))
                     .padding()
                 }
-            case .failure(let error):
+            case let .failure(error):
                 Text(error.localizedDescription)
             }
         }
         .toolbar(content: {
             ImagePicker(title: "Choose Image", handler: { url in
-                if let image = ImageUtilities.loadUserPickedImage(from: url, requiresUnpremultipliedAlpha: true) {
-                    self.inputImage = image
+                if let image = ImageUtilities.loadUserPickedImage(
+                    from: url,
+                    requiresUnpremultipliedAlpha: true
+                ) {
+                    inputImage = image
                 }
             })
         })
@@ -58,14 +58,16 @@ struct SimpleImageFilterView: View {
 
 struct SimpleImageFilterViewMTKDriven: View {
     private let image: MTIImage = DemoImages.p1040808
-    @StateObject private var renderContext: MTIContext = try! MTIContext(device: MTLCreateSystemDefaultDevice()!)
+    @StateObject private var renderContext: MTIContext =
+        try! MTIContext(device: MTLCreateSystemDefaultDevice()!)
 
     var body: some View {
         MetalKitView(device: renderContext.device) { view in
-            let filteredImage = image.adjusting(saturation: 1.0 + Float(sin(CFAbsoluteTimeGetCurrent() * 2.0)))
+            let filteredImage = image
+                .adjusting(saturation: 1.0 + Float(sin(CFAbsoluteTimeGetCurrent() * 2.0)))
             let request = MTIDrawableRenderingRequest(drawableProvider: view, resizingMode: .aspect)
             do {
-                try self.renderContext.render(filteredImage, toDrawableWithRequest: request)
+                try renderContext.render(filteredImage, toDrawableWithRequest: request)
             } catch {
                 print(error)
             }

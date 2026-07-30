@@ -52,15 +52,15 @@ final class UtilitiesTests: XCTestCase {
     }
     
     func testMTILayerModel() throws {
-        var propertyCount: UInt32 = 0
-        let list = try XCTUnwrap(class_copyPropertyList(MTILayer.self, &propertyCount))
-        let properties = [objc_property_t](UnsafeBufferPointer<objc_property_t>(start: list, count: Int(propertyCount)))
-        list.deallocate()
+        // `MTILayer` is now a Swift class, so its stored properties are enumerated via `Mirror`
+        // rather than the Objective-C runtime. This still verifies that every `MTILayer` property
+        // has a matching field on `MultilayerCompositingFilter.Layer`.
+        let mtiLayer = MTILayer(content: .white, layoutUnit: .pixel, position: .zero, size: .zero, rotation: 0, opacity: 1, blendMode: .normal)
+        let mtiLayerMirror = Mirror(reflecting: mtiLayer)
         let swiftLayerMirror = Mirror(reflecting: MultilayerCompositingFilter.Layer(content: .white))
-        for property in properties {
-            XCTAssert(swiftLayerMirror.children.contains { label, value in
-                label == String(cString: property_getName(property))
-            })
+        for child in mtiLayerMirror.children {
+            guard let label = child.label else { continue }
+            XCTAssert(swiftLayerMirror.children.contains { $0.label == label }, "Missing property: \(label)")
         }
     }
     

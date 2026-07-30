@@ -25,7 +25,10 @@ extension Image {
         #if os(iOS)
         self.init(uiImage: UIImage(cgImage: cgImage))
         #elseif os(macOS)
-        self.init(nsImage: NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height)))
+        self.init(nsImage: NSImage(
+            cgImage: cgImage,
+            size: CGSize(width: cgImage.width, height: cgImage.height)
+        ))
         #else
         #error("Unsupported Platform")
         #endif
@@ -35,7 +38,7 @@ extension Image {
 extension Button {
     func linkButtonStyle() -> some View {
         #if os(macOS)
-        return self.buttonStyle(LinkButtonStyle()).onHover(perform: { isHover in
+        return buttonStyle(LinkButtonStyle()).onHover(perform: { isHover in
             if isHover {
                 NSCursor.pointingHand.push()
             } else {
@@ -51,78 +54,82 @@ extension Button {
 extension View {
     func roundedRectangleButtonStyle() -> some View {
         #if os(iOS)
-        return self.padding(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+        return padding(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
             .background(RoundedRectangle(cornerRadius: 10)
-                            .foregroundColor(Color.secondarySystemBackground))
+                .foregroundColor(Color.secondarySystemBackground))
         #else
         return self
         #endif
     }
-    
+
     func stackNavigationViewStyle() -> some View {
         #if os(iOS)
-        return self.navigationViewStyle(StackNavigationViewStyle())
+        return navigationViewStyle(StackNavigationViewStyle())
         #else
         return self
         #endif
     }
-    
+
     func groupedListStyle() -> some View {
         #if os(iOS)
-        return self.listStyle(GroupedListStyle())
+        return listStyle(GroupedListStyle())
         #else
         return self
         #endif
     }
-    
-    func inlineNavigationBarTitle<T>(_ title: T) -> some View where T: StringProtocol {
+
+    func inlineNavigationBarTitle(_ title: some StringProtocol) -> some View {
         #if os(iOS)
-        return self.navigationBarTitle(title, displayMode: .inline)
+        return navigationBarTitle(title, displayMode: .inline)
         #else
-        return self.navigationTitle(title)
+        return navigationTitle(title)
         #endif
     }
-    
+
     func largeControlSize() -> some View {
         #if os(macOS)
-        return self.controlSize(.large)
+        return controlSize(.large)
         #else
         return self
         #endif
     }
-    
+
     func smallControlSize() -> some View {
         #if os(macOS)
-        return self.controlSize(.small)
+        return controlSize(.small)
         #else
         return self
         #endif
     }
-    
-    func toolbarMenu<T>(_ menu: T) -> some View where T: View {
+
+    func toolbarMenu(_ menu: some View) -> some View {
         #if os(iOS)
-        return self.navigationBarItems(trailing: menu)
+        return navigationBarItems(trailing: menu)
         #else
-        return self.toolbar(content: {
+        return toolbar(content: {
             menu
         })
         #endif
     }
-    
+
     func pickerWidthLimit(_ width: CGFloat) -> some View {
         #if os(macOS)
-        return self.frame(maxWidth: width)
+        return frame(maxWidth: width)
         #else
         return self
         #endif
     }
-    
+
     func blurBackgroundEffect(cornerRadius: CGFloat) -> some View {
         #if os(macOS)
-        return self.background(VisualEffectBlur(material: .hudWindow, blendingMode: .withinWindow, state: .followsWindowActiveState).clipShape(RoundedRectangle(cornerRadius: cornerRadius)))
+        return background(VisualEffectBlur(
+            material: .hudWindow,
+            blendingMode: .withinWindow,
+            state: .followsWindowActiveState
+        ).clipShape(RoundedRectangle(cornerRadius: cornerRadius)))
         #elseif os(iOS)
-        return self.background(VisualEffectBlur(blurStyle: .systemThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: cornerRadius)))
+        return background(VisualEffectBlur(blurStyle: .systemThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius)))
         #endif
     }
 }
@@ -131,7 +138,7 @@ extension View {
 
 extension UIApplication {
     var topMostViewController: UIViewController? {
-        let rootWindow = self.windows.first(where: { $0.isHidden == false })
+        let rootWindow = windows.first(where: { $0.isHidden == false })
         var topMostViewController: UIViewController? = rootWindow?.rootViewController
         while topMostViewController?.presentedViewController != nil {
             topMostViewController = topMostViewController?.presentedViewController

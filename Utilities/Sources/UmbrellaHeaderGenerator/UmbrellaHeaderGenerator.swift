@@ -8,7 +8,6 @@
 import Foundation
 import ArgumentParser
 import URLExpressibleByArgument
-import RunCommand
 import MetalPetalSourceLocator
 
 public struct UmbrellaHeaderGenerator: ParsableCommand {
@@ -40,20 +39,16 @@ public struct UmbrellaHeaderGenerator: ParsableCommand {
         try! content.write(to: directoryURL.appendingPathComponent("MetalPetal.h"), atomically: true, encoding: .utf8)
     }
     
-    struct Podspec: Codable {
-        var subspecs: [Podspec]?
-        var name: String
-        var private_header_files: [String]?
-    }
-    
+    private static let privateHeaderFileNames = [
+        "MTIPrint.h",
+        "MTIDefer.h",
+        "MTIHasher.h",
+        "MTIImageRenderingContext+Internal.h",
+        "MTIBlendFormulaSupport.h"
+    ]
+
     private func exludesHeaderFileNames() throws -> [String] {
-        let podSpecFileURL = MetalPetalSourcesRootURL(in: projectRoot).appendingPathComponent("MetalPetal.podspec")
-        let jsonString = try Command.execute("pod ipc spec \(podSpecFileURL.lastPathComponent)", fromDirectory: MetalPetalSourcesRootURL(in: projectRoot).path)
-        let podspec = try JSONDecoder().decode(Podspec.self, from: jsonString.data(using: .utf8)!)
-        var headers: [String] = []
-        for subspec in podspec.subspecs ?? [] {
-            headers.append(contentsOf: (subspec.private_header_files ?? []).map({ URL(fileURLWithPath: $0).lastPathComponent }))
-        }
+        var headers: [String] = UmbrellaHeaderGenerator.privateHeaderFileNames
         let modulemap = MetalPetalSourcesRootURL(in: projectRoot).appendingPathComponent("MetalPetal.modulemap")
         let modulemapContents = try String(contentsOf: modulemap)
         modulemapContents.enumerateLines { (line, stop) in

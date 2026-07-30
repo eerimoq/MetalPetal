@@ -27,6 +27,6 @@
 	<key>NSCameraUsageDescription</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string></string>
+	<string>To test filters.</string>
 </dict>
 </plist>
