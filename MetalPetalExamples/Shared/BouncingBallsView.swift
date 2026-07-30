@@ -9,95 +9,94 @@ import Foundation
 import MetalPetal
 import SwiftUI
 
+private class PointVertices: NSObject, MTIGeometry {
+    func copy(with _: NSZone? = nil) -> Any {
+        self
+    }
+
+    func encodeDrawCall(
+        with commandEncoder: MTLRenderCommandEncoder,
+        context _: MTIGeometryRenderingContext
+    ) {
+        commandEncoder.drawPrimitives(
+            type: .point,
+            vertexStart: 0,
+            vertexCount: 1,
+            instanceCount: BouncingBallsView.numberOfParticles
+        )
+    }
+}
+
+private class FrameDataBuffer: ObservableObject {
+    @Published var buffer: MTIDataBuffer = FrameDataBuffer.makeBuffer()
+
+    func reset() {
+        buffer = FrameDataBuffer.makeBuffer()
+    }
+
+    private static func makeBuffer() -> MTIDataBuffer {
+        var particles: [ParticleData] = []
+        for _ in 0 ..< BouncingBallsView.numberOfParticles {
+            particles.append(ParticleData(
+                position: SIMD2<Float>(Float.random(in: 24 ... 1000), Float.random(in: 24 ... 400)),
+                speed: .zero,
+                size: Float.random(in: 8 ... 36)
+            ))
+        }
+        return MTIDataBuffer(
+            bytes: particles,
+            length: UInt(MemoryLayout<ParticleData>.size * BouncingBallsView.numberOfParticles),
+            options: .init()
+        )!
+    }
+}
+
+private let computeKernel =
+    MTIComputePipelineKernel(computeFunctionDescriptor: MTIFunctionDescriptor(
+        name: "bouncingBallCompute",
+        in: .main
+    ))
+
+private let renderKernel = MTIRenderPipelineKernel(
+    vertexFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallVertex", in: .main),
+    fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallFragment", in: .main)
+)
+
 struct BouncingBallsView: View {
     static let numberOfParticles = 1024
-
-    private class PointVertices: NSObject, MTIGeometry {
-        func copy(with _: NSZone? = nil) -> Any {
-            self
-        }
-
-        func encodeDrawCall(
-            with commandEncoder: MTLRenderCommandEncoder,
-            context _: MTIGeometryRenderingContext
-        ) {
-            commandEncoder.drawPrimitives(
-                type: .point,
-                vertexStart: 0,
-                vertexCount: 1,
-                instanceCount: BouncingBallsView.numberOfParticles
-            )
-        }
-    }
-
-    private static let computeKernel =
-        MTIComputePipelineKernel(computeFunctionDescriptor: MTIFunctionDescriptor(
-            name: "bouncingBallCompute",
-            in: .main
-        ))
-    private static let renderKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallVertex", in: .main),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallFragment", in: .main)
-    )
-
     @StateObject private var renderContext = try! MTIContext(device: MTLCreateSystemDefaultDevice()!)
-
-    private class FrameDataBuffer: ObservableObject {
-        @Published var buffer: MTIDataBuffer = FrameDataBuffer.makeBuffer()
-
-        func reset() {
-            buffer = FrameDataBuffer.makeBuffer()
-        }
-
-        private static func makeBuffer() -> MTIDataBuffer {
-            var particles: [ParticleData] = []
-            for _ in 0 ..< BouncingBallsView.numberOfParticles {
-                particles.append(ParticleData(
-                    position: SIMD2<Float>(Float.random(in: 24 ... 1000), Float.random(in: 24 ... 400)),
-                    speed: .zero,
-                    size: Float.random(in: 8 ... 36)
-                ))
-            }
-            return MTIDataBuffer(
-                bytes: particles,
-                length: UInt(MemoryLayout<ParticleData>.size * BouncingBallsView.numberOfParticles),
-                options: .init()
-            )!
-        }
-    }
-
     @StateObject private var frameDataBuffer: FrameDataBuffer = .init()
 
     var body: some View {
         MetalKitView(device: renderContext.device) { view in
-            let computeOutput = BouncingBallsView.computeKernel.apply(toInputImages: [],
-                                                                      parameters: ["data": frameDataBuffer
-                                                                          .buffer],
-                                                                      dispatchOptions: .init(
-                                                                          threads: MTLSize(width: 1024,
-                                                                                           height: 1,
-                                                                                           depth: 1),
-                                                                          threadgroups: MTLSize(
-                                                                              width: 32,
-                                                                              height: 1,
-                                                                              depth: 1
-                                                                          ),
-                                                                          threadsPerThreadgroup: MTLSize(
-                                                                              width: 32,
-                                                                              height: 1,
-                                                                              depth: 1
-                                                                          )
-                                                                      ),
-                                                                      outputTextureDimensions: MTITextureDimensions(
-                                                                          width: 1,
-                                                                          height: 1,
-                                                                          depth: 1
-                                                                      ),
-                                                                      outputPixelFormat: .unspecified)
+            let computeOutput = computeKernel.apply(toInputImages: [],
+                                                    parameters: ["data": frameDataBuffer
+                                                        .buffer],
+                                                    dispatchOptions: .init(
+                                                        threads: MTLSize(width: 1024,
+                                                                         height: 1,
+                                                                         depth: 1),
+                                                        threadgroups: MTLSize(
+                                                            width: 32,
+                                                            height: 1,
+                                                            depth: 1
+                                                        ),
+                                                        threadsPerThreadgroup: MTLSize(
+                                                            width: 32,
+                                                            height: 1,
+                                                            depth: 1
+                                                        )
+                                                    ),
+                                                    outputTextureDimensions: MTITextureDimensions(
+                                                        width: 1,
+                                                        height: 1,
+                                                        depth: 1
+                                                    ),
+                                                    outputPixelFormat: .unspecified)
             // There's no actual image data in computeOutput. It is used to build the dependency between the
             // compute command and the render command.
             let renderCommand = MTIRenderCommand(
-                kernel: BouncingBallsView.renderKernel,
+                kernel: renderKernel,
                 geometry: PointVertices(),
                 images: [computeOutput],
                 parameters: ["data": frameDataBuffer.buffer]
