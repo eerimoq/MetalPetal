@@ -36,6 +36,9 @@ public struct SwiftPackageGenerator: ParsableCommand {
         import Foundation
         import Metal
 
+        // swiftlint:disable line_length
+        // swiftlint:disable trailing_whitespace
+
         private let MTIBuiltinLibrarySource = #"""
         \##(source)
         """#
@@ -56,6 +59,9 @@ public struct SwiftPackageGenerator: ParsableCommand {
             }
             return Static.url
         }
+
+        // swiftlint:enable trailing_whitespace
+        // swiftlint:enable line_length
 
         """##
         try generatedSwift.write(

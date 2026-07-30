@@ -2,6 +2,9 @@
 import Foundation
 import Metal
 
+// swiftlint:disable line_length
+// swiftlint:disable trailing_whitespace
+
 private let MTIBuiltinLibrarySource = #"""
 //
 //  MTIShader.h
@@ -5706,8 +5709,14 @@ func _MTISwiftPMBuiltinLibrarySourceURL() -> URL {
             let librarySource = targetConditionals + MTIBuiltinLibrarySource
             let options = MTLCompileOptions()
             options.fastMathEnabled = true
-            return MTILibrarySourceRegistration.shared.registerLibrary(source: librarySource, compileOptions: options)
+            return MTILibrarySourceRegistration.shared.registerLibrary(
+                source: librarySource,
+                compileOptions: options
+            )
         }()
     }
     return Static.url
 }
+
+// swiftlint:enable trailing_whitespace
+// swiftlint:enable line_length

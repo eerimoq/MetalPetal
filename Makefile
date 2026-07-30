@@ -7,7 +7,7 @@ SWIFTLINT_ARGS = --strict --quiet
 CODESPELL_ARGS = \
 	--ignore-words-list "inout,froms,soop,medias,deactive,upto,datas,ro,lightyears"
 
-CODE_DIRS += "Frameworks"
+CODE_DIRS += "Sources"
 CODE_DIRS += "MetalPetalExamples"
 
 SHELL = /usr/bin/env bash
