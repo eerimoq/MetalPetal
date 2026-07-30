@@ -26,8 +26,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v7
-    - name: Select Xcode
-      run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
       run: make build
     - name: Run tests
@@ -37,8 +35,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v7
-    - name: Select Xcode
-      run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
       run: make build-ios
 
@@ -46,8 +42,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v7
-    - name: Select Xcode
-      run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
       run: make build-mac-catalyst
     - name: Test
@@ -57,7 +51,5 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v7
-    - name: Select Xcode
-      run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
       run: make build-tvos
