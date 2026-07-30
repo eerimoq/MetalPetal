@@ -33,3 +33,15 @@ build:
 
 test:
 	swift test
+
+build-all: build
+	xcodebuild build -scheme MetalPetal -destination 'platform=iOS Simulator,name=iPhone 17' -workspace .
+	xcodebuild build -scheme MetalPetal -destination 'platform=macOS,variant=Mac Catalyst' -workspace .
+	xcodebuild build -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
+	xcodebuild build -scheme MetalPetal -destination generic/platform=iOS -workspace .
+	xcodebuild build -scheme MetalPetal -destination generic/platform=tvOS -workspace .
+
+test-all: test
+	xcodebuild test -scheme MetalPetal -destination 'platform=iOS Simulator,name=iPhone 17' -workspace .
+	xcodebuild test -scheme MetalPetal -destination 'platform=macOS,variant=Mac Catalyst' -workspace .
+	xcodebuild test -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
