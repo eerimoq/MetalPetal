@@ -480,8 +480,6 @@ The shader function argument types and the corresponding types to use in a param
 To build a custom unary filter, you can subclass `MTIUnaryImageRenderingFilter` and override the methods in the `SubclassingHooks` category. Examples: `MTIPixellateFilter`, `MTIVibranceFilter`, `MTIUnpremultiplyAlphaFilter`, `MTIPremultiplyAlphaFilter`, etc.
 
 ```Swift
-//Swift
-
 class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     var fractionalWidthOfAPixel: Float = 0.05
 
