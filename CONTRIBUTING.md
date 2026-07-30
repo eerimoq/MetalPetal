@@ -28,18 +28,6 @@ topic), send a pull request.
 
 ### API Design Guidelines
 
-#### Objective-C
-
-Basically, you should follow Apple's [Objective-C Conventions](https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/Conventions/Conventions.html) as well as [Coding Guidelines for Cocoa](https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html).
-
-Additionally:
-
-- Use `NS_ENUM` or `NS_OPTIONS` for enumerations. 
-
-- All interfaces should be marked with nullability annotations.
-
-- Always review the generated Swift interfaces, make sure that every single API conforms to the [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/).  Use `NS_SWIFT_NAME` / `NS_SWIFT_UNAVAILABLE` / `NS_REFINED_FOR_SWIFT` whenever needed.
-
 #### Swift
 
 Follow the [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/).

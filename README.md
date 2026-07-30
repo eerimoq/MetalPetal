@@ -92,7 +92,7 @@ Provides an evaluation context for rendering `MTIImage`s. It also stores a lot o
 
 #### MTIFilter
 
-A `MTIFilter` represents an image processing effect and any parameters that control that effect. It produces a `MTIImage` object as output. To use a filter, you create a filter object, set its input images and parameters, and then access its output image. Typically, a filter class owns a static kernel (`MTIKernel`), when you access its `outputImage` property, it asks the kernel with the input images and parameters to produce an output `MTIImage`. 
+A `MTIFilter` represents an image processing effect and any parameters that control that effect. It produces a `MTIImage` object as output. To use a filter, you create a filter object, set its input images and parameters, and then access its output image. Typically, a filter class owns a static kernel (`MTIKernel`), when you access its `outputImage` property, it asks the kernel with the input images and parameters to produce an output `MTIImage`.
 
 #### MTIKernel
 
@@ -268,7 +268,7 @@ guard let device = MTLCreateSystemDefaultDevice(), let context = try? MTIContext
 }
 let image: MTIImage = ...
 do {
-    try context.render(image, to: pixelBuffer) 
+    try context.render(image, to: pixelBuffer)
     //context.makeCIImage(from: image)
     //context.makeCGImage(from: image)
 } catch {
@@ -344,13 +344,13 @@ var configuration = AssetExportSession.Configuration(fileType: .mp4, videoSettin
 configuration.videoComposition = composition.makeAVVideoComposition()
 self.exporter = try! AssetExportSession(asset: asset, outputURL: outputURL, configuration: configuration)
 exporter.export(progress: { progress in
-}, completion: { error in    
+}, completion: { error in
 })
 ```
 
 ### Process Live Video (with VideoIO)
 
-_[VideoIO](https://github.com/MetalPetal/VideoIO) is required for this example._ 
+_[VideoIO](https://github.com/MetalPetal/VideoIO) is required for this example._
 
 ```Swift
 import VideoIO
@@ -390,36 +390,36 @@ Please refer to the `CameraFilterView.swift` in the example project for more abo
     Contexts are heavyweight objects, so if you do create one, do so as early as possible, and reuse it each time you need to render an image.
 
 - Use `MTIImage.cachePolicy` wisely.
-    
+
     Use `MTIImageCachePolicyTransient` when you do not want to preserve the render result of an image, for example when the image is just an intermediate result in a filter chain, so the underlying texture of the render result can be reused. It is the most memory efficient option. However, when you ask the context to render a previously rendered image, it may re-render that image since its underlying texture has been reused.
-    
+
     By default, a filter's output image has the `transient` policy.
 
     Use `MTIImageCachePolicyPersistent` when you want to prevent the underlying texture from being reused.
-    
+
     By default, images created from external sources have the `persistent` policy.
 
 - Understand that `MTIFilter.outputImage` is a compute property.
 
     Each time you ask a filter for its output image, the filter may give you a new output image object even if the inputs are identical with the previous call. So reuse output images whenever possible.
-    
+
     For example,
 
      ```Swift
     //          ╭→ filterB
     // filterA ─┤
     //          ╰→ filterC
-    // 
+    //
     // filterB and filterC use filterA's output as their input.
     ```
     In this situation, the following solution:
-    
+
     ```Swift
     let filterOutputImage = filterA.outputImage
     filterB.inputImage = filterOutputImage
     filterC.inputImage = filterOutputImage
     ```
-    
+
     is better than:
 
     ```Swift
@@ -464,16 +464,16 @@ fragment float4 vibranceAdjust(...,
 
 The shader function argument types and the corresponding types to use in a parameter dictionary is listed below.
 
-| Shader Function Argument Type | Swift | Objective-C | 
-| :--- | :--- | :--- |
-| float | Float | float |
-| int | Int32 | int |
-| uint | UInt32 | uint |
-| bool | Bool | bool |
-| simd (float2,float4,float4x4,int4, etc.) | simd (with `MetalPetal/Swift`) / MTIVector | MTIVector |
-| struct | Data / MTIDataBuffer | NSData / MTIDataBuffer |
-| other (float *, struct *, etc.) immutable | Data / MTIDataBuffer | NSData / MTIDataBuffer |
-| other (float *, struct *, etc.) mutable | MTIDataBuffer | MTIDataBuffer |
+| Shader Function Argument Type | Swift |
+| :--- | :--- |
+| float | Float |
+| int | Int32 |
+| uint | UInt32 |
+| bool | Bool |
+| simd (float2,float4,float4x4,int4, etc.) | simd (with `MetalPetal/Swift`) / MTIVector |
+| struct | Data / MTIDataBuffer |
+| other (float *, struct *, etc.) immutable | Data / MTIDataBuffer |
+| other (float *, struct *, etc.) mutable | MTIDataBuffer |
 
 ### Simple Single Input / Output Filters
 
@@ -488,7 +488,7 @@ class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     override var parameters: [String : Any] {
         return ["fractionalWidthOfAPixel": fractionalWidthOfAPixel]
     }
-    
+
     override class func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
         return MTIFunctionDescriptor(name: "pixellateEffect", libraryURL: MTIDefaultLibraryURLForBundle(Bundle.main))
     }
@@ -524,7 +524,7 @@ In rare scenarios, you may want to access the underlying texture directly, use m
 
 `MTIImagePromise` protocol provides direct access to the underlying texture and the render context for a step in MetalPetal.
 
-You can create new input sources or fully custom processing units by implementing the `MTIImagePromise` protocol. You will need to import an additional module to do so. 
+You can create new input sources or fully custom processing units by implementing the `MTIImagePromise` protocol. You will need to import an additional module to do so.
 
 ```Swift
 import MetalPetalObjectiveC.Extension
@@ -561,9 +561,9 @@ For performance reasons, alpha type validation only happens in debug build.
 - Most of the filters in MetalPetal accept unpremultiplied alpha and opaque images and output unpremultiplied alpha images.
 
 - Filters with `outputAlphaType` property accept inputs of all alpha types. And you can use `outputAlphaType` to specify the alpha type of the output image.
-    
+
     e.g. `MTIBlendFilter`, `MTIMultilayerCompositingFilter`, `MTICoreImageUnaryFilter`, `MTIRGBColorSpaceConversionFilter`
-    
+
 - Filters that do not actually modify colors have passthrough alpha handling rule, that means the alpha types of the output images are the same with the input images.
 
     e.g. `MTITransformFilter`, `MTICropFilter`, `MTIPixellateFilter`, `MTIBulgeDistortionFilter`
@@ -590,7 +590,7 @@ Specifying a color space for an input means that MetalPetal should convert the s
 
 ### Color Spaces for Outputs
 
-When specifying a color space for an output, the color space serves more like a tag which is used to communicate with the rest of the system on how to represent the color values in the output. There is no actual color space conversion performed. 
+When specifying a color space for an output, the color space serves more like a tag which is used to communicate with the rest of the system on how to represent the color values in the output. There is no actual color space conversion performed.
 
 - You can specify the color space of an output `CGImage` using `MTIContext.makeCGImage...` or `MTIContext.startTaskTo...` methods with a `colorSpace` parameter.
 
