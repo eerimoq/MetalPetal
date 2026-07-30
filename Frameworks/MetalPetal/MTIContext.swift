@@ -112,7 +112,7 @@ public final class MTIContext: NSObject {
 
     public let coreVideoTextureBridge: MTICVMetalTextureBridging
 
-    @objc private let texturePool: MTITexturePool
+    private let texturePool: MTITexturePool
 
     private let defaultLibraryFunctionShort2FullNames: [String: String]
 
@@ -243,6 +243,15 @@ public final class MTIContext: NSObject {
         }
         return MTIMPSSupportsMTLDevice(device)
     }()
+
+    // `texturePool` is a private property typed as the Swift `MTITexturePool` protocol, so it can't be `@objc`.
+    // Expose it via KVC so tooling/tests that inspect the pool keep working.
+    override public func value(forKey key: String) -> Any? {
+        if key == "texturePool" {
+            return texturePool
+        }
+        return super.value(forKey: key)
+    }
 
     public func reclaimResources() {
         texturePool.flush()
