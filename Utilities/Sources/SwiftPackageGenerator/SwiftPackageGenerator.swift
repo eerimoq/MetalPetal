@@ -17,23 +17,14 @@ public struct SwiftPackageGenerator: ParsableCommand {
     public init() { }
     
     public func run() throws {
+        // MetalPetal is a single all-Swift SwiftPM target living at `Sources/MetalPetal`, so there is no
+        // longer a separate source tree to mirror. This step only regenerates the builtin metal library
+        // support code (the embedded shader source), reading the shaders in place.
         let sourcesDirectory = MetalPetalSourcesRootURL(in: projectRoot)
-        let packageSourcesDirectory = projectRoot.appendingPathComponent("Sources/")
-        try? fileManager.removeItem(at: packageSourcesDirectory)
-        try fileManager.createDirectory(at: packageSourcesDirectory, withIntermediateDirectories: true, attributes: nil)
-        let swiftTargetDirectory = packageSourcesDirectory.appendingPathComponent("MetalPetal/")
-        try fileManager.createDirectory(at: swiftTargetDirectory, withIntermediateDirectories: true, attributes: nil)
-
-        // MetalPetal is now an all-Swift target; only `.swift` sources are mirrored into the package. The
-        // shader source headers (Shaders/MTIShaderLib.h etc.) stay in the authoritative Frameworks tree and
-        // are read directly when generating the builtin library support code below.
-        let fileHandlers = [
-            SourceFileHandler(fileTypes: ["swift"], projectRoot: projectRoot, targetURL: swiftTargetDirectory, fileManager: fileManager)
-        ]
-
-        try processSources(in: sourcesDirectory, fileHandlers: fileHandlers)
-
-        try generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: swiftTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
+        try generateBuiltinMetalLibrarySupportCode(
+            swiftTargetDirectory: sourcesDirectory,
+            shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders")
+        )
     }
     
     public func generateBuiltinMetalLibrarySupportCode(swiftTargetDirectory: URL, shadersDirectory: URL) throws {
@@ -92,53 +83,4 @@ public struct SwiftPackageGenerator: ParsableCommand {
         return librarySource
     }
     
-    private func processSources(in directory: URL, fileHandlers: [SourceFileHandler]) throws {
-        let sourceFiles = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
-        for sourceFile in sourceFiles {
-            if try sourceFile.resourceValues(forKeys: Set<URLResourceKey>([URLResourceKey.isDirectoryKey])).isDirectory == true {
-                try processSources(in: sourceFile, fileHandlers: fileHandlers)
-            } else {
-                for fileHandler in fileHandlers {
-                    try fileHandler.handle(sourceFile)
-                }
-            }
-        }
-    }
-    
-    struct SourceFileHandler {
-        let fileTypes: [String]
-        let projectRoot: URL
-        let targetURL: URL
-        let fileManager: FileManager
-        
-        enum Error: String, Swift.Error, LocalizedError {
-            case cannotCreateRelativePath
-            var errorDescription: String? {
-                return self.rawValue
-            }
-        }
-        
-        @discardableResult func handle(_ file: URL) throws -> Bool {
-            if fileTypes.contains(file.pathExtension) || fileTypes.contains(file.lastPathComponent) {
-                let fileRelativeToProjectRoot = try relativePathComponents(for: file, baseURL: projectRoot)
-                let targetRelativeToProjectRoot = try relativePathComponents(for: targetURL, baseURL: projectRoot)
-                let destinationURL = URL(string: (Array<String>(repeating: "..", count: targetRelativeToProjectRoot.count) + fileRelativeToProjectRoot).joined(separator: "/"))!
-                try fileManager.createSymbolicLink(at: targetURL.appendingPathComponent(file.lastPathComponent), withDestinationURL: destinationURL)
-                return true
-            } else {
-                return false
-            }
-        }
-        
-        private func relativePathComponents(for url: URL, baseURL: URL) throws -> [String] {
-            let filePathComponents = url.standardized.pathComponents
-            let basePathComponents = baseURL.standardized.pathComponents
-            let r: [String] = filePathComponents.dropLast(filePathComponents.count - basePathComponents.count)
-            if r == basePathComponents {
-                return [String](filePathComponents.dropFirst(basePathComponents.count))
-            } else {
-                throw Error.cannotCreateRelativePath
-            }
-        }
-    }
 }

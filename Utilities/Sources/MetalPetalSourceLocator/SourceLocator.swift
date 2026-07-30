@@ -8,5 +8,5 @@
 import Foundation
 
 public func MetalPetalSourcesRootURL(in projectRoot: URL) -> URL {
-    return projectRoot.appendingPathComponent("Frameworks/MetalPetal/")
+    return projectRoot.appendingPathComponent("Sources/MetalPetal/")
 }

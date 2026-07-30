@@ -1134,7 +1134,7 @@ final class RenderTests: XCTestCase {
     
     func testCustomRenderPipeline() throws {
         var librarySource = ""
-        let sourceFileDirectory = URL(fileURLWithPath: String(#file)).deletingLastPathComponent().appendingPathComponent("../../Frameworks/MetalPetal/Shaders")
+        let sourceFileDirectory = URL(fileURLWithPath: String(#file)).deletingLastPathComponent().appendingPathComponent("../../Sources/MetalPetal/Shaders")
         let headerURL = sourceFileDirectory.appendingPathComponent("MTIShaderLib.h")
         librarySource += try String(contentsOf: headerURL)
         librarySource += """
@@ -1164,7 +1164,7 @@ final class RenderTests: XCTestCase {
     
     func testCustomRenderPipelineWithFunctionConstants() throws {
         var librarySource = ""
-        let sourceFileDirectory = URL(fileURLWithPath: String(#file)).deletingLastPathComponent().appendingPathComponent("../../Frameworks/MetalPetal/Shaders")
+        let sourceFileDirectory = URL(fileURLWithPath: String(#file)).deletingLastPathComponent().appendingPathComponent("../../Sources/MetalPetal/Shaders")
         let headerURL = sourceFileDirectory.appendingPathComponent("MTIShaderLib.h")
         librarySource += try String(contentsOf: headerURL)
         librarySource += """

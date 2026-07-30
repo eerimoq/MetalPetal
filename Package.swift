@@ -17,7 +17,10 @@ let package = Package(
     targets: [
         .target(
             name: "MetalPetal",
-            dependencies: []),
+            dependencies: [],
+            // The Shaders directory holds .metal source + shared C headers. They are compiled at runtime
+            // from the embedded builtin library (MTISwiftPMBuiltinLibrarySupport.swift), not by SwiftPM.
+            exclude: ["Shaders"]),
         .target(
             name: "MetalPetalTestHelpers",
             dependencies: ["MetalPetal"],

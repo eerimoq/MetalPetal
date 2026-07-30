@@ -15,7 +15,7 @@ final class UtilitiesTests: XCTestCase {
     static let mtiShaderLibrarySource: String = {
         let headerURL = URL(fileURLWithPath: String(#file))
             .deletingLastPathComponent()
-            .appendingPathComponent("../../Frameworks/MetalPetal/Shaders/MTIShaderLib.h")
+            .appendingPathComponent("../../Sources/MetalPetal/Shaders/MTIShaderLib.h")
         return try! String(contentsOf: headerURL)
     }()
     
