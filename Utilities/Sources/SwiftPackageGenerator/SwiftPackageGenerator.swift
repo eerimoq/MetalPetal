@@ -21,8 +21,8 @@ public struct SwiftPackageGenerator: ParsableCommand {
             export *
         }
         explicit module Extension {
-            header "MTIContext+Internal.h"
             header "MTIBlendFormulaSupport.h"
+            header "MTISwiftPMBuiltinLibrarySupport.h"
             export *
         }
     }
@@ -52,19 +52,19 @@ public struct SwiftPackageGenerator: ParsableCommand {
         try processSources(in: sourcesDirectory, fileHandlers: fileHandlers)
         
         //TODO: remove this in swift 5.3
-        try generateBuiltinMetalLibrarySupportCode(directory: objectiveCTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
+        try generateBuiltinMetalLibrarySupportCode(headerDirectory: objectiveCHeaderDirectory, sourceDirectory: objectiveCTargetDirectory, shadersDirectory: sourcesDirectory.appendingPathComponent("Shaders"))
         
         try objectiveCModuleMapContents.write(to: objectiveCHeaderDirectory.appendingPathComponent("module.modulemap"), atomically: true, encoding: .utf8)
     }
     
-    public func generateBuiltinMetalLibrarySupportCode(directory: URL, shadersDirectory: URL) throws {
+    public func generateBuiltinMetalLibrarySupportCode(headerDirectory: URL, sourceDirectory: URL, shadersDirectory: URL) throws {
         try """
         // Auto generated.
         #import <Foundation/Foundation.h>
 
         FOUNDATION_EXPORT NSURL * _MTISwiftPMBuiltinLibrarySourceURL(void);
-        
-        """.write(to: directory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.h"), atomically: true, encoding: .utf8)
+
+        """.write(to: headerDirectory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.h"), atomically: true, encoding: .utf8)
         
         try """
         #import "MTISwiftPMBuiltinLibrarySupport.h"
@@ -87,7 +87,7 @@ public struct SwiftPackageGenerator: ParsableCommand {
             });
             return url;
         }
-        """.write(to: directory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.mm"), atomically: true, encoding: .utf8)
+        """.write(to: sourceDirectory.appendingPathComponent("MTISwiftPMBuiltinLibrarySupport.mm"), atomically: true, encoding: .utf8)
     }
     
     public func collectBuiltinMetalLibrarySource(shadersDirectory: URL) throws -> String {
