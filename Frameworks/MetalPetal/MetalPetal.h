@@ -5,13 +5,10 @@
 #import "MTICVMetalTextureBridging.h"
 #import "MTICVMetalTextureCache.h"
 #import "MTICorner.h"
-#import "MTIError.h"
 #import "MTIImageProperties.h"
 #import "MTILibrarySource.h"
 #import "MTILock.h"
-#import "MTITextureDescriptor.h"
 #import "MTITextureDimensions.h"
-#import "MTITextureLoader.h"
 #import "MTIShaderFunctionConstants.h"
 #import "MTIShaderLib.h"
 
