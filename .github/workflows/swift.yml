@@ -5,10 +5,27 @@ on:
   pull_request:
 
 jobs:
+  various:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Source code styling
+        run: |
+          brew install swiftformat
+          make style-check
+      - name: Linting
+        run: |
+          brew install swiftlint
+          make lint
+      - name: Spell checking
+        run: |
+          brew install codespell
+          make spell-check
+
   macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Select Xcode
       run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
@@ -19,7 +36,7 @@ jobs:
   ios:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Select Xcode
       run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
@@ -28,7 +45,7 @@ jobs:
   mac-catalyst:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Select Xcode
       run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
@@ -39,7 +56,7 @@ jobs:
   tvos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - name: Select Xcode
       run: sudo xcode-select --switch "$(find /Applications -mindepth 1 -maxdepth 1 ! -type l | grep "Xcode_[\.0-9]*app" | sort -V | tail -1)/Contents/Developer"
     - name: Build
