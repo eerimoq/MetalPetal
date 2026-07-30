@@ -75,7 +75,7 @@ struct BokehEffectView: View {
         switch bokehShape {
         case .hexagon:
             let bokeh = MTIHexagonalBokehBlurFilter()
-            bokeh.inputImage = inputImage.withSamplerDescriptor(.defaultSamplerDescriptor(with: .clampToEdge))
+            bokeh.inputImage = inputImage.withSamplerDescriptor(.defaultSamplerDescriptor(withAddressMode: .clampToEdge))
             bokeh.inputMask = MTIMask(content: inputDepthMask, component: .red, mode: .oneMinusMaskValue)
             bokeh.brightness = brightness
             bokeh.radius = radius
