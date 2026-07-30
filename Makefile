@@ -31,17 +31,27 @@ spell-check:
 build:
 	swift build
 
+build-ios:
+	xcodebuild build -scheme MetalPetal -destination generic/platform=iOS -workspace .
+
+build-mac-catalyst:
+	xcodebuild build -scheme MetalPetal -destination 'platform=macOS,variant=Mac Catalyst' -workspace .
+
+build-tvos:
+	xcodebuild build -scheme MetalPetal -destination generic/platform=tvOS -workspace .
+
+build-all: build build-ios build-mac-catalyst build-tvos
+
 test:
 	swift test
 
-build-all: build
-	xcodebuild build -scheme MetalPetal -destination 'platform=iOS Simulator,name=iPhone 17' -workspace .
-	xcodebuild build -scheme MetalPetal -destination 'platform=macOS,variant=Mac Catalyst' -workspace .
-	xcodebuild build -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
-	xcodebuild build -scheme MetalPetal -destination generic/platform=iOS -workspace .
-	xcodebuild build -scheme MetalPetal -destination generic/platform=tvOS -workspace .
-
-test-all: test
+test-ios:
 	xcodebuild test -scheme MetalPetal -destination 'platform=iOS Simulator,name=iPhone 17' -workspace .
+
+test-mac-catalyst:
 	xcodebuild test -scheme MetalPetal -destination 'platform=macOS,variant=Mac Catalyst' -workspace .
+
+test-tvos:
 	xcodebuild test -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
+
+test-all: test test-ios test-mac-catalyst test-tvos
