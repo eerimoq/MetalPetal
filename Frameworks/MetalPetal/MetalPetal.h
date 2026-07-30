@@ -5,7 +5,6 @@
 #import "MTICVMetalTextureBridging.h"
 #import "MTICVMetalTextureCache.h"
 #import "MTICorner.h"
-#import "MTIImageProperties.h"
 #import "MTILibrarySource.h"
 #import "MTILock.h"
 #import "MTITextureDimensions.h"
