@@ -55,3 +55,6 @@ test-tvos:
 	xcodebuild test -scheme MetalPetal -destination 'platform=tvOS Simulator,name=Apple TV' -workspace .
 
 test-all: test test-ios test-mac-catalyst test-tvos
+
+generate:
+	./utilities.sh
