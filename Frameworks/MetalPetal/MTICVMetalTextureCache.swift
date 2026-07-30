@@ -53,7 +53,11 @@ public final class MTICVMetalTextureCache: NSObject, MTICVMetalTextureBridging {
                 domain: MTICVMetalTextureCacheErrorDomain,
                 code: MTICVMetalTextureCacheError.failedToInitialize.rawValue,
                 userInfo: [
-                    NSUnderlyingErrorKey: NSError(domain: NSOSStatusErrorDomain, code: Int(status), userInfo: [:]),
+                    NSUnderlyingErrorKey: NSError(
+                        domain: NSOSStatusErrorDomain,
+                        code: Int(status),
+                        userInfo: [:]
+                    ),
                 ]
             )
         }
@@ -61,7 +65,9 @@ public final class MTICVMetalTextureCache: NSObject, MTICVMetalTextureBridging {
         super.init()
     }
 
-    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws -> MTICVMetalTextureBridging {
+    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws
+        -> MTICVMetalTextureBridging
+    {
         try MTICVMetalTextureCache(device: device, cacheAttributes: nil, textureAttributes: nil)
     }
 
@@ -94,7 +100,11 @@ public final class MTICVMetalTextureCache: NSObject, MTICVMetalTextureBridging {
                 domain: MTICVMetalTextureCacheErrorDomain,
                 code: MTICVMetalTextureCacheError.failedToCreateTexture.rawValue,
                 userInfo: [
-                    NSUnderlyingErrorKey: NSError(domain: NSOSStatusErrorDomain, code: Int(status), userInfo: [:]),
+                    NSUnderlyingErrorKey: NSError(
+                        domain: NSOSStatusErrorDomain,
+                        code: Int(status),
+                        userInfo: [:]
+                    ),
                 ]
             )
         }

@@ -44,9 +44,9 @@ public extension MTICornerCurve {
     var expansionFactor: Float {
         switch self {
         case .circular:
-            return 1.0
+            1.0
         case .continuous:
-            return 1.528665
+            1.528665
         }
     }
 }

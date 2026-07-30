@@ -34,7 +34,9 @@ public final class MTICVMetalIOSurfaceBridge: NSObject, MTICVMetalTextureBridgin
         super.init()
     }
 
-    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws -> MTICVMetalTextureBridging {
+    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws
+        -> MTICVMetalTextureBridging
+    {
         MTICVMetalIOSurfaceBridge(device: device)
     }
 
