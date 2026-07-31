@@ -9,7 +9,9 @@ import CoreGraphics
 import Foundation
 import Metal
 
-public final class MTIRGBToneCurveFilter: NSObject, MTIFilter {
+public final class MTIRGBToneCurveFilter: MTIFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var redControlPoints: [MTIVector] = [] {

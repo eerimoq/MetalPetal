@@ -24,10 +24,8 @@ import SwiftUI
 public struct VisualEffectBlur<Content: View>: View {
     /// Defaults to .systemMaterial
     var blurStyle: UIBlurEffect.Style
-
     /// Defaults to nil
     var vibrancyStyle: UIVibrancyEffectStyle?
-
     var content: Content
 
     public init(
@@ -41,13 +39,13 @@ public struct VisualEffectBlur<Content: View>: View {
     }
 
     public var body: some View {
-        Representable(blurStyle: blurStyle, vibrancyStyle: vibrancyStyle, content: ZStack { content })
+        Representable(blurStyle: blurStyle, vibrancyStyle: vibrancyStyle, content: content)
             .accessibility(hidden: Content.self == EmptyView.self)
     }
 }
 
 extension VisualEffectBlur {
-    struct Representable<Content: View>: UIViewRepresentable {
+    struct Representable: UIViewRepresentable {
         var blurStyle: UIBlurEffect.Style
         var vibrancyStyle: UIVibrancyEffectStyle?
         var content: Content

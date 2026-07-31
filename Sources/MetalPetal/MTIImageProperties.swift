@@ -9,23 +9,18 @@ import CoreGraphics
 import Foundation
 import ImageIO
 
-public final class MTIImageProperties: NSObject, NSCopying {
+public final class MTIImageProperties {
     public let alphaInfo: CGImageAlphaInfo
     public let byteOrderInfo: CGImageByteOrderInfo
     public let floatComponents: Bool
     public let colorSpace: CGColorSpace?
-
-    public let bitsPerComponent: UInt
-
-    public let pixelWidth: UInt
-    public let pixelHeight: UInt
-
+    public let bitsPerComponent: Int
+    public let pixelWidth: Int
+    public let pixelHeight: Int
     public let orientation: CGImagePropertyOrientation
-
     // Width and height with orientation applied.
-    public let displayWidth: UInt
-    public let displayHeight: UInt
-
+    public let displayWidth: Int
+    public let displayHeight: Int
     public let properties: [AnyHashable: Any]
 
     private static var imageSourceOptions: [CFString: Any] {
@@ -38,11 +33,11 @@ public final class MTIImageProperties: NSObject, NSCopying {
     }
 
     private static func displaySize(
-        pixelWidth: UInt,
-        pixelHeight: UInt,
+        pixelWidth: Int,
+        pixelHeight: Int,
         orientation: CGImagePropertyOrientation
     )
-        -> (width: UInt, height: UInt)
+        -> (width: Int, height: Int)
     {
         switch orientation {
         case .up, .down, .upMirrored, .downMirrored:
@@ -70,15 +65,13 @@ public final class MTIImageProperties: NSObject, NSCopying {
         byteOrderInfo = image.byteOrderInfo
         floatComponents = image.bitmapInfo.contains(.floatComponents)
         colorSpace = image.colorSpace
-        pixelWidth = UInt(image.width)
-        pixelHeight = UInt(image.height)
-        bitsPerComponent = UInt(image.bitsPerComponent)
-
+        pixelWidth = image.width
+        pixelHeight = image.height
+        bitsPerComponent = image.bitsPerComponent
         let orientationRawValue = (properties[kCGImagePropertyOrientation as String] as? NSNumber)?
             .uint32Value
         let orientation = orientationRawValue.flatMap { CGImagePropertyOrientation(rawValue: $0) } ?? .up
         self.orientation = orientation
-
         let displaySize = MTIImageProperties.displaySize(
             pixelWidth: pixelWidth,
             pixelHeight: pixelHeight,
@@ -86,8 +79,6 @@ public final class MTIImageProperties: NSObject, NSCopying {
         )
         displayWidth = displaySize.width
         displayHeight = displaySize.height
-
-        super.init()
     }
 
     public init(cgImage image: CGImage, orientation: CGImagePropertyOrientation) {
@@ -96,20 +87,17 @@ public final class MTIImageProperties: NSObject, NSCopying {
         byteOrderInfo = image.byteOrderInfo
         floatComponents = image.bitmapInfo.contains(.floatComponents)
         colorSpace = image.colorSpace
-        pixelWidth = UInt(image.width)
-        pixelHeight = UInt(image.height)
-        bitsPerComponent = UInt(image.bitsPerComponent)
+        pixelWidth = image.width
+        pixelHeight = image.height
+        bitsPerComponent = image.bitsPerComponent
         self.orientation = orientation
-
         let displaySize = MTIImageProperties.displaySize(
-            pixelWidth: UInt(image.width),
-            pixelHeight: UInt(image.height),
+            pixelWidth: Int(image.width),
+            pixelHeight: Int(image.height),
             orientation: orientation
         )
         displayWidth = displaySize.width
         displayHeight = displaySize.height
-
-        super.init()
     }
 
     public convenience init(cgImage image: CGImage) {
@@ -122,9 +110,5 @@ public final class MTIImageProperties: NSObject, NSCopying {
             return nil
         }
         self.init(imageSource: source, index: 0)
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 }

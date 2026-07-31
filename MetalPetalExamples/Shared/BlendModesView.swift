@@ -50,7 +50,8 @@ struct BlendModesView: View {
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10)
                             .foregroundColor(Color.secondarySystemBackground))
-                    }.padding()
+                    }
+                    .padding()
                 }
             case let .failure(error):
                 Text(error.localizedDescription)
@@ -90,18 +91,9 @@ struct BlendModesView: View {
 
 private extension Picker {
     func blendModesPickerStyle() -> some View {
-        #if os(iOS)
-        return pickerStyle(WheelPickerStyle())
+        pickerStyle(WheelPickerStyle())
             .background(RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.secondarySystemBackground))
-        #elseif os(macOS)
-        return pickerStyle(MenuPickerStyle())
-            .scaledToFit()
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.secondarySystemBackground))
-            .largeControlSize()
-        #endif
     }
 }
 

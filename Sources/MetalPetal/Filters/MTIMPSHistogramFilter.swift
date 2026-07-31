@@ -10,9 +10,9 @@ import MetalPerformanceShaders
 import simd
 
 public struct MTIHistogramType: OptionSet {
-    public let rawValue: UInt
+    public let rawValue: Int
 
-    public init(rawValue: UInt) {
+    public init(rawValue: Int) {
         self.rawValue = rawValue
     }
 
@@ -20,7 +20,7 @@ public struct MTIHistogramType: OptionSet {
     public static let rgb = MTIHistogramType(rawValue: 1 << 1)
 }
 
-private final class MTIMPSHistogramRecipe: NSObject, MTIImagePromise {
+private final class MTIMPSHistogramRecipe: MTIImagePromise {
     let inputImage: MTIImage
     let histogramInfo: MPSImageHistogramInfo
     let sourceRegion: MTLRegion
@@ -39,30 +39,24 @@ private final class MTIMPSHistogramRecipe: NSObject, MTIImagePromise {
         self.histogramInfo = histogramInfo
         self.sourceRegion = sourceRegion
         alphaType = .alphaIsOne
-        super.init()
     }
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
         guard renderingContext.context.isMetalPerformanceShadersSupported else {
-            throw _MTIErrorCreate(.mpsKernelNotSupported, "MTIErrorMPSKernelNotSupported", nil)
+            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
         }
-        assert(inputImage.alphaType == .alphaIsOne || inputImage.alphaType == .nonPremultiplied)
         let inputTexture = renderingContext.resolvedTexture(for: inputImage)
         var info = histogramInfo
         let kernel = MPSImageHistogram(device: renderingContext.context.device, histogramInfo: &info)
         kernel.clipRectSource = sourceRegion
         kernel.zeroHistogram = true
         let bytesPerComponent = 4
-        let bufferSize = Int(dimensions.width) * Int(dimensions.height) * bytesPerComponent
-        assert(
-            bufferSize >= kernel.histogramSize(forSourceFormat: inputTexture.pixelFormat),
-            "Buffer too small."
-        )
+        let bufferSize = dimensions.width * dimensions.height * bytesPerComponent
         guard let buffer = renderingContext.context.device.makeBuffer(
             length: bufferSize,
             options: .storageModePrivate
         ) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         kernel.encode(
             to: renderingContext.commandBuffer,
@@ -72,8 +66,8 @@ private final class MTIMPSHistogramRecipe: NSObject, MTIImagePromise {
         )
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .r32Uint,
-            width: Int(dimensions.width),
-            height: Int(dimensions.height),
+            width: dimensions.width,
+            height: dimensions.height,
             mipmapped: false
         )
         textureDescriptor.usage = [.shaderWrite, .shaderRead]
@@ -83,18 +77,13 @@ private final class MTIMPSHistogramRecipe: NSObject, MTIImagePromise {
             offset: 0,
             bytesPerRow: Int(histogramInfo.numberOfHistogramEntries) * bytesPerComponent
         ) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == self.dependencies.count)
-        return MTIMPSHistogramRecipe(
+        MTIMPSHistogramRecipe(
             inputImage: dependencies[0],
             histogramInfo: histogramInfo,
             sourceRegion: sourceRegion
@@ -106,7 +95,9 @@ private final class MTIMPSHistogramRecipe: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIMPSHistogramFilter: NSObject, MTIFilter {
+public final class MTIMPSHistogramFilter: MTIFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .r32Uint
     /// Unimplemented
@@ -140,7 +131,9 @@ public final class MTIMPSHistogramFilter: NSObject, MTIFilter {
     }
 }
 
-public final class MTIHistogramDisplayFilter: NSObject, MTIUnaryFilter {
+public final class MTIHistogramDisplayFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var outputSize: CGSize = .zero

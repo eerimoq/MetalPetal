@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIFunctionDescriptor: NSObject, NSCopying {
+public final class MTIFunctionDescriptor: Hashable, CustomStringConvertible {
     public let libraryURL: URL?
 
     public let name: String
@@ -27,8 +27,6 @@ public final class MTIFunctionDescriptor: NSObject, NSCopying {
         hasher.combine(libraryURL)
         hasher.combine(self.constantValues)
         cachedHashValue = hasher.finalize()
-
-        super.init()
     }
 
     public convenience init(name: String) {
@@ -43,28 +41,21 @@ public final class MTIFunctionDescriptor: NSObject, NSCopying {
         MTIFunctionDescriptor(name: name, constantValues: constantValues, libraryURL: libraryURL)
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(cachedHashValue)
     }
 
-    override public var hash: Int {
-        cachedHashValue
-    }
-
-    override public func isEqual(_ object: Any?) -> Bool {
-        if object as AnyObject === self {
+    public static func == (lhs: MTIFunctionDescriptor, rhs: MTIFunctionDescriptor) -> Bool {
+        if lhs === rhs {
             return true
         }
-        guard let descriptor = object as? MTIFunctionDescriptor else {
-            return false
-        }
-        return descriptor.name == name
-            && descriptor.libraryURL == libraryURL
-            && ((descriptor.constantValues == nil && constantValues == nil)
-                || descriptor.constantValues?.isEqual(constantValues) == true)
+        return lhs.name == rhs.name
+            && lhs.libraryURL == rhs.libraryURL
+            && ((lhs.constantValues == nil && rhs.constantValues == nil)
+                || lhs.constantValues?.isEqual(rhs.constantValues) == true)
     }
 
-    override public var description: String {
+    public var description: String {
         "<\(type(of: self)): \(Unmanaged.passUnretained(self).toOpaque()); "
             + "name = \(name); constantValues = \(String(describing: constantValues)); "
             + "libraryURL = \(String(describing: libraryURL))>"

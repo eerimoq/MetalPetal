@@ -12,7 +12,7 @@ import Metal
 
 public typealias MTIMPSKernelBuilder = (MTLDevice) -> MPSKernel
 
-private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
+private final class MTIMPSProcessingRecipe: MTIImagePromise {
     private let kernel: MTIMPSKernel
     private let inputImages: [MTIImage]
     private let parameters: [String: Any]
@@ -26,14 +26,12 @@ private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
          outputTextureDimensions: MTITextureDimensions,
          outputPixelFormat: MTLPixelFormat)
     {
-        assert(kernel.alphaTypeHandlingRule._canHandleAlphaTypes(in: inputImages))
         self.inputImages = inputImages
         self.kernel = kernel
         self.parameters = parameters
         dimensions = outputTextureDimensions
         self.outputPixelFormat = outputPixelFormat
         alphaType = kernel.alphaTypeHandlingRule.outputAlphaType(forInputImages: inputImages)
-        super.init()
     }
 
     var dependencies: [MTIImage] {
@@ -45,7 +43,7 @@ private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
         guard let kernel = try renderingContext.context
             .kernelState(for: kernel, configuration: nil) as? MPSKernel
         else {
-            throw _MTIErrorCreate(.mpsKernelNotSupported, "MTIErrorMPSKernelNotSupported", nil)
+            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
         }
         kernel.setValuesForKeys(parameters)
         let pixelFormat = (outputPixelFormat == .unspecified) ? renderingContext.context
@@ -60,7 +58,7 @@ private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
         let renderTarget = try renderingContext.context
             .makeRenderTarget(reusableTextureDescriptor: textureDescriptor)
         guard let destinationTexture = renderTarget.texture else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         if inputImages.count == 1 {
             let texture = renderingContext.resolvedTexture(for: inputImages[0])
@@ -81,22 +79,17 @@ private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
                 destinationTexture: destinationTexture
             )
         } else {
-            throw _MTIErrorCreate(.mpsKernelInputCountMismatch, "MTIErrorMPSKernelInputCountMismatch", nil)
+            throw MTIError(code: .mpsKernelInputCountMismatch, message: "MTIErrorMPSKernelInputCountMismatch")
         }
         return renderTarget
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == self.dependencies.count)
-        return MTIMPSProcessingRecipe(kernel: kernel,
-                                      inputImages: dependencies,
-                                      parameters: parameters,
-                                      outputTextureDimensions: dimensions,
-                                      outputPixelFormat: outputPixelFormat) as! Self
+        MTIMPSProcessingRecipe(kernel: kernel,
+                               inputImages: dependencies,
+                               parameters: parameters,
+                               outputTextureDimensions: dimensions,
+                               outputPixelFormat: outputPixelFormat) as! Self
     }
 
     var debugInfo: MTIImagePromiseDebugInfo {
@@ -104,7 +97,7 @@ private final class MTIMPSProcessingRecipe: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIMPSKernel: NSObject, MTIKernel {
+public final class MTIMPSKernel: MTIKernel {
     private let builder: MTIMPSKernelBuilder
     public let alphaTypeHandlingRule: MTIAlphaTypeHandlingRule
 
@@ -115,12 +108,11 @@ public final class MTIMPSKernel: NSObject, MTIKernel {
     public init(builder: @escaping MTIMPSKernelBuilder, alphaTypeHandlingRule: MTIAlphaTypeHandlingRule) {
         self.builder = builder
         self.alphaTypeHandlingRule = alphaTypeHandlingRule
-        super.init()
     }
 
     public func makeKernelState(context: MTIContext, configuration _: MTIKernelConfiguration?) throws -> Any {
         guard context.isMetalPerformanceShadersSupported else {
-            throw _MTIErrorCreate(.mpsKernelNotSupported, "MTIErrorMPSKernelNotSupported", nil)
+            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
         }
         return builder(context.device)
     }

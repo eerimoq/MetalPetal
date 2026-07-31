@@ -5,8 +5,9 @@
 
 import Foundation
 import Metal
+import os
 
-public final class MTIBlendFilter: NSObject, MTIFilter {
+public final class MTIBlendFilter: MTIFilter {
     public let blendMode: MTIBlendMode
     public var inputBackgroundImage: MTIImage?
     public var inputImage: MTIImage?
@@ -18,9 +19,7 @@ public final class MTIBlendFilter: NSObject, MTIFilter {
     public var outputAlphaType: MTIAlphaType = .nonPremultiplied
 
     public init(blendMode mode: MTIBlendMode) {
-        assert(MTIBlendModes.all.contains(mode))
         blendMode = mode
-        super.init()
     }
 
     private struct KernelKey: Hashable {
@@ -45,7 +44,7 @@ public final class MTIBlendFilter: NSObject, MTIFilter {
     }
 
     private static var kernels: [KernelKey: MTIRenderPipelineKernel] = [:]
-    private static let kernelsLock = MTILockCreate()
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     private static func kernel(blendMode mode: MTIBlendMode,
                                backdropAlphaType: MTIAlphaType,
@@ -59,7 +58,9 @@ public final class MTIBlendFilter: NSObject, MTIFilter {
             outputAlphaType: outputAlphaType
         )
         kernelsLock.lock()
-        defer { kernelsLock.unlock() }
+        defer {
+            kernelsLock.unlock()
+        }
         if let kernel = kernels[key] {
             return kernel
         }

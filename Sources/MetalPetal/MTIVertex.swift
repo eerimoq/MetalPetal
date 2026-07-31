@@ -10,7 +10,7 @@ import Foundation
 import Metal
 import simd
 
-public struct MTIVertex {
+public struct MTIVertex: Hashable {
     public var position: SIMD4<Float>
     public var textureCoordinate: SIMD2<Float>
 
@@ -31,23 +31,6 @@ public extension MTIVertex {
         self.init()
         self.position = SIMD4<Float>(position.0, position.1, position.2, position.3)
         self.textureCoordinate = SIMD2<Float>(textureCoordinate.0, textureCoordinate.1)
-    }
-
-    func isEqual(to other: MTIVertex) -> Bool {
-        position == other.position && textureCoordinate == other.textureCoordinate
-    }
-}
-
-extension MTIVertex: Equatable {
-    public static func == (lhs: MTIVertex, rhs: MTIVertex) -> Bool {
-        lhs.isEqual(to: rhs)
-    }
-}
-
-extension MTIVertex: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(position)
-        hasher.combine(textureCoordinate)
     }
 }
 
@@ -97,7 +80,7 @@ extension MTIDataBuffer: MTIVertexBufferStorage {
 
 /// A MTIGeometry implementation. A MTIVertices contains MTIVertex data structures. It is designed to handle a
 /// small amount of vertices. A MTIVertices bounds its contents to the vertex buffer with index of 0.
-public final class MTIVertices: NSObject, MTIGeometry {
+public final class MTIVertices: MTIGeometry, Hashable {
     public let vertexCount: Int
 
     public let indexCount: Int
@@ -108,82 +91,64 @@ public final class MTIVertices: NSObject, MTIGeometry {
 
     private let indexBuffer: MTIDataBuffer?
 
-    public init(vertices: UnsafePointer<MTIVertex>, count: UInt, primitiveType: MTLPrimitiveType) {
-        assert(count > 0)
-        vertexCount = Int(count)
+    public init(vertices: UnsafePointer<MTIVertex>, count: Int, primitiveType: MTLPrimitiveType) {
+        vertexCount = count
         self.primitiveType = primitiveType
-        let bufferLength = Int(count) * MemoryLayout<MTIVertex>.stride
+        let bufferLength = count * MemoryLayout<MTIVertex>.stride
         if bufferLength < 4096 {
             vertexBuffer = MTIMallocVertexBuffer(contents: UnsafeRawPointer(vertices), length: bufferLength)
         } else {
-            vertexBuffer = MTIDataBuffer(bytes: vertices, length: UInt(bufferLength), options: [])!
+            vertexBuffer = MTIDataBuffer(bytes: vertices, length: Int(bufferLength), options: [])!
         }
         indexBuffer = nil
         indexCount = 0
-        super.init()
     }
 
     public init(
         vertexBuffer: MTIDataBuffer,
-        vertexCount: UInt,
+        vertexCount: Int,
         indexBuffer: MTIDataBuffer?,
-        indexCount: UInt,
+        indexCount: Int,
         primitiveType: MTLPrimitiveType
     ) {
-        assert(vertexCount > 0)
-        assert(Int(vertexBuffer.length) == Int(vertexCount) * MemoryLayout<MTIVertex>.stride)
-        assert(indexBuffer == nil || Int(indexBuffer!.length) == Int(indexCount) * MemoryLayout<UInt32>
-            .stride)
-        self.vertexCount = Int(vertexCount)
-        self.indexCount = Int(indexCount)
+        self.vertexCount = vertexCount
+        self.indexCount = indexCount
         self.primitiveType = primitiveType
         self.vertexBuffer = vertexBuffer
         self.indexBuffer = indexBuffer
-        super.init()
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
-    override public var hash: Int {
-        var hasher = Hasher()
+    public func hash(into hasher: inout Hasher) {
         let vertices = vertexBuffer.contents.assumingMemoryBound(to: MTIVertex.self)
         for index in 0 ..< vertexCount {
-            let v = vertices[index]
-            hasher.combine(v.position.x)
-            hasher.combine(v.position.y)
-            hasher.combine(v.position.z)
-            hasher.combine(v.position.w)
-            hasher.combine(v.textureCoordinate.x)
-            hasher.combine(v.textureCoordinate.y)
+            hasher.combine(vertices[index])
         }
-        let indexes = vertexBuffer.contents.assumingMemoryBound(to: UInt32.self)
-        for index in 0 ..< indexCount {
-            hasher.combine(indexes[index])
+        // Read the indexes from `indexBuffer`, not `vertexBuffer`. Reading them from the vertex buffer
+        // both weakened the hash and could read past its end when indexCount * 4 exceeded its length.
+        if let indexBuffer {
+            let indexes = indexBuffer.contents.assumingMemoryBound(to: UInt32.self)
+            for index in 0 ..< indexCount {
+                hasher.combine(indexes[index])
+            }
         }
-        return hasher.finalize()
     }
 
-    override public func isEqual(_ object: Any?) -> Bool {
-        guard let other = object as? MTIVertices else {
-            return false
-        }
-        if other === self {
+    public static func == (lhs: MTIVertices, rhs: MTIVertices) -> Bool {
+        if lhs === rhs {
             return true
         }
-        guard vertexCount == other.vertexCount, indexCount == other.indexCount else {
+        guard lhs.vertexCount == rhs.vertexCount, lhs.indexCount == rhs.indexCount else {
             return false
         }
-        let v1 = vertexBuffer.contents.assumingMemoryBound(to: MTIVertex.self)
-        let v2 = other.vertexBuffer.contents.assumingMemoryBound(to: MTIVertex.self)
-        for index in 0 ..< vertexCount where !v1[index].isEqual(to: v2[index]) {
+        let v1 = lhs.vertexBuffer.contents.assumingMemoryBound(to: MTIVertex.self)
+        let v2 = rhs.vertexBuffer.contents.assumingMemoryBound(to: MTIVertex.self)
+        for index in 0 ..< lhs.vertexCount where v1[index] != v2[index] {
             return false
         }
-        if let indexBuffer, let otherIndexBuffer = other.indexBuffer {
-            let i1 = indexBuffer.contents.assumingMemoryBound(to: UInt32.self)
-            let i2 = otherIndexBuffer.contents.assumingMemoryBound(to: UInt32.self)
-            for index in 0 ..< indexCount where i1[index] != i2[index] {
+        if let lhsIndexBuffer = lhs.indexBuffer, let rhsIndexBuffer = rhs.indexBuffer {
+            let i1 = lhsIndexBuffer.contents.assumingMemoryBound(to: UInt32.self)
+            let i2 = rhsIndexBuffer.contents.assumingMemoryBound(to: UInt32.self)
+            for index in 0 ..< lhs.indexCount where i1[index] != i2[index] {
                 return false
             }
         }
@@ -241,23 +206,7 @@ public final class MTIVertices: NSObject, MTIGeometry {
 
 public extension MTIVertices {
     convenience init(vertices: [MTIVertex], primitiveType: MTLPrimitiveType) {
-        self.init(vertices: vertices, count: UInt(vertices.count), primitiveType: primitiveType)
-    }
-
-    convenience init(
-        vertexBuffer: MTIDataBuffer,
-        vertexCount: Int,
-        indexBuffer: MTIDataBuffer?,
-        indexCount: Int?,
-        primitiveType: MTLPrimitiveType
-    ) {
-        self.init(
-            vertexBuffer: vertexBuffer,
-            vertexCount: UInt(vertexCount),
-            indexBuffer: indexBuffer,
-            indexCount: UInt(indexCount ?? 0),
-            primitiveType: primitiveType
-        )
+        self.init(vertices: vertices, count: vertices.count, primitiveType: primitiveType)
     }
 }
 
@@ -265,7 +214,7 @@ public extension MTIDataBuffer {
     convenience init?(mtiVertices: [MTIVertex]) {
         self.init(
             bytes: mtiVertices,
-            length: UInt(mtiVertices.count * MemoryLayout<MTIVertex>.stride),
+            length: Int(mtiVertices.count * MemoryLayout<MTIVertex>.stride),
             options: []
         )
     }
@@ -273,7 +222,7 @@ public extension MTIDataBuffer {
     convenience init?(uint32Indexes: [UInt32]) {
         self.init(
             bytes: uint32Indexes,
-            length: UInt(uint32Indexes.count * MemoryLayout<UInt32>.stride),
+            length: Int(uint32Indexes.count * MemoryLayout<UInt32>.stride),
             options: []
         )
     }

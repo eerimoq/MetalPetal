@@ -34,12 +34,11 @@ private func sampleCount(for antialiasingMode: SCNAntialiasingMode) -> Int {
         return 16
     #endif
     @unknown default:
-        assertionFailure("Unsupported SCNAntialiasingMode.")
         return 1
     }
 }
 
-private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
+private final class MTISCNSceneImagePromise: MTIImagePromise {
     private let pixelFormat: MTLPixelFormat
     private let renderer: SCNRenderer
     private let frameTime: CFTimeInterval
@@ -63,22 +62,15 @@ private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
         self.renderer = renderer
         self.frameTime = frameTime
         self.viewport = viewport
-        super.init()
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
+    func updatingDependencies(_: [MTIImage]) -> Self {
         self
     }
 
-    func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
-    }
-
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
-        assert(renderingContext.context.device === renderer.device)
         guard renderingContext.context.device === renderer.device else {
-            throw _MTIErrorCreate(.crossDeviceRendering, "MTIErrorCrossDeviceRendering", nil)
+            throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
         }
         var pixelFormat = renderingContext.context.workingPixelFormat
         if self.pixelFormat != .invalid {
@@ -99,15 +91,14 @@ private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
         var count = sampleCount(for: antialiasingMode)
         if !renderingContext.context.device.supportsTextureSampleCount(count) {
-            assertionFailure("The device does not support \(count)xMSAA")
             count = 1
         }
         if count > 1 {
             let multisampleTextureDescriptor = MTLTextureDescriptor()
             multisampleTextureDescriptor.textureType = .type2DMultisample
-            multisampleTextureDescriptor.width = Int(dimensions.width)
-            multisampleTextureDescriptor.height = Int(dimensions.height)
-            multisampleTextureDescriptor.depth = Int(dimensions.depth)
+            multisampleTextureDescriptor.width = dimensions.width
+            multisampleTextureDescriptor.height = dimensions.height
+            multisampleTextureDescriptor.depth = dimensions.depth
             multisampleTextureDescriptor.usage = .renderTarget
             multisampleTextureDescriptor.pixelFormat = pixelFormat
             multisampleTextureDescriptor.sampleCount = count
@@ -123,7 +114,7 @@ private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
                 guard let texture = renderingContext.context.device
                     .makeTexture(descriptor: multisampleTextureDescriptor)
                 else {
-                    throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                    throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
                 }
                 multisampleTexture = texture
             } else {
@@ -133,7 +124,7 @@ private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
                         .makeMTITextureDescriptor())
                 multisampleRenderTarget = target
                 guard let texture = target.texture else {
-                    throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                    throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
                 }
                 multisampleTexture = texture
             }
@@ -163,7 +154,7 @@ private final class MTISCNSceneImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTISCNSceneRenderer: NSObject {
+public final class MTISCNSceneRenderer {
     private let renderer: SCNRenderer
     private let device: MTLDevice
     private let textureCache: MTICVMetalTextureCache?
@@ -180,7 +171,6 @@ public final class MTISCNSceneRenderer: NSObject {
             cacheAttributes: nil,
             textureAttributes: nil
         )
-        super.init()
     }
 
     public var scene: SCNScene? {
@@ -204,7 +194,6 @@ public final class MTISCNSceneRenderer: NSObject {
         pixelFormat: MTLPixelFormat,
         isOpaque: Bool
     ) -> MTIImage {
-        assert(renderer.scene != nil)
         let promise = MTISCNSceneImagePromise(renderer: renderer,
                                               antialiasingMode: antialiasingMode,
                                               viewport: viewport,
@@ -233,7 +222,10 @@ public final class MTISCNSceneRenderer: NSObject {
         completion: @escaping (CVPixelBuffer) -> Void
     ) throws {
         guard let commandQueue, let commandBuffer = commandQueue.makeCommandBuffer() else {
-            throw _MTIErrorCreate(.failedToCreateCommandEncoder, "MTIErrorFailedToCreateCommandEncoder", nil)
+            throw MTIError(
+                code: .failedToCreateCommandEncoder,
+                message: "MTIErrorFailedToCreateCommandEncoder"
+            )
         }
         let width = Int(viewport.size.width)
         let height = Int(viewport.size.height)
@@ -252,7 +244,7 @@ public final class MTISCNSceneRenderer: NSObject {
         )
         textureDescriptor.usage = .renderTarget
         guard let textureCache else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         let cvMetalTexture = try textureCache.makeTexture(
             with: pixelBuffer,
@@ -264,7 +256,6 @@ public final class MTISCNSceneRenderer: NSObject {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0)
         var count = sampleCount(for: antialiasingMode)
         if !device.supportsTextureSampleCount(count) {
-            assertionFailure("The device does not support \(count)xMSAA")
             count = 1
         }
         if count > 1 {
@@ -284,7 +275,7 @@ public final class MTISCNSceneRenderer: NSObject {
                 multisampleTextureDescriptor.storageMode = .private
             }
             guard let multisampleTexture = device.makeTexture(descriptor: multisampleTextureDescriptor) else {
-                throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
             }
             renderPassDescriptor.colorAttachments[0].texture = multisampleTexture
             renderPassDescriptor.colorAttachments[0].resolveTexture = cvMetalTexture.texture

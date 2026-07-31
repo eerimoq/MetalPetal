@@ -13,17 +13,12 @@ import MetalKit
 import ModelIO
 import simd
 
-public protocol MTIImagePromise: NSObjectProtocol, NSCopying {
+public protocol MTIImagePromise: AnyObject {
     var dimensions: MTITextureDimensions { get }
-
     var dependencies: [MTIImage] { get }
-
     var alphaType: MTIAlphaType { get }
-
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget
-
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self
-
     var debugInfo: MTIImagePromiseDebugInfo { get }
 }
 
@@ -38,7 +33,7 @@ private func MTIImagePromiseOptimizeContentsForGPUAccess(
     }
 }
 
-public final class MTIImageURLPromise: NSObject, MTIImagePromise {
+public final class MTIImageURLPromise: MTIImagePromise {
     private let url: URL
     private let options: [MTKTextureLoader.Option: Any]?
 
@@ -55,14 +50,9 @@ public final class MTIImageURLPromise: NSObject, MTIImagePromise {
         self.options = options
         self.alphaType = alphaType
         self.dimensions = dimensions
-        super.init()
         if dimensions.depth * dimensions.height * dimensions.width == 0 {
             return nil
         }
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -80,9 +70,8 @@ public final class MTIImageURLPromise: NSObject, MTIImagePromise {
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -90,7 +79,7 @@ public final class MTIImageURLPromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTILegacyCGImagePromise: NSObject, MTIImagePromise {
+public final class MTILegacyCGImagePromise: MTIImagePromise {
     private let image: CGImage
     private let options: [MTKTextureLoader.Option: Any]?
 
@@ -102,11 +91,6 @@ public final class MTILegacyCGImagePromise: NSObject, MTIImagePromise {
         dimensions = MTITextureDimensions(width: cgImage.width, height: cgImage.height, depth: 1)
         self.options = options
         self.alphaType = alphaType
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -121,9 +105,8 @@ public final class MTILegacyCGImagePromise: NSObject, MTIImagePromise {
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -131,7 +114,7 @@ public final class MTILegacyCGImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTICGImageLoadingOptions: NSObject, NSCopying {
+public final class MTICGImageLoadingOptions {
     public let colorSpace: CGColorSpace?
     public let flipsVertically: Bool
     public let storageMode: MTLStorageMode
@@ -151,7 +134,6 @@ public final class MTICGImageLoadingOptions: NSObject, NSCopying {
         self.flipsVertically = flipsVertically
         self.storageMode = storageMode
         self.cpuCacheMode = cpuCacheMode
-        super.init()
     }
 
     public convenience init(colorSpace: CGColorSpace?) {
@@ -171,13 +153,9 @@ public final class MTICGImageLoadingOptions: NSObject, NSCopying {
             cpuCacheMode: MTICGImageLoadingOptions.defaultTextureDescriptor.cpuCacheMode
         )
     }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
 }
 
-public final class MTICGImagePromise: NSObject, MTIImagePromise {
+public final class MTICGImagePromise: MTIImagePromise {
     private let image: CGImage
     private let options: MTICGImageLoadingOptions
     private let properties: MTIImageProperties
@@ -201,11 +179,6 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
         self.options = options ?? MTICGImageLoadingOptions.default
         alphaType = isOpaque ? .alphaIsOne :
             .premultiplied // kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -229,7 +202,7 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
             &pixelBufferOut
         )
         guard let pixelBuffer = pixelBufferOut else {
-            throw _MTIErrorCreate(.failedToCreateCVPixelBuffer, "MTIErrorFailedToCreateCVPixelBuffer", nil)
+            throw MTIError(code: .failedToCreateCVPixelBuffer, message: "MTIErrorFailedToCreateCVPixelBuffer")
         }
 
         let specifiedColorSpace = options.colorSpace ?? image.colorSpace
@@ -250,10 +223,9 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
             bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
         ) else {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
-            throw _MTIErrorCreate(
-                .textureLoaderFailedToCreateCGContext,
-                "MTIErrorTextureLoaderFailedToCreateCGContext",
-                nil
+            throw MTIError(
+                code: .textureLoaderFailedToCreateCGContext,
+                message: "MTIErrorTextureLoaderFailedToCreateCGContext"
             )
         }
 
@@ -280,8 +252,7 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
         guard let iosurface = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
-            assertionFailure("CVPixelBuffer is not backed by an IOSurface, please file a bug report.")
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
 
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -299,19 +270,18 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
             iosurface: iosurface,
             plane: 0
         ) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
 
         #if os(iOS) && !targetEnvironment(macCatalyst)
         // Workaround for #64. See https://github.com/MetalPetal/MetalPetal/issues/64
-        if !renderingContext.context.device.supportsFeatureSet(.iOS_GPUFamily2_v1) {
+        if !renderingContext.context.device.supportsFamily(.apple2) {
             let renderTarget = try renderingContext.context
                 .makeRenderTarget(reusableTextureDescriptor: textureDescriptor.makeMTITextureDescriptor())
             guard let commandEncoder = renderingContext.commandBuffer.makeBlitCommandEncoder() else {
-                throw _MTIErrorCreate(
-                    .failedToCreateCommandEncoder,
-                    "MTIErrorFailedToCreateCommandEncoder",
-                    nil
+                throw MTIError(
+                    code: .failedToCreateCommandEncoder,
+                    message: "MTIErrorFailedToCreateCommandEncoder"
                 )
             }
             commandEncoder.copy(
@@ -334,9 +304,8 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -344,7 +313,7 @@ public final class MTICGImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTITexturePromise: NSObject, MTIImagePromise {
+public final class MTITexturePromise: MTIImagePromise {
     public let texture: MTLTexture
 
     public let dimensions: MTITextureDimensions
@@ -354,11 +323,6 @@ public final class MTITexturePromise: NSObject, MTIImagePromise {
         dimensions = MTITextureDimensions(width: texture.width, height: texture.height, depth: texture.depth)
         self.texture = texture
         self.alphaType = alphaType
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -368,16 +332,14 @@ public final class MTITexturePromise: NSObject, MTIImagePromise {
     public func resolve(with renderingContext: MTIImageRenderingContext) throws
         -> MTIImagePromiseRenderTarget
     {
-        assert(renderingContext.context.device === texture.device)
         if renderingContext.context.device !== texture.device {
-            throw _MTIErrorCreate(.crossDeviceRendering, "MTIErrorCrossDeviceRendering", nil)
+            throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
         }
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -385,7 +347,7 @@ public final class MTITexturePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTICIImagePromise: NSObject, MTIImagePromise {
+public final class MTICIImagePromise: MTIImagePromise {
     private let image: CIImage
     private let bounds: CGRect
     private let textureDescriptor: MTITextureDescriptor
@@ -405,14 +367,13 @@ public final class MTICIImagePromise: NSObject, MTIImagePromise {
         )
         textureDescriptor = MTITextureDescriptor(
             pixelFormat: options.destinationPixelFormat,
-            width: UInt(ciImage.extent.size.width),
-            height: UInt(ciImage.extent.size.height),
+            width: Int(ciImage.extent.size.width),
+            height: Int(ciImage.extent.size.height),
             mipmapped: false,
             usage: [.shaderWrite, .shaderRead],
             resourceOptions: .storageModePrivate
         )
         self.options = options
-        super.init()
     }
 
     public var dependencies: [MTIImage] {
@@ -431,7 +392,6 @@ public final class MTICIImagePromise: NSObject, MTIImagePromise {
             case .unpremultiplied:
                 return .nonPremultiplied
             @unknown default:
-                assertionFailure("Unknown CIRenderDestinationAlphaMode")
                 return .premultiplied
             }
         }
@@ -458,13 +418,8 @@ public final class MTICIImagePromise: NSObject, MTIImagePromise {
         return renderTarget
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
+    public func updatingDependencies(_: [MTIImage]) -> Self {
         self
-    }
-
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -472,7 +427,7 @@ public final class MTICIImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIColorImagePromise: NSObject, MTIImagePromise {
+public final class MTIColorImagePromise: MTIImagePromise {
     public let color: MTIColor
     private let sRGB: Bool
 
@@ -482,11 +437,6 @@ public final class MTIColorImagePromise: NSObject, MTIImagePromise {
         dimensions = MTITextureDimensions(width: Int(size.width), height: Int(size.height), depth: 1)
         self.color = color
         self.sRGB = sRGB
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -505,7 +455,7 @@ public final class MTIColorImagePromise: NSObject, MTIImagePromise {
         textureDescriptor.pixelFormat = sRGB ? .bgra8Unorm_srgb : .bgra8Unorm
         // It's not safe to reuse a GPU texture here, 'cause we're going to fill its content using CPU.
         guard let texture = renderingContext.context.device.makeTexture(descriptor: textureDescriptor) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         let floatColor = simd_clamp(
             color.toFloat4(),
@@ -538,9 +488,8 @@ public final class MTIColorImagePromise: NSObject, MTIImagePromise {
         return .nonPremultiplied
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -552,35 +501,27 @@ public final class MTIColorImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIBitmapDataImagePromise: NSObject, MTIImagePromise {
+public final class MTIBitmapDataImagePromise: MTIImagePromise {
     private let data: Data
     private let pixelFormat: MTLPixelFormat
-    private let bytesPerRow: UInt
+    private let bytesPerRow: Int
 
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
     public init(
         bitmapData data: Data,
-        width: UInt,
-        height: UInt,
-        bytesPerRow: UInt,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
         pixelFormat: MTLPixelFormat,
         alphaType: MTIAlphaType
     ) {
-        assert(width > 0)
-        assert(height > 0)
-        assert(data.count == Int(height * bytesPerRow))
         self.data = data
         dimensions = MTITextureDimensions(width: Int(width), height: Int(height), depth: 1)
         self.pixelFormat = pixelFormat
         self.alphaType = alphaType
         self.bytesPerRow = bytesPerRow
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -591,15 +532,15 @@ public final class MTIBitmapDataImagePromise: NSObject, MTIImagePromise {
         -> MTIImagePromiseRenderTarget
     {
         let textureDescriptor = MTLTextureDescriptor()
-        textureDescriptor.width = Int(dimensions.width)
-        textureDescriptor.height = Int(dimensions.height)
-        textureDescriptor.depth = Int(dimensions.depth)
+        textureDescriptor.width = dimensions.width
+        textureDescriptor.height = dimensions.height
+        textureDescriptor.depth = dimensions.depth
         textureDescriptor.textureType = .type2D
         textureDescriptor.pixelFormat = pixelFormat
         textureDescriptor.usage = .shaderRead
         // It's not safe to reuse a GPU texture here, 'cause we're going to fill its content using CPU.
         guard let texture = renderingContext.context.device.makeTexture(descriptor: textureDescriptor) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
 
         data.withUnsafeBytes { rawBuffer in
@@ -617,9 +558,8 @@ public final class MTIBitmapDataImagePromise: NSObject, MTIImagePromise {
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -627,7 +567,7 @@ public final class MTIBitmapDataImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTINamedImagePromise: NSObject, MTIImagePromise {
+public final class MTINamedImagePromise: MTIImagePromise {
     public let name: String
     public let bundle: Bundle?
     public let scaleFactor: CGFloat
@@ -650,11 +590,6 @@ public final class MTINamedImagePromise: NSObject, MTIImagePromise {
         self.scaleFactor = scaleFactor
         self.options = options
         self.alphaType = alphaType
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -670,18 +605,17 @@ public final class MTINamedImagePromise: NSObject, MTIImagePromise {
             bundle: bundle,
             options: options
         )
-        if texture.width == Int(dimensions.width), texture.height == Int(dimensions.height),
-           texture.depth == Int(dimensions.depth)
+        if texture.width == dimensions.width, texture.height == dimensions.height,
+           texture.depth == dimensions.depth
         {
             return renderingContext.context.makeRenderTarget(texture: texture)
         } else {
-            throw _MTIErrorCreate(.textureDimensionsMismatch, "MTIErrorTextureDimensionsMismatch", nil)
+            throw MTIError(code: .textureDimensionsMismatch, message: "MTIErrorTextureDimensionsMismatch")
         }
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -698,7 +632,7 @@ public final class MTINamedImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIMDLTexturePromise: NSObject, MTIImagePromise {
+public final class MTIMDLTexturePromise: MTIImagePromise {
     private let options: [MTKTextureLoader.Option: Any]?
     private let texture: MDLTexture
 
@@ -718,32 +652,26 @@ public final class MTIMDLTexturePromise: NSObject, MTIImagePromise {
             depth: 1
         )
         self.alphaType = alphaType
-        super.init()
     }
 
     public var dependencies: [MTIImage] {
         []
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
+    public func updatingDependencies(_: [MTIImage]) -> Self {
         self
-    }
-
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
     }
 
     public func resolve(with renderingContext: MTIImageRenderingContext) throws
         -> MTIImagePromiseRenderTarget
     {
         let texture = try renderingContext.context.textureLoader.newTexture(with: texture, options: options)
-        if texture.width == Int(dimensions.width), texture.height == Int(dimensions.height),
-           texture.depth == Int(dimensions.depth)
+        if texture.width == dimensions.width, texture.height == dimensions.height,
+           texture.depth == dimensions.depth
         {
             return renderingContext.context.makeRenderTarget(texture: texture)
         } else {
-            throw _MTIErrorCreate(.textureDimensionsMismatch, "MTIErrorTextureDimensionsMismatch", nil)
+            throw MTIError(code: .textureDimensionsMismatch, message: "MTIErrorTextureDimensionsMismatch")
         }
     }
 

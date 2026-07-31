@@ -1,15 +1,15 @@
 //
-//  File.swift
-//  
+//  ContextTests.swift
+//
 //
 //  Created by YuAo on 2021/2/2.
 //
 
-import XCTest
-import MetalPetal
+@testable import MetalPetal
 import MetalPetalTestHelpers
+import Testing
 
-fileprivate func listMetalDevices() -> String {
+func listMetalDevices() -> String {
     #if os(macOS)
     let devices = MTLCopyAllDevices()
     return devices.map(\.description).joined(separator: "\n")
@@ -22,29 +22,25 @@ fileprivate func listMetalDevices() -> String {
     #endif
 }
 
+let metalDeviceIsAvailable = MTLCreateSystemDefaultDevice() != nil
+
 func makeContext(options: MTIContextOptions? = nil) throws -> MTIContext {
-    if let device = MTLCreateSystemDefaultDevice() {
-        if let options = options {
-            return try MTIContext(device: device, options: options)
-        } else {
-            return try MTIContext(device: device)
-        }
+    let device = try #require(MTLCreateSystemDefaultDevice(), "no metal device found.")
+    if let options {
+        return try MTIContext(device: device, options: options)
+    } else {
+        return try MTIContext(device: device)
     }
-    throw XCTSkip("no metal device found.")
 }
 
-final class ContextTests: XCTestCase {
-    
-    static override func setUp() {
-        super.setUp()
+@Suite(.enabled(if: metalDeviceIsAvailable))
+struct ContextTests {
+    @Test func contextCreation() throws {
         print("""
         ----- Metal Devices -----
         \(listMetalDevices())
         -------------------------
         """)
-    }
-    
-    func testContextCreation() throws {
         let context = try makeContext()
         print("""
         ----- Context -----
@@ -58,91 +54,83 @@ final class ContextTests: XCTestCase {
     }
 }
 
-final class ContextOptionsTests: XCTestCase {
-    
-    func testContextTexturePoolClass() throws {
+@Suite(.enabled(if: metalDeviceIsAvailable))
+struct ContextOptionsTests {
+    @Test func contextTexturePoolFactory() throws {
         do {
             let options = MTIContextOptions()
-            options.texturePoolClass = MTIDeviceTexturePool.self
+            options.makeTexturePool = { MTIDeviceTexturePool(device: $0) }
             let context = try makeContext(options: options)
-            let texturePool = (context.value(forKeyPath: "texturePool") as? NSObject)
-            XCTAssert(texturePool?.isKind(of: MTIDeviceTexturePool.self) == true)
+            #expect(context.texturePool is MTIDeviceTexturePool)
         }
-        
         do {
             if #available(iOS 13.0, macOS 10.15, *) {
                 if let device = MTLCreateSystemDefaultDevice(), MTIHeapTexturePool.isSupported(on: device) {
                     let options = MTIContextOptions()
-                    options.texturePoolClass = MTIHeapTexturePool.self
+                    options.makeTexturePool = { MTIHeapTexturePool(device: $0) }
                     let context = try makeContext(options: options)
-                    let texturePool = (context.value(forKeyPath: "texturePool") as? NSObject)
-                    XCTAssert(texturePool?.isKind(of: MTIHeapTexturePool.self) == true)
+                    #expect(context.texturePool is MTIHeapTexturePool)
                 }
             }
         }
     }
-    
-    func testCoreVideoMetalTextureBridgeClass() throws {
+
+    @Test func coreVideoMetalTextureBridgeClass() throws {
         do {
             let options = MTIContextOptions()
-            options.coreVideoMetalTextureBridgeClass = MTICVMetalTextureCache.self
+            options.makeCoreVideoMetalTextureBridge = { try MTICVMetalTextureCache(device: $0) }
             let context = try makeContext(options: options)
-            context.coreVideoTextureBridge.isKind(of: MTICVMetalTextureCache.self)
+            #expect(context.coreVideoTextureBridge is MTICVMetalTextureCache)
         }
-        
         do {
             let options = MTIContextOptions()
-            options.coreVideoMetalTextureBridgeClass = MTICVMetalIOSurfaceBridge.self
+            options.makeCoreVideoMetalTextureBridge = { MTICVMetalIOSurfaceBridge(device: $0) }
             let context = try makeContext(options: options)
-            context.coreVideoTextureBridge.isKind(of: MTICVMetalIOSurfaceBridge.self)
+            #expect(context.coreVideoTextureBridge is MTICVMetalIOSurfaceBridge)
         }
     }
-    
-    func testWorkingPixelFormat() throws {
+
+    @Test func testWorkingPixelFormat() throws {
         do {
             let options = MTIContextOptions()
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.workingPixelFormat, .bgra8Unorm)
+            #expect(context.workingPixelFormat == .bgra8Unorm)
         }
-        
         do {
             let options = MTIContextOptions()
             options.workingPixelFormat = .r16Float
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.workingPixelFormat, .r16Float)
+            #expect(context.workingPixelFormat == .r16Float)
         }
     }
-    
-    func testContextLabel() throws {
+
+    @Test func contextLabel() throws {
         do {
             let options = MTIContextOptions()
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.label, MTIContextDefaultLabel)
+            #expect(context.label == MTIContextDefaultLabel)
         }
-        
         do {
             let options = MTIContextOptions()
             options.label = "test"
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.label, "test")
+            #expect(context.label == "test")
         }
     }
-    
-    func testCoreImageContextOptions() throws {
+
+    @Test func testCoreImageContextOptions() throws {
         do {
             let options = MTIContextOptions()
             options.coreImageContextOptions = [CIContextOption.workingFormat: CIFormat.RGBA8]
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.coreImageContext.workingFormat, .RGBA8)
+            #expect(context.coreImageContext.workingFormat == .RGBA8)
         }
-        
         do {
             let options = MTIContextOptions()
             let colorspace = CGColorSpaceCreateDeviceRGB()
             options.coreImageContextOptions = [CIContextOption.workingColorSpace: colorspace]
             let context = try makeContext(options: options)
-            XCTAssertEqual(context.coreImageContext.workingColorSpace, colorspace)
+            #expect(context.coreImageContext.workingColorSpace == colorspace)
         }
     }
 }
-

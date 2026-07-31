@@ -8,44 +8,41 @@
 import CoreGraphics
 import Foundation
 import Metal
+import os
 import QuartzCore
 import simd
 
-private final class MTIMultilayerCompositeKernelConfiguration: NSObject, MTIKernelConfiguration {
+private final class MTIMultilayerCompositeKernelConfiguration: MTIKernelConfiguration, Hashable {
     let outputPixelFormat: MTLPixelFormat
     let rasterSampleCount: Int
 
     init(outputPixelFormat: MTLPixelFormat, rasterSampleCount: Int) {
         self.outputPixelFormat = outputPixelFormat
         self.rasterSampleCount = rasterSampleCount
-        super.init()
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
+    var identifier: AnyHashable {
         self
     }
 
-    var identifier: NSCopying {
-        self
-    }
-
-    override var hash: Int {
-        var hasher = Hasher()
+    func hash(into hasher: inout Hasher) {
         hasher.combine(outputPixelFormat.rawValue)
         hasher.combine(rasterSampleCount)
-        return hasher.finalize()
     }
 
-    override func isEqual(_ object: Any?) -> Bool {
-        if self === (object as AnyObject) {
+    static func == (
+        lhs: MTIMultilayerCompositeKernelConfiguration,
+        rhs: MTIMultilayerCompositeKernelConfiguration
+    ) -> Bool {
+        if lhs === rhs {
             return true
         }
-        guard let obj = object as? MTIMultilayerCompositeKernelConfiguration else { return false }
-        return obj.outputPixelFormat == outputPixelFormat && obj.rasterSampleCount == rasterSampleCount
+        return lhs.outputPixelFormat == rhs.outputPixelFormat
+            && lhs.rasterSampleCount == rhs.rasterSampleCount
     }
 }
 
-private final class MTILayerRenderPipelineKey: NSObject {
+private final class MTILayerRenderPipelineKey: Hashable {
     let blendMode: MTIBlendMode
     private let contentHasPremultipliedAlpha: Bool
     private let hasContentMask: Bool
@@ -71,28 +68,24 @@ private final class MTILayerRenderPipelineKey: NSObject {
             cornerCurveType = 0
         }
         self.cornerCurveType = cornerCurveType
-        super.init()
     }
 
-    override func isEqual(_ object: Any?) -> Bool {
-        guard let other = object as? MTILayerRenderPipelineKey else { return false }
-        return other.blendMode == blendMode &&
-            other.contentHasPremultipliedAlpha == contentHasPremultipliedAlpha &&
-            other.hasContentMask == hasContentMask &&
-            other.hasCompositingMask == hasCompositingMask &&
-            other.hasTintColor == hasTintColor &&
-            other.cornerCurveType == cornerCurveType
+    static func == (lhs: MTILayerRenderPipelineKey, rhs: MTILayerRenderPipelineKey) -> Bool {
+        lhs.blendMode == rhs.blendMode &&
+            lhs.contentHasPremultipliedAlpha == rhs.contentHasPremultipliedAlpha &&
+            lhs.hasContentMask == rhs.hasContentMask &&
+            lhs.hasCompositingMask == rhs.hasCompositingMask &&
+            lhs.hasTintColor == rhs.hasTintColor &&
+            lhs.cornerCurveType == rhs.cornerCurveType
     }
 
-    override var hash: Int {
-        var hasher = Hasher()
+    func hash(into hasher: inout Hasher) {
         hasher.combine(blendMode)
         hasher.combine(contentHasPremultipliedAlpha)
         hasher.combine(hasContentMask)
         hasher.combine(hasCompositingMask)
         hasher.combine(hasTintColor)
         hasher.combine(cornerCurveType)
-        return hasher.finalize()
     }
 
     func createFragmentFunctionDescriptor(usesProgrammableBlending: Bool) -> MTIFunctionDescriptor? {
@@ -141,7 +134,7 @@ private final class MTILayerRenderPipelineKey: NSObject {
     }
 }
 
-private final class MTIMultilayerCompositeKernelState: NSObject {
+private final class MTIMultilayerCompositeKernelState {
     unowned(unsafe) let context: MTIContext
     let rasterSampleCount: Int
     private let colorAttachmentDescriptor: MTLRenderPipelineColorAttachmentDescriptor
@@ -149,7 +142,7 @@ private final class MTIMultilayerCompositeKernelState: NSObject {
     let unpremultiplyAlphaRenderPipeline: MTIRenderPipeline
     let premultiplyAlphaInPlaceRenderPipeline: MTIRenderPipeline
     let alphaToOneInPlaceRenderPipeline: MTIRenderPipeline
-    private let layerPipelineCacheLock: NSLocking = MTILockCreate()
+    private let layerPipelineCacheLock = OSAllocatedUnfairLock()
     private var layerPipelines: [MTILayerRenderPipelineKey: MTIRenderPipeline] = [:]
 
     private static func renderPipeline(
@@ -221,13 +214,14 @@ private final class MTIMultilayerCompositeKernelState: NSObject {
                 context: context
             )
         }
-        super.init()
     }
 
     func renderPipeline(for layer: MTILayer) throws -> MTIRenderPipeline {
         let key = MTILayerRenderPipelineKey(layer: layer)
         layerPipelineCacheLock.lock()
-        defer { layerPipelineCacheLock.unlock() }
+        defer {
+            layerPipelineCacheLock.unlock()
+        }
         if let pipeline = layerPipelines[key] {
             return pipeline
         }
@@ -239,10 +233,9 @@ private final class MTIMultilayerCompositeKernelState: NSObject {
         guard let fragmentFunctionDescriptorForBlending = key
             .createFragmentFunctionDescriptor(usesProgrammableBlending: useProgrammableBlending)
         else {
-            throw _MTIErrorCreate(
-                .blendFunctionNotFound,
-                "MTIErrorBlendFunctionNotFound",
-                ["blendMode": key.blendMode, "programmableBlending": useProgrammableBlending]
+            throw MTIError(
+                code: .blendFunctionNotFound,
+                message: "MTIErrorBlendFunctionNotFound"
             )
         }
         let fragmentFunction = try context.function(with: fragmentFunctionDescriptorForBlending)
@@ -258,7 +251,7 @@ private final class MTIMultilayerCompositeKernelState: NSObject {
     }
 }
 
-private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
+private final class MTIMultilayerCompositingRecipe: MTIImagePromise {
     let backgroundImage: MTIImage
     let kernel: MTIMultilayerCompositeKernel
     let layers: [MTILayer]
@@ -277,8 +270,6 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         outputTextureDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat
     ) {
-        assert(rasterSampleCount >= 1)
-        assert(outputAlphaType != .unknown)
         self.backgroundImage = backgroundImage
         alphaType = outputAlphaType
         self.kernel = kernel
@@ -297,7 +288,6 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
             }
         }
         self.dependencies = dependencies
-        super.init()
     }
 
     private func drawVertices(
@@ -368,10 +358,7 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         parameters.maskHasPremultipliedAlpha = layer.mask?.content.alphaType == .premultiplied
         parameters.tintColor = layer.tintColor.toFloat4()
         parameters.layerSize = simd_make_float2(Float(layerPixelSize.width), Float(layerPixelSize.height))
-        parameters.cornerRadius = _MTICornerRadiusGetShadingParameterValue(
-            layer.cornerRadius,
-            layer.cornerCurve
-        )
+        parameters.cornerRadius = layer.cornerRadius.shadingParameterValue(for: layer.cornerCurve)
         return parameters
     }
 
@@ -419,7 +406,7 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
             guard let msaaTexture = renderingContext.context.device
                 .makeTexture(descriptor: tempTextureDescriptor)
             else {
-                throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
             }
             renderPassDescriptor.colorAttachments[0].texture = msaaTexture
             renderPassDescriptor.colorAttachments[0].loadAction = .dontCare
@@ -433,9 +420,11 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         guard let commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw _MTIErrorCreate(.failedToCreateCommandEncoder, "MTIErrorFailedToCreateCommandEncoder", nil)
+            throw MTIError(
+                code: .failedToCreateCommandEncoder,
+                message: "MTIErrorFailedToCreateCommandEncoder"
+            )
         }
-        assert(backgroundImage.alphaType != .unknown)
         let backgroundPipeline = (backgroundImage.alphaType == .premultiplied) ? kernelState
             .unpremultiplyAlphaRenderPipeline : kernelState.passthroughRenderPipeline
         commandEncoder.setRenderPipelineState(backgroundPipeline.state)
@@ -447,7 +436,6 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         MTIVertices.fullViewportSquare.encodeDrawCall(with: commandEncoder, context: backgroundPipeline)
         let backgroundImageSize = backgroundImage.size
         for layer in layers {
-            assert(layer.content.alphaType != .unknown)
             let layerPixelSize = layer.sizeInPixel(forBackgroundSize: backgroundImageSize)
             let layerPixelPosition = layer.positionInPixel(forBackgroundSize: backgroundImageSize)
             let renderPipeline: MTIRenderPipeline
@@ -599,9 +587,11 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         guard var commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw _MTIErrorCreate(.failedToCreateCommandEncoder, "MTIErrorFailedToCreateCommandEncoder", nil)
+            throw MTIError(
+                code: .failedToCreateCommandEncoder,
+                message: "MTIErrorFailedToCreateCommandEncoder"
+            )
         }
-        assert(backgroundImage.alphaType != .unknown)
         let backgroundPipeline = (backgroundImage.alphaType == .premultiplied) ? kernelState
             .unpremultiplyAlphaRenderPipeline : kernelState.passthroughRenderPipeline
         commandEncoder.setRenderPipelineState(backgroundPipeline.state)
@@ -651,7 +641,6 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
                     index: 3
                 )
             }
-            assert(layer.content.alphaType != .unknown)
             let layerPixelSize = layer.sizeInPixel(forBackgroundSize: backgroundImageSize)
             let layerPixelPosition = layer.positionInPixel(forBackgroundSize: backgroundImageSize)
 
@@ -750,12 +739,7 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
         return renderTarget
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == self.dependencies.count)
         var pointer = 0
         let backgroundImage = dependencies[pointer]
         pointer += 1
@@ -813,7 +797,9 @@ private final class MTIMultilayerCompositingRecipe: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTIMultilayerCompositeKernel: NSObject, MTIKernel {
+public final class MTIMultilayerCompositeKernel: MTIKernel {
+    public init() {}
+
     public func makeKernelState(context: MTIContext, configuration: MTIKernelConfiguration?) throws -> Any {
         let configuration = configuration as! MTIMultilayerCompositeKernelConfiguration
         let colorAttachmentDescriptor = MTLRenderPipelineColorAttachmentDescriptor()
@@ -829,7 +815,7 @@ public final class MTIMultilayerCompositeKernel: NSObject, MTIKernel {
     public func apply(
         toBackgroundImage image: MTIImage,
         layers: [MTILayer],
-        rasterSampleCount: UInt,
+        rasterSampleCount: Int,
         outputAlphaType: MTIAlphaType,
         outputTextureDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat
@@ -838,7 +824,7 @@ public final class MTIMultilayerCompositeKernel: NSObject, MTIKernel {
             kernel: self,
             backgroundImage: image,
             layers: layers,
-            rasterSampleCount: Int(rasterSampleCount),
+            rasterSampleCount: rasterSampleCount,
             outputAlphaType: outputAlphaType,
             outputTextureDimensions: outputTextureDimensions,
             outputPixelFormat: outputPixelFormat

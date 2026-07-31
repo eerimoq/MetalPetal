@@ -22,8 +22,8 @@ public extension MTIRenderPipelineKernel {
         parameters: [String: Any] = [:],
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
-        __apply(
-            toInputImages: [image],
+        makeOutputImage(
+            inputImages: [image],
             parameters: parameters,
             outputTextureDimensions: image.dimensions,
             outputPixelFormat: outputPixelFormat
@@ -36,8 +36,8 @@ public extension MTIRenderPipelineKernel {
         outputDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
-        __apply(
-            toInputImages: [image],
+        makeOutputImage(
+            inputImages: [image],
             parameters: parameters,
             outputTextureDimensions: outputDimensions,
             outputPixelFormat: outputPixelFormat
@@ -50,8 +50,8 @@ public extension MTIRenderPipelineKernel {
         outputDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
-        __apply(
-            toInputImages: images,
+        makeOutputImage(
+            inputImages: images,
             parameters: parameters,
             outputTextureDimensions: outputDimensions,
             outputPixelFormat: outputPixelFormat
@@ -63,31 +63,7 @@ public extension MTIRenderPipelineKernel {
         parameters: [String: Any] = [:],
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) -> [MTIImage] {
-        __apply(toInputImages: images, parameters: parameters, outputDescriptors: outputDescriptors)
-    }
-
-    @available(*, deprecated, renamed: "apply(to:parameters:outputDescriptors:)")
-    func apply(
-        toInputImages: [MTIImage],
-        parameters: [String: Any],
-        outputDescriptors: [MTIRenderPassOutputDescriptor]
-    ) -> [MTIImage] {
-        __apply(toInputImages: toInputImages, parameters: parameters, outputDescriptors: outputDescriptors)
-    }
-
-    @available(*, deprecated, renamed: "apply(to:parameters:outputDimensions:outputPixelFormat:)")
-    func apply(
-        toInputImages: [MTIImage],
-        parameters: [String: Any],
-        outputTextureDimensions: MTITextureDimensions,
-        outputPixelFormat: MTLPixelFormat
-    ) -> MTIImage {
-        __apply(
-            toInputImages: toInputImages,
-            parameters: parameters,
-            outputTextureDimensions: outputTextureDimensions,
-            outputPixelFormat: outputPixelFormat
-        )
+        makeOutputImages(inputImages: images, parameters: parameters, outputDescriptors: outputDescriptors)
     }
 }
 
@@ -99,7 +75,7 @@ public extension [MTIRenderCommand] {
     ) -> MTIImage {
         MTIRenderCommand.images(
             byPerforming: self,
-            rasterSampleCount: UInt(rasterSampleCount),
+            rasterSampleCount: rasterSampleCount,
             outputDescriptors: [MTIRenderPassOutputDescriptor(
                 dimensions: dimension,
                 pixelFormat: pixelFormat
@@ -112,7 +88,7 @@ public extension [MTIRenderCommand] {
     {
         MTIRenderCommand.images(
             byPerforming: self,
-            rasterSampleCount: UInt(rasterSampleCount),
+            rasterSampleCount: rasterSampleCount,
             outputDescriptors: outputDescriptors
         )
     }

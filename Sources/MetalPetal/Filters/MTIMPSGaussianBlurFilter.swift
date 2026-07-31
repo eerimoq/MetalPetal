@@ -6,17 +6,22 @@
 import Foundation
 import Metal
 import MetalPerformanceShaders
+import os
 
-public final class MTIMPSGaussianBlurFilter: NSObject, MTIUnaryFilter {
+public final class MTIMPSGaussianBlurFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var radius: Float = 0
     private static var kernels: [Int: MTIMPSKernel] = [:]
-    private static let kernelsLock = MTILockCreate()
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     private static func kernel(radius: Int) -> MTIMPSKernel {
         kernelsLock.lock()
-        defer { kernelsLock.unlock() }
+        defer {
+            kernelsLock.unlock()
+        }
         if let kernel = kernels[radius] {
             return kernel
         }

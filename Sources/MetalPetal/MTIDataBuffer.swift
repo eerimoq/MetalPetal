@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import os
 
 private final class MTIPageAlignedBuffer {
     let contents: UnsafeMutableRawPointer
@@ -46,18 +47,18 @@ private final class MTIPageAlignedBuffer {
 /// all read and write the buffer's content. However, accessing a `MTIDataBuffer`'s contents using CPU is not
 /// safe. You must ensure all the GPU reads/writes to this buffer are completed. For one `MTIDataBuffer`
 /// instance, one and only one underlying `MTLBuffer` will be created for one GPU device.
-public final class MTIDataBuffer: NSObject {
+public final class MTIDataBuffer {
     private let alignedBuffer: MTIPageAlignedBuffer
 
-    public let length: UInt
+    public let length: Int
 
     public let options: MTLResourceOptions
 
     private let bufferCache: NSMapTable<AnyObject, AnyObject>
-    private let bufferCacheLock = MTILockCreate()
+    private let bufferCacheLock = OSAllocatedUnfairLock()
 
-    public init?(length: UInt, options: MTLResourceOptions) {
-        guard let alignedBuffer = MTIPageAlignedBuffer(length: Int(length)) else {
+    public init?(length: Int, options: MTLResourceOptions) {
+        guard let alignedBuffer = MTIPageAlignedBuffer(length: length) else {
             return nil
         }
         self.alignedBuffer = alignedBuffer
@@ -67,27 +68,26 @@ public final class MTIDataBuffer: NSObject {
             keyOptions: [.objectPointerPersonality, .weakMemory],
             valueOptions: [.objectPointerPersonality, .strongMemory]
         )
-        super.init()
     }
 
-    public convenience init?(bytes: UnsafeRawPointer, length: UInt, options: MTLResourceOptions) {
+    public convenience init?(bytes: UnsafeRawPointer, length: Int, options: MTLResourceOptions) {
         self.init(length: length, options: options)
-        memcpy(alignedBuffer.contents, bytes, Int(length))
+        memcpy(alignedBuffer.contents, bytes, length)
     }
 
     public convenience init?(data: Data, options: MTLResourceOptions) {
         let bytes = [UInt8](data)
-        self.init(bytes: bytes, length: UInt(bytes.count), options: options)
+        self.init(bytes: bytes, length: Int(bytes.count), options: options)
     }
 
     public func buffer(for device: MTLDevice) -> MTLBuffer? {
         bufferCacheLock.lock()
-        defer { bufferCacheLock.unlock() }
-
+        defer {
+            bufferCacheLock.unlock()
+        }
         if let buffer = bufferCache.object(forKey: device) as? MTLBuffer {
             return buffer
         }
-
         let alignedBuffer = alignedBuffer
         let buffer = device.makeBuffer(
             bytesNoCopy: alignedBuffer.contents,
@@ -98,36 +98,13 @@ public final class MTIDataBuffer: NSObject {
                 _ = alignedBuffer
             }
         )
-
         if let buffer {
             bufferCache.setObject(buffer, forKey: device)
         }
         return buffer
     }
 
-    public func unsafeAccess(_ block: (UnsafeMutableRawPointer, UInt) -> Void) {
+    public func unsafeAccess(_ block: (UnsafeMutableRawPointer, Int) -> Void) {
         block(alignedBuffer.contents, length)
-    }
-}
-
-public extension MTIDataBuffer {
-    convenience init?<T>(values: [T], options: MTLResourceOptions = []) {
-        self.init(bytes: values, length: UInt(MemoryLayout<T>.size * values.count), options: options)
-    }
-
-    func unsafeAccess<ReturnType,
-        BufferContentType>(_ block: (UnsafeMutableBufferPointer<BufferContentType>) throws
-        -> ReturnType) rethrows -> ReturnType
-    {
-        var buffer: UnsafeMutableBufferPointer<BufferContentType>!
-        unsafeAccess { (pointer: UnsafeMutableRawPointer, length: UInt) in
-            precondition(Int(length) % MemoryLayout<BufferContentType>.stride == 0)
-            let count = Int(length) / MemoryLayout<BufferContentType>.stride
-            buffer = UnsafeMutableBufferPointer(
-                start: pointer.bindMemory(to: BufferContentType.self, capacity: count),
-                count: count
-            )
-        }
-        return try block(buffer)
     }
 }

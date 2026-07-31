@@ -10,9 +10,9 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        NavigationView {
-            List {
-                Group {
+        NavigationStack {
+            Form {
+                Section {
                     NavigationLink(destination: SimpleImageFilterView()) {
                         Text("Simple Image Filter")
                     }
@@ -20,7 +20,7 @@ struct HomeView: View {
                         Text("Simple Image Filter (MTKView driven)")
                     }
                 }
-                Group {
+                Section {
                     NavigationLink(destination: CameraFilterView()) {
                         Text("Camera")
                     }
@@ -28,7 +28,7 @@ struct HomeView: View {
                         Text("Video Processing")
                     }
                 }
-                Group {
+                Section {
                     NavigationLink(destination: BlendModesView()) {
                         Text("Blend Modes")
                     }
@@ -45,23 +45,19 @@ struct HomeView: View {
                         Text("Multilayer Compositing")
                     }
                 }
-                NavigationLink(destination: SketchBoardView()) {
-                    Text("Sketch Board")
-                }
-                NavigationLink(destination: SceneKitSupportView()) {
-                    Text("Working with SceneKit")
-                }
-                NavigationLink(destination: BouncingBallsView()) {
-                    Text("Particles")
+                Section {
+                    NavigationLink(destination: SketchBoardView()) {
+                        Text("Sketch Board")
+                    }
+                    NavigationLink(destination: SceneKitSupportView()) {
+                        Text("Working with SceneKit")
+                    }
+                    NavigationLink(destination: BouncingBallsView()) {
+                        Text("Particles")
+                    }
                 }
             }
-            .groupedListStyle()
             .inlineNavigationBarTitle("MetalPetal Examples")
-            VStack(spacing: 6) {
-                Text("Welcome to MetalPetal examples.")
-                Text("Select a topic to begin.").font(Font.caption).foregroundColor(.secondary)
-            }.toolbar(content: { Spacer() })
         }
-        .stackNavigationViewStyle()
     }
 }

@@ -6,7 +6,9 @@
 import Foundation
 import Metal
 
-public final class MTIChromaKeyBlendFilter: NSObject, MTIFilter {
+public final class MTIChromaKeyBlendFilter: MTIFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var inputBackgroundImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified

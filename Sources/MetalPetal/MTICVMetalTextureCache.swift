@@ -8,32 +8,31 @@
 import CoreVideo
 import Foundation
 import Metal
+import os
 
 public let MTICVMetalTextureCacheErrorDomain = "MTICVMetalTextureCacheErrorDomain"
 
 public enum MTICVMetalTextureCacheError: Int {
-    case metalIsNotSupported = 10001
-    case failedToInitialize = 10002
-    case failedToCreateTexture = 10003
+    case metalIsNotSupported
+    case failedToInitialize
+    case failedToCreateTexture
 }
 
-private final class MTICVMetalTextureCacheTexture: NSObject, MTICVMetalTexture {
+private final class MTICVMetalTextureCacheTexture: MTICVMetalTexture {
     let texture: MTLTexture
-
     // Keep the CVMetalTexture alive for the lifetime of this wrapper.
     private let textureRef: CVMetalTexture
 
     init(cvMetalTexture textureRef: CVMetalTexture) {
         self.textureRef = textureRef
         texture = CVMetalTextureGetTexture(textureRef)!
-        super.init()
     }
 }
 
 /// Thread-safe object-orientated CVMetalTextureCache.
-public final class MTICVMetalTextureCache: NSObject, MTICVMetalTextureBridging {
+public final class MTICVMetalTextureCache: MTICVMetalTextureBridging {
     private let cache: CVMetalTextureCache
-    private let lock = MTILockCreate()
+    private let lock = OSAllocatedUnfairLock()
 
     public init(
         device: MTLDevice,
@@ -62,13 +61,10 @@ public final class MTICVMetalTextureCache: NSObject, MTICVMetalTextureBridging {
             )
         }
         self.cache = cache
-        super.init()
     }
 
-    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws
-        -> MTICVMetalTextureBridging
-    {
-        try MTICVMetalTextureCache(device: device, cacheAttributes: nil, textureAttributes: nil)
+    public convenience init(device: MTLDevice) throws {
+        try self.init(device: device, cacheAttributes: nil, textureAttributes: nil)
     }
 
     public func makeTexture(

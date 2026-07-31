@@ -102,7 +102,7 @@ struct ImageFilterView<Filter: MTIFilter>: View {
                 Text(error.localizedDescription)
             }
         }
-        .toolbar(content: {
+        .toolbar {
             if isChangingImageAllowed {
                 ImagePicker(title: "Choose Image", handler: { url in
                     if let image = ImageUtilities.loadUserPickedImage(
@@ -115,6 +115,6 @@ struct ImageFilterView<Filter: MTIFilter>: View {
             } else {
                 Spacer()
             }
-        })
+        }
     }
 }

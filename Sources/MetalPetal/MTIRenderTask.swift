@@ -7,12 +7,11 @@ import Foundation
 import Metal
 
 /// Represents a GPU render task - i.e., commands in a command buffer.
-public final class MTIRenderTask: NSObject {
+public final class MTIRenderTask {
     private let commandBuffer: MTLCommandBuffer
 
     public init(commandBuffer: MTLCommandBuffer) {
         self.commandBuffer = commandBuffer
-        super.init()
     }
 
     /// Status of the underlying command buffer.

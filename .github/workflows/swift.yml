@@ -22,6 +22,19 @@ jobs:
           brew install codespell
           make spell-check
 
+  generated-sources:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Check generated sources are up to date
+      run: |
+        brew install swiftformat
+        make generate
+        git diff --exit-code -- Sources || {
+          echo "::error::Generated sources are out of date. Run 'make generate' and commit the result."
+          exit 1
+        }
+
   macos:
     runs-on: macos-latest
     steps:
@@ -38,6 +51,13 @@ jobs:
     - name: Build
       run: make build-ios
 
+  ios-simulator:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Build
+      run: make build-ios-simulator
+
   mac-catalyst:
     runs-on: macos-latest
     steps:
@@ -53,3 +73,10 @@ jobs:
     - uses: actions/checkout@v7
     - name: Build
       run: make build-tvos
+
+  examples:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Build
+      run: make build-examples

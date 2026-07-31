@@ -13,7 +13,7 @@ import Metal
 
 @_exported import SpriteKit
 
-private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
+private final class MTISKSceneImagePromise: MTIImagePromise {
     private let pixelFormat: MTLPixelFormat
     private let frameTime: TimeInterval
     private let viewport: CGRect
@@ -40,7 +40,6 @@ private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
         self.pixelFormat = pixelFormat
         self.frameTime = frameTime
         self.viewport = viewport
-        super.init()
     }
 
     init(
@@ -58,24 +57,17 @@ private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
         self.pixelFormat = pixelFormat
         self.frameTime = frameTime
         self.viewport = viewport
-        super.init()
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
+    func updatingDependencies(_: [MTIImage]) -> Self {
         self
-    }
-
-    func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
     }
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
         let renderer: SKRenderer
         if let device, let existingRenderer = self.renderer {
-            assert(renderingContext.context.device === device)
             guard renderingContext.context.device === device else {
-                throw _MTIErrorCreate(.crossDeviceRendering, "MTIErrorCrossDeviceRendering", nil)
+                throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
             }
             renderer = existingRenderer
         } else if let scene {
@@ -98,7 +90,7 @@ private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
                 resourceOptions: .storageModePrivate
             ))
         guard let targetTexture = renderTarget.texture else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = targetTexture
@@ -125,7 +117,7 @@ private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
         guard let depthStencilTexture = renderingContext.context.device
             .makeTexture(descriptor: depthStencilTextureDescriptor)
         else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         // Depth render target
         renderPassDescriptor.depthAttachment.texture = depthStencilTexture
@@ -155,14 +147,13 @@ private final class MTISKSceneImagePromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTISKSceneRenderer: NSObject {
+public final class MTISKSceneRenderer {
     private let renderer: SKRenderer
     private let device: MTLDevice
 
     public init(device: MTLDevice) {
         renderer = SKRenderer(device: device)
         self.device = device
-        super.init()
     }
 
     public var scene: SKScene? {
@@ -182,7 +173,6 @@ public final class MTISKSceneRenderer: NSObject {
         pixelFormat: MTLPixelFormat,
         isOpaque: Bool
     ) -> MTIImage {
-        assert(renderer.scene != nil)
         let promise = MTISKSceneImagePromise(
             renderer: renderer,
             device: device,

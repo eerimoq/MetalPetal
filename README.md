@@ -522,11 +522,7 @@ In rare scenarios, you may want to access the underlying texture directly, use m
 
 `MTIImagePromise` protocol provides direct access to the underlying texture and the render context for a step in MetalPetal.
 
-You can create new input sources or fully custom processing units by implementing the `MTIImagePromise` protocol. You will need to import an additional module to do so.
-
-```Swift
-import MetalPetalObjectiveC.Extension
-```
+You can create new input sources or fully custom processing units by implementing the `MTIImagePromise` protocol. Everything you need is part of the `MetalPetal` module, so no additional import is required.
 
 See the implementation of `MTIComputePipelineKernel`, `MTICLAHELUTRecipe` or `MTIImage` for example.
 

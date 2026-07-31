@@ -68,7 +68,6 @@ public final class MTIImageView: UIView, MTKViewDelegate {
             _image
         }
         set {
-            assert(Thread.isMainThread, "-[MTIImageView setImage:] can only be called on main thread.")
             if _image !== newValue {
                 _image = newValue
                 updateContentScaleFactor()
@@ -78,38 +77,9 @@ public final class MTIImageView: UIView, MTKViewDelegate {
     }
 
     private var _image: MTIImage?
-
-    @available(
-        *,
-        deprecated,
-        message: """
-        Set `drawsImmediately` to `YES` is not recommended anymore. Please \
-        file an issue describing how you'd like to use this feature. \
-        https://github.com/MetalPetal/MetalPetal
-        """
-    )
-    public var drawsImmediately: Bool {
-        get {
-            _drawsImmediately
-        }
-        set {
-            _drawsImmediately = newValue
-            if newValue {
-                renderView.isPaused = true
-                renderView.enableSetNeedsDisplay = false
-            } else {
-                renderView.isPaused = true
-                renderView.enableSetNeedsDisplay = true
-            }
-        }
-    }
-
     private var _drawsImmediately = false
-
     private var renderView: MTKView!
-
     private var screenScale: CGFloat = 1.0
-
     private var contextCreationError: Error?
 
     override public init(frame: CGRect) {
@@ -194,7 +164,9 @@ public final class MTIImageView: UIView, MTKViewDelegate {
     }
 
     private func updateContentScaleFactor() {
-        guard let renderView, let image = _image else { return }
+        guard let renderView, let image = _image else {
+            return
+        }
         if renderView.frame.size.width > 0, renderView.frame.size.height > 0, image.size.width > 0,
            image.size.height > 0, window?.screen != nil
         {
@@ -216,7 +188,9 @@ public final class MTIImageView: UIView, MTKViewDelegate {
     }
 
     private func setNeedsRedraw() {
-        guard let renderView else { return }
+        guard let renderView else {
+            return
+        }
         if _drawsImmediately {
             renderView.draw()
         } else {
@@ -244,7 +218,12 @@ public final class MTIImageView: UIView, MTKViewDelegate {
                     } catch {
                         #if DEBUG
                         if ProcessInfo.processInfo.environment["MTI_PRINT_ENABLED"] != nil {
-                            NSLog("%@: Failed to render image %@ - %@", self, imageToRender, error as NSError)
+                            NSLog(
+                                "%@: Failed to render image %@ - %@",
+                                self,
+                                String(describing: imageToRender),
+                                error as NSError
+                            )
                         }
                         #endif
                     }

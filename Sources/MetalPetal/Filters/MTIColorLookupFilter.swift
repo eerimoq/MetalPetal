@@ -36,8 +36,8 @@ public struct MTIColorLookupTableInfo {
         if dimensions.depth == 1 {
             var type = MTIColorLookupTableType.typeUnknown
             var dimension = 0
-            let width = Int(dimensions.width)
-            let height = Int(dimensions.height)
+            let width = dimensions.width
+            let height = dimensions.height
             if width == height {
                 // may be a 2d square
                 let possibleDimension = Int(round(pow(Double(width * height), 1.0 / 3.0)))
@@ -58,7 +58,7 @@ public struct MTIColorLookupTableInfo {
             self.init(type: type, dimension: dimension)
         } else {
             if dimensions.width == dimensions.height, dimensions.width == dimensions.depth {
-                self.init(type: .type3D, dimension: Int(dimensions.width))
+                self.init(type: .type3D, dimension: dimensions.width)
             } else {
                 self.init(type: .typeUnknown, dimension: 0)
             }
@@ -66,7 +66,9 @@ public struct MTIColorLookupTableInfo {
     }
 }
 
-public final class MTIColorLookupFilter: NSObject, MTIFilter {
+public final class MTIColorLookupFilter: MTIFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var inputColorLookupTable: MTIImage? {
         didSet {

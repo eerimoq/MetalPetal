@@ -9,15 +9,10 @@ import Metal
 
 public protocol MTIImageViewProtocol: AnyObject {
     var automaticallyCreatesContext: Bool { get set }
-
     var colorPixelFormat: MTLPixelFormat { get set }
-
     var clearColor: MTLClearColor { get set }
-
     var resizingMode: MTIDrawableRenderingResizingMode { get set }
-
     var context: MTIContext? { get set }
-
     var image: MTIImage? { get set }
 }
 

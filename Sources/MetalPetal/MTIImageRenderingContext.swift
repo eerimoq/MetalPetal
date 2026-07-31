@@ -36,7 +36,6 @@ private final class MTIImageRenderingDependencyGraph {
 
     func dependentCount(for promise: MTIImagePromise) -> Int {
         guard let dependents = table[ObjectIdentifier(promise)] else {
-            assertionFailure("Promise: \(promise) is not in this dependency graph.")
             return 0
         }
         return dependents.count
@@ -45,11 +44,9 @@ private final class MTIImageRenderingDependencyGraph {
     func removeDependent(_ dependent: MTIImagePromise, for promise: MTIImagePromise) {
         let key = ObjectIdentifier(promise)
         guard var dependents = table[key] else {
-            assertionFailure("Dependents not found.")
             return
         }
         guard let index = dependents.firstIndex(where: { $0 === dependent }) else {
-            assertionFailure("Dependent not found in promise's dependents array.")
             return
         }
         dependents.remove(at: index)
@@ -57,33 +54,27 @@ private final class MTIImageRenderingDependencyGraph {
     }
 }
 
-private final class MTITransientImagePromiseResolution: NSObject, MTIImagePromiseResolution {
+private final class MTITransientImagePromiseResolution: MTIImagePromiseResolution {
     let texture: MTLTexture
     private var invalidationHandler: ((AnyObject) -> Void)?
 
     init(texture: MTLTexture, invalidationHandler: @escaping (AnyObject) -> Void) {
         self.texture = texture
         self.invalidationHandler = invalidationHandler
-        super.init()
     }
 
     func markAsConsumed(by consumer: AnyObject) {
         invalidationHandler?(consumer)
         invalidationHandler = nil
     }
-
-    deinit {
-        assert(invalidationHandler == nil)
-    }
 }
 
-private final class MTIPersistImageResolutionHolder: NSObject {
-    @objc let renderTarget: MTIImagePromiseRenderTarget
+private final class MTIPersistImageResolutionHolder {
+    let renderTarget: MTIImagePromiseRenderTarget
 
     init(renderTarget: MTIImagePromiseRenderTarget) {
         self.renderTarget = renderTarget
         _ = renderTarget.retainTexture()
-        super.init()
     }
 
     deinit {
@@ -91,11 +82,9 @@ private final class MTIPersistImageResolutionHolder: NSObject {
     }
 }
 
-public final class MTIImageRenderingContext: NSObject {
+public final class MTIImageRenderingContext {
     public let context: MTIContext
-
     public let commandBuffer: MTLCommandBuffer
-
     private var resolvedPromises: [ObjectIdentifier: (
         promise: MTIImagePromise,
         renderTarget: MTIImagePromiseRenderTarget
@@ -109,7 +98,6 @@ public final class MTIImageRenderingContext: NSObject {
     public init(context: MTIContext) {
         self.context = context
         commandBuffer = context.commandQueue.makeCommandBuffer()!
-        super.init()
     }
 
     deinit {
@@ -119,35 +107,25 @@ public final class MTIImageRenderingContext: NSObject {
     }
 
     public func resolvedTexture(for image: MTIImage) -> MTLTexture {
-        let promise = currentResolvingPromise
-        assert(promise != nil)
-        guard let result = currentDependencyResolutionMap[ObjectIdentifier(image)], promise != nil else {
-            NSException(
-                name: .internalInconsistencyException,
-                reason: """
-                Do not query resolved texture for image which is not the current \
-                resolving promise's dependency. (Image: \(image))
-                """,
-                userInfo: nil
-            ).raise()
-            fatalError()
+        guard currentResolvingPromise != nil,
+              let result = currentDependencyResolutionMap[ObjectIdentifier(image)]
+        else {
+            preconditionFailure("""
+            Do not query resolved texture for image which is not the current resolving promise's \
+            dependency. (Image: \(image))
+            """)
         }
         return result
     }
 
     public func resolvedSamplerState(for image: MTIImage) -> MTLSamplerState {
-        let promise = currentResolvingPromise
-        assert(promise != nil)
-        guard let result = currentDependencySamplerStateMap[ObjectIdentifier(image)], promise != nil else {
-            NSException(
-                name: .internalInconsistencyException,
-                reason: """
-                Do not query resolved sampler state for image which is not the \
-                current resolving promise's dependency. (Image: \(image))
-                """,
-                userInfo: nil
-            ).raise()
-            fatalError()
+        guard currentResolvingPromise != nil,
+              let result = currentDependencySamplerStateMap[ObjectIdentifier(image)]
+        else {
+            preconditionFailure("""
+            Do not query resolved sampler state for image which is not the current resolving \
+            promise's dependency. (Image: \(image))
+            """)
         }
         return result
     }
@@ -178,14 +156,12 @@ public final class MTIImageRenderingContext: NSObject {
         if let existing = resolvedPromises[promiseKey] {
             renderTarget = existing.renderTarget
             // Promise resolved.
-            assert(renderTarget.texture != nil)
         } else {
             // Maybe the context has a resolved promise. (The image has a persistent cache policy)
             let cachedRenderTarget = context.renderTarget(for: promise)
             if let cachedRenderTarget, cachedRenderTarget.retainTexture() {
                 // Got the render target from the context, we need to retain the texture here. [A]
                 renderTarget = cachedRenderTarget
-                assert(renderTarget.texture != nil)
             } else {
                 // All caches miss. Resolve promise.
                 if promise.dimensions.width > 0, promise.dimensions.height > 0, promise.dimensions.depth > 0 {
@@ -228,10 +204,9 @@ public final class MTIImageRenderingContext: NSObject {
                         throw error
                     }
                 } else {
-                    throw _MTIErrorCreate(.invalidTextureDimension, "MTIErrorInvalidTextureDimension", nil)
+                    throw MTIError(code: .invalidTextureDimension, message: "MTIErrorInvalidTextureDimension")
                 }
                 // Make sure the render target is valid.
-                assert(renderTarget.texture != nil)
                 if image.cachePolicy == .persistent {
                     // Share the render result with the context.
                     context.setRenderTarget(renderTarget, for: promise)
@@ -268,7 +243,9 @@ public final class MTIImageRenderingContext: NSObject {
             return MTITransientImagePromiseResolution(
                 texture: renderTarget.texture!,
                 invalidationHandler: { [weak self] consumer in
-                    guard let self, let graph = dependencyGraph else { return }
+                    guard let self, let graph = dependencyGraph else {
+                        return
+                    }
                     graph.removeDependent(consumer as! MTIImagePromise, for: capturedPromise)
                     if graph.dependentCount(for: capturedPromise) == 0 {
                         // Nothing depends on this render result, releasing the texture. [C]
@@ -280,8 +257,8 @@ public final class MTIImageRenderingContext: NSObject {
     }
 }
 
-private final class MTIImageBufferPromise: NSObject, MTIImagePromise {
-    @objc private let resolution: MTIPersistImageResolutionHolder
+private final class MTIImageBufferPromise: MTIImagePromise {
+    fileprivate let resolution: MTIPersistImageResolutionHolder
     private weak var context: MTIContext?
     let dimensions: MTITextureDimensions
     let alphaType: MTIAlphaType
@@ -296,11 +273,6 @@ private final class MTIImageBufferPromise: NSObject, MTIImagePromise {
         self.alphaType = alphaType
         resolution = holder
         self.context = context
-        super.init()
-    }
-
-    func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     var dependencies: [MTIImage] {
@@ -308,17 +280,15 @@ private final class MTIImageBufferPromise: NSObject, MTIImagePromise {
     }
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
-        assert(renderingContext.context === context)
         if renderingContext.context !== context {
-            throw _MTIErrorCreate(.crossContextRendering, "MTIErrorCrossContextRendering", nil)
+            throw MTIError(code: .crossContextRendering, message: "MTIErrorCrossContextRendering")
         }
         _ = resolution.renderTarget.retainTexture()
         return resolution.renderTarget
     }
 
-    func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     var debugInfo: MTIImagePromiseDebugInfo {
@@ -326,9 +296,17 @@ private final class MTIImageBufferPromise: NSObject, MTIImagePromise {
     }
 }
 
+extension MTIImage {
+    /// The texture backing an image returned by `MTIContext.renderedBuffer(for:)`, or `nil` if this image
+    /// did not come from that method. Intended for tests, which need to read back the exact texture a
+    /// render produced rather than a copy of it.
+    var renderedTexture: MTLTexture? {
+        (promise as? MTIImageBufferPromise)?.resolution.renderTarget.texture
+    }
+}
+
 public extension MTIContext {
     func renderedBuffer(for targetImage: MTIImage) -> MTIImage? {
-        assert(targetImage.cachePolicy == .persistent)
         guard let persistResolution = value(
             forImage: targetImage,
             in: MTIContextImagePersistentResolutionHolderTable

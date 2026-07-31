@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -18,7 +19,7 @@ public final class MTIMemoryWarningObserver {
     private static let sharedObserver = MTIMemoryWarningObserver()
 
     private let handlers = NSHashTable<AnyObject>.weakObjects()
-    private let lock = MTILockCreate()
+    private let lock = OSAllocatedUnfairLock()
 
     private init() {
         #if canImport(UIKit)

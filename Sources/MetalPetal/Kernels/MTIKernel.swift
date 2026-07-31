@@ -8,12 +8,14 @@
 import Foundation
 import Metal
 
-public protocol MTIKernelConfiguration: NSObjectProtocol, NSCopying {
-    var identifier: NSCopying { get }
+public protocol MTIKernelConfiguration: AnyObject {
+    /// Identifies the configuration within a kernel's state cache. Configurations with equal identifiers
+    /// share a cached kernel state, so this must incorporate everything `makeKernelState` depends on.
+    var identifier: AnyHashable { get }
 }
 
 /// A kernel must be stateless.
-public protocol MTIKernel: NSObjectProtocol {
+public protocol MTIKernel: AnyObject {
     func makeKernelState(
         context: MTIContext,
         configuration: MTIKernelConfiguration?

@@ -8,15 +8,15 @@ import Foundation
 
 /// A MTILayer represents a compositing layer for MTIMultilayerCompositingFilter. MTILayers use a UIKit like
 /// coordinate system.
-public final class MTILayer: NSObject, NSCopying {
+public final class MTILayer {
     public enum LayoutUnit: Int {
         case pixel
         case fractionOfBackgroundSize
     }
 
     public struct FlipOptions: OptionSet {
-        public let rawValue: UInt
-        public init(rawValue: UInt) {
+        public let rawValue: Int
+        public init(rawValue: Int) {
             self.rawValue = rawValue
         }
 
@@ -73,7 +73,6 @@ public final class MTILayer: NSObject, NSCopying {
         self.cornerCurve = cornerCurve
         self.tintColor = tintColor
         self.blendMode = blendMode
-        super.init()
     }
 
     public convenience init(
@@ -210,10 +209,6 @@ public final class MTILayer: NSObject, NSCopying {
             tintColor: tintColor,
             blendMode: blendMode
         )
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public func sizeInPixel(forBackgroundSize backgroundSize: CGSize) -> CGSize {

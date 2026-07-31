@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 /// Port for read `Value` from `Object`
 public protocol OutputPort {
@@ -151,7 +152,7 @@ public class FilterGraph {
         ReferenceWritableKeyPath<ImageReceiver, MTIImage?>
     >
 
-    private static let builderLock = MTILockCreate()
+    private static let builderLock = OSAllocatedUnfairLock()
 
     /// Performs the `builder` block to create an output image. The `builder` block provides an `input` object
     /// and an `output` port. You can use `=>` operator to connect filters and input/output ports. One and
@@ -167,12 +168,6 @@ public class FilterGraph {
 
         let rootConnections = connections.filter { $0.toObject === outputReceiver }
         if rootConnections.count != 1 {
-            assertionFailure(
-                """
-                One and only one port is allowed to connect to the graph output \
-                port. (\(rootConnections.count) currently)
-                """
-            )
             return nil
         }
 

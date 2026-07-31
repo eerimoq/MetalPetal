@@ -9,37 +9,28 @@ import Foundation
 import Metal
 
 /// An immutable wrapper for MTLSamplerDescriptor.
-public final class MTISamplerDescriptor: NSObject, NSCopying {
+public final class MTISamplerDescriptor: Hashable {
     private let metalSamplerDescriptor: MTLSamplerDescriptor
-
     private let cachedHashValue: Int
 
     public init(mtlSamplerDescriptor samplerDescriptor: MTLSamplerDescriptor) {
         metalSamplerDescriptor = samplerDescriptor.copy() as! MTLSamplerDescriptor
         cachedHashValue = samplerDescriptor.hash
-        super.init()
     }
 
     public func makeMTLSamplerDescriptor() -> MTLSamplerDescriptor {
         metalSamplerDescriptor.copy() as! MTLSamplerDescriptor
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(cachedHashValue)
     }
 
-    override public var hash: Int {
-        cachedHashValue
-    }
-
-    override public func isEqual(_ object: Any?) -> Bool {
-        if let other = object as? MTISamplerDescriptor {
-            if other === self {
-                return true
-            }
-            return metalSamplerDescriptor.isEqual(other.metalSamplerDescriptor)
+    public static func == (lhs: MTISamplerDescriptor, rhs: MTISamplerDescriptor) -> Bool {
+        if lhs === rhs {
+            return true
         }
-        return false
+        return lhs.metalSamplerDescriptor.isEqual(rhs.metalSamplerDescriptor)
     }
 
     public static let `default`: MTISamplerDescriptor = {
@@ -65,6 +56,8 @@ public final class MTISamplerDescriptor: NSObject, NSCopying {
     private static let defaultClampToEdge = makeDefault(addressMode: .clampToEdge)
     private static let defaultRepeat = makeDefault(addressMode: .repeat)
     private static let defaultMirrorRepeat = makeDefault(addressMode: .mirrorRepeat)
+    private static let defaultMirrorClampToEdge = makeDefault(addressMode: .mirrorClampToEdge)
+    private static let defaultClampToBorderColor = makeDefault(addressMode: .clampToBorderColor)
 
     public static func defaultSamplerDescriptor(withAddressMode addressMode: MTLSamplerAddressMode)
         -> MTISamplerDescriptor
@@ -78,8 +71,11 @@ public final class MTISamplerDescriptor: NSObject, NSCopying {
             return defaultRepeat
         case .clampToZero:
             return defaultClampToZero
+        case .mirrorClampToEdge:
+            return defaultMirrorClampToEdge
+        case .clampToBorderColor:
+            return defaultClampToBorderColor
         @unknown default:
-            assertionFailure("Unsupported address mode.")
             return defaultClampToZero
         }
     }

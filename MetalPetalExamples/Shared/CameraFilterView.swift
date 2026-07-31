@@ -8,166 +8,25 @@
 import AVKit
 import Foundation
 import MetalPetal
+import os
 import SwiftUI
 import VideoIO
 import VideoToolbox
 
-class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate,
-    AVCaptureAudioDataOutputSampleBufferDelegate
-{
-    struct Face {
-        var bounds: CGRect
-    }
+class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+    struct Effect: Identifiable {
+        typealias Filter = (MTIImage) -> MTIImage
 
-    enum Effect: String, Identifiable, CaseIterable {
-        case none = "No Filter"
-        case grayscale = "Gray Scale"
-        case colorHalftone = "Color Halftone"
-        case colorGrading = "Color Grading (Color Lookup)"
-        case instant = "CIPhotoEffectInstant"
-        case bloom = "CIBloom"
-        #if os(iOS)
-        case faceTrackingPixellate = "Face Tracking Pixellate"
-        #endif
+        let name: String
+        let makeFilter: () -> Filter
 
         var id: String {
-            rawValue
+            name
         }
 
-        typealias Filter = (MTIImage, [Face]) -> MTIImage
-
-        func makeFilter() -> Filter {
-            switch self {
-            case .none:
-                return { image, _ in image }
-            case .grayscale:
-                return { image, _ in image.adjusting(saturation: 0) }
-            case .colorHalftone:
-                let filter = MTIColorHalftoneFilter()
-                filter.scale = 16
-                return { image, _ in
-                    filter.inputImage = image
-                    return filter.outputImage!
-                }
-            case .colorGrading:
-                let filter = MTIColorLookupFilter()
-                filter.inputColorLookupTable = DemoImages.colorLookupTable
-                return { image, _ in
-                    filter.inputImage = image
-                    return filter.outputImage!
-                }
-            case .instant:
-                let filter = MTICoreImageUnaryFilter()
-                filter.filter = CIFilter(name: "CIPhotoEffectInstant")
-                return { image, _ in
-                    filter.inputImage = image
-                    return filter.outputImage!
-                }
-            case .bloom:
-                return { image, _ in
-                    MTICoreImageKernel.image(byProcessing: [image], using: { inputs in
-                        let extent = inputs[0].extent
-                        return inputs[0].clampedToExtent().applyingFilter("CIBloom").cropped(to: extent)
-                    }, outputDimensions: image.dimensions)
-                }
-            #if os(iOS)
-            case .faceTrackingPixellate:
-                return { image, faces in
-                    let kernel = MTIPixellateFilter.kernel()
-                    var renderCommands: [MTIRenderCommand] = []
-                    renderCommands.append(MTIRenderCommand(
-                        kernel: .passthrough,
-                        geometry: MTIVertices.fullViewportSquare,
-                        images: [image],
-                        parameters: [:]
-                    ))
-                    for face in faces {
-                        let normalizedX = Float(face.bounds.origin.x / image.size.width)
-                        let normalizedY = Float(face.bounds.origin.y / image.size.height)
-                        let normalizedWidth = Float(face.bounds.width / image.size.width)
-                        let normalizedHeight = Float(face.bounds.height / image.size.height)
-                        let vertices = MTIVertices(vertices: [
-                            MTIVertex(
-                                x: normalizedX * 2 - 1,
-                                y: (1.0 - normalizedY - normalizedHeight) * 2 - 1,
-                                z: 0,
-                                w: 1,
-                                u: normalizedX,
-                                v: normalizedY + normalizedHeight
-                            ),
-                            MTIVertex(
-                                x: (normalizedX + normalizedWidth) * 2 - 1,
-                                y: (1.0 - normalizedY - normalizedHeight) * 2 - 1,
-                                z: 0,
-                                w: 1,
-                                u: normalizedX + normalizedWidth,
-                                v: normalizedY + normalizedHeight
-                            ),
-                            MTIVertex(
-                                x: normalizedX * 2 - 1,
-                                y: (1.0 - normalizedY) * 2 - 1,
-                                z: 0,
-                                w: 1,
-                                u: normalizedX,
-                                v: normalizedY
-                            ),
-                            MTIVertex(
-                                x: (normalizedX + normalizedWidth) * 2 - 1,
-                                y: (1.0 - normalizedY) * 2 - 1,
-                                z: 0,
-                                w: 1,
-                                u: normalizedX + normalizedWidth,
-                                v: normalizedY
-                            ),
-                        ], primitiveType: .triangleStrip)
-                        let faceRenderCommand = MTIRenderCommand(
-                            kernel: kernel,
-                            geometry: vertices,
-                            images: [image],
-                            parameters: ["scale": SIMD2<Float>(30, 30)]
-                        )
-                        renderCommands.append(faceRenderCommand)
-                    }
-                    return MTIRenderCommand.images(
-                        byPerforming: renderCommands,
-                        outputDescriptors: [MTIRenderPassOutputDescriptor(
-                            dimensions: image.dimensions,
-                            pixelFormat: .unspecified
-                        )]
-                    )[0]
-                }
-            #endif
-            }
-        }
-    }
-
-    struct State {
-        var isRecording: Bool = false
-        var isVideoMirrored: Bool = true
-    }
-
-    @Published private var stateChangeCount: Int = 0
-    private var _state: State = .init()
-    private let stateLock = MTILockCreate()
-
-    private(set) var state: State {
-        get {
-            stateLock.lock()
-            defer {
-                stateLock.unlock()
-            }
-            return _state
-        }
-        set {
-            stateLock.lock()
-            defer {
-                stateLock.unlock()
-
-                // ensure that the state update happens on main thread.
-                dispatchPrecondition(condition: .onQueue(.main))
-                stateChangeCount += 1
-            }
-            _state = newValue
+        init(_ name: String, makeFilter: @escaping () -> Filter) {
+            self.name = name
+            self.makeFilter = makeFilter
         }
     }
 
@@ -178,8 +37,7 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
     private let camera: Camera = {
         var configurator = Camera.Configurator()
         #if os(iOS)
-        let interfaceOrientation = UIApplication.shared.windows.first(where: { $0.windowScene != nil })?
-            .windowScene?.interfaceOrientation
+        let interfaceOrientation = UIApplication.shared.activeWindowScene?.interfaceOrientation
         #endif
         configurator.videoConnectionConfigurator = { _, connection in
             #if os(iOS)
@@ -198,31 +56,19 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             #endif
         }
         return Camera(
-            captureSessionPreset: .hd1280x720,
+            captureSessionPreset: .hd1920x1080,
             defaultCameraPosition: .front,
             configurator: configurator
         )
     }()
 
     private let imageRenderer = PixelBufferPoolBackedImageRenderer()
-    private var filter: Effect.Filter = { image, _ in image }
-    private var faces: [Face] = []
-    private var isMetadataOutputEnabled: Bool = false
-    private var recorder: MovieRecorder?
+    private var filter: Effect.Filter = { $0 }
 
-    @Published var effect: Effect = .none {
+    @Published var effect: Effect = .noFilter {
         didSet {
             let filter = effect.makeFilter()
-            let currentEffect = effect
             queue.async {
-                #if os(iOS)
-                if currentEffect == .faceTrackingPixellate, !self.isMetadataOutputEnabled {
-                    self.camera.stopRunningCaptureSession()
-                    try? self.camera.enableMetadataOutput(for: [.face], on: self.queue, delegate: self)
-                    self.camera.startRunningCaptureSession()
-                    self.isMetadataOutputEnabled = true
-                }
-                #endif
                 self.filter = filter
             }
         }
@@ -231,7 +77,6 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
     override init() {
         super.init()
         try? camera.enableVideoDataOutput(on: queue, delegate: self)
-        try? camera.enableAudioDataOutput(on: queue, delegate: self)
         camera.videoDataOutput?
             .videoSettings =
             [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
@@ -249,39 +94,15 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
         }
     }
 
-    func startRecording() throws {
-        let sessionID = UUID()
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(sessionID.uuidString).mp4")
-        // record audio when permission is given
-        let hasAudio = camera.audioDataOutput != nil
-        let recorder = try MovieRecorder(
-            url: url,
-            configuration: MovieRecorder.Configuration(hasAudio: hasAudio)
+    private static func croppedToCenterSquare(_ image: MTIImage) -> MTIImage {
+        let side = min(image.size.width, image.size.height)
+        let bounds = CGRect(
+            x: (image.size.width - side) / 2,
+            y: image.size.height - side,
+            width: side,
+            height: side * 0.75
         )
-        state.isRecording = true
-        queue.async {
-            self.recorder = recorder
-        }
-    }
-
-    func stopRecording(completion: @escaping (Result<URL, Error>) -> Void) {
-        if let recorder {
-            recorder.stopRecording(completion: { error in
-                self.state.isRecording = false
-                if let error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(recorder.url))
-                }
-            })
-            queue.async {
-                self.recorder = nil
-            }
-        }
-    }
-
-    func toggleVideoMirrored() {
-        state.isVideoMirrored = !state.isVideoMirrored
+        return image.cropped(to: bounds) ?? image
     }
 
     func captureOutput(
@@ -293,24 +114,15 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             return
         }
         switch formatDescription.mediaType {
-        case .audio:
-            do {
-                try recorder?.appendSampleBuffer(sampleBuffer)
-            } catch {
-                print(error)
-            }
         case .video:
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                return
+            }
             do {
-                let image = MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .alphaIsOne)
-                let filterOutputImage = filter(image, faces)
-                let outputImage = state.isVideoMirrored ? filterOutputImage
-                    .oriented(.upMirrored) : filterOutputImage
-                let renderOutput = try imageRenderer.render(outputImage, using: renderContext)
-                try recorder?.appendSampleBuffer(SampleBufferUtilities.makeSampleBufferByReplacingImageBuffer(
-                    of: sampleBuffer,
-                    with: renderOutput.pixelBuffer
-                )!)
+                let image = CapturePipeline
+                    .croppedToCenterSquare(MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .alphaIsOne))
+                let filterOutputImage = filter(image)
+                let renderOutput = try imageRenderer.render(filterOutputImage, using: renderContext)
                 DispatchQueue.main.async {
                     self.previewImage = renderOutput.cgImage
                 }
@@ -323,170 +135,416 @@ class CapturePipeline: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
     }
 }
 
-#if os(iOS)
+extension CapturePipeline.Effect: Hashable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
 
-extension CapturePipeline: AVCaptureMetadataOutputObjectsDelegate {
-    func metadataOutput(
-        _: AVCaptureMetadataOutput,
-        didOutput metadataObjects: [AVMetadataObject],
-        from _: AVCaptureConnection
-    ) {
-        var faces = [Face]()
-        for faceMetadataObject in metadataObjects.compactMap({ $0 as? AVMetadataFaceObject }) {
-            if let rect = camera.videoDataOutput?
-                .outputRectConverted(fromMetadataOutputRect: faceMetadataObject.bounds)
-            {
-                faces.append(Face(bounds: rect.insetBy(dx: -rect.width / 4, dy: -rect.height / 4)))
-            }
-        }
-        self.faces = faces
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
-#endif
+extension CapturePipeline.Effect {
+    static let noFilter = Self("No Filter") {
+        { $0 }
+    }
+
+    static let all: [Self] = basic + colorAdjustment + blurAndSharpen + stylize + geometry
+        + compositing + analysis + coreImage
+
+    private static func applying(_ makeFilter: @escaping () -> some MTIUnaryFilter) -> () -> Filter {
+        {
+            let filter = makeFilter()
+            return { image in
+                filter.inputImage = image
+                return filter.outputImage!
+            }
+        }
+    }
+
+    private static func applying<F: MTIFilter>(
+        _ makeFilter: @escaping () -> F,
+        inputImage keyPath: ReferenceWritableKeyPath<F, MTIImage?>
+    ) -> () -> Filter {
+        {
+            let filter = makeFilter()
+            return { image in
+                filter[keyPath: keyPath] = image
+                return filter.outputImage!
+            }
+        }
+    }
+
+    private static func makeImageProvider(
+        _ makeImage: @escaping (CGSize) -> MTIImage
+    ) -> (CGSize) -> MTIImage {
+        var cachedSize: CGSize?
+        var cachedImage: MTIImage?
+        return { size in
+            if let cachedImage, cachedSize == size {
+                return cachedImage
+            }
+            let image = makeImage(size).withCachePolicy(.persistent)
+            cachedSize = size
+            cachedImage = image
+            return image
+        }
+    }
+
+    private static func makeDemoImageProvider() -> (CGSize) -> MTIImage {
+        makeImageProvider { size in
+            DemoImages.p1040808.resized(to: size) ?? DemoImages.p1040808
+        }
+    }
+
+    private static let basic: [Self] = [noFilter]
+
+    private static let colorAdjustment: [Self] = [
+        Self("Brightness", makeFilter: applying {
+            let filter = MTIBrightnessFilter()
+            filter.brightness = 0.2
+            return filter
+        }),
+        Self("Contrast", makeFilter: applying {
+            let filter = MTIContrastFilter()
+            filter.contrast = 1.5
+            return filter
+        }),
+        Self("Exposure", makeFilter: applying {
+            let filter = MTIExposureFilter()
+            filter.exposure = 1
+            return filter
+        }),
+        Self("Saturation", makeFilter: applying {
+            let filter = MTISaturationFilter()
+            filter.saturation = 2
+            return filter
+        }),
+        Self("Gray Scale", makeFilter: applying {
+            let filter = MTISaturationFilter()
+            filter.saturation = 0
+            return filter
+        }),
+        Self("Vibrance", makeFilter: applying {
+            let filter = MTIVibranceFilter()
+            filter.amount = 1
+            return filter
+        }),
+        Self("Opacity", makeFilter: applying {
+            let filter = MTIOpacityFilter()
+            filter.opacity = 0.5
+            return filter
+        }),
+        Self("Color Invert", makeFilter: applying {
+            MTIColorInvertFilter()
+        }),
+        Self("Color Matrix (Sepia)", makeFilter: applying {
+            let filter = MTIColorMatrixFilter()
+            filter.colorMatrix = MTIColorMatrix(
+                matrix: simd_float4x4(columns: (
+                    SIMD4<Float>(0.393, 0.769, 0.189, 0),
+                    SIMD4<Float>(0.349, 0.686, 0.168, 0),
+                    SIMD4<Float>(0.272, 0.534, 0.131, 0),
+                    SIMD4<Float>(0, 0, 0, 1)
+                )),
+                bias: SIMD4<Float>(0, 0, 0, 0)
+            )
+            return filter
+        }),
+        Self("Color Grading (Color Lookup)", makeFilter: applying({
+            let filter = MTIColorLookupFilter()
+            filter.inputColorLookupTable = DemoImages.colorLookupTable
+            return filter
+        }, inputImage: \.inputImage)),
+        Self("RGB Tone Curve", makeFilter: applying({
+            let filter = MTIRGBToneCurveFilter()
+            filter.rgbCompositeControlPoints = [
+                MTIVector(value: CGPoint(x: 0, y: 0)),
+                MTIVector(value: CGPoint(x: 0.5, y: 0.75)),
+                MTIVector(value: CGPoint(x: 1, y: 1)),
+            ]
+            return filter
+        }, inputImage: \.inputImage)),
+        Self("CLAHE", makeFilter: applying {
+            let filter = MTICLAHEFilter()
+            filter.clipLimit = 2
+            filter.tileGridSize = MTICLAHESize(width: 8, height: 8)
+            return filter
+        }),
+        Self("RGB Color Space Conversion", makeFilter: applying {
+            let filter = MTIRGBColorSpaceConversionFilter()
+            filter.inputColorSpace = .linearSRGB
+            filter.outputColorSpace = .sRGB
+            filter.outputAlphaType = .alphaIsOne
+            return filter
+        }),
+        Self("Linear RGB to sRGB Tone Curve", makeFilter: applying {
+            MTILinearToSRGBToneCurveFilter()
+        }),
+        Self("sRGB Tone Curve to Linear RGB", makeFilter: applying {
+            MTISRGBToneCurveToLinearFilter()
+        }),
+        Self("ITU-R 709 RGB to Linear RGB", makeFilter: applying {
+            MTIITUR709RGBToLinearRGBFilter()
+        }),
+        Self("ITU-R 709 RGB to sRGB", makeFilter: applying {
+            MTIITUR709RGBToSRGBFilter()
+        }),
+        // The camera frames are opaque, so the alpha filters below pass them through unchanged.
+        Self("Premultiply Alpha", makeFilter: applying {
+            MTIPremultiplyAlphaFilter()
+        }),
+        Self("Unpremultiply Alpha", makeFilter: applying {
+            MTIUnpremultiplyAlphaFilter()
+        }),
+    ]
+
+    private static let blurAndSharpen: [Self] = [
+        Self("MPS Gaussian Blur", makeFilter: applying {
+            let filter = MTIMPSGaussianBlurFilter()
+            filter.radius = 10
+            return filter
+        }),
+        Self("MPS Box Blur", makeFilter: applying {
+            let filter = MTIMPSBoxBlurFilter()
+            filter.size = simd_make_int2(15, 15)
+            return filter
+        }),
+        Self("MPS Unsharp Mask", makeFilter: applying {
+            let filter = MTIMPSUnsharpMaskFilter()
+            filter.scale = 2
+            filter.radius = 4
+            return filter
+        }),
+        Self("MPS Definition", makeFilter: applying {
+            let filter = MTIMPSDefinitionFilter()
+            filter.intensity = 1
+            return filter
+        }),
+        Self("MPS Sobel", makeFilter: applying {
+            MTIMPSSobelFilter()
+        }),
+        Self("MPS Convolution (Emboss)", makeFilter: applying {
+            let weights: [Float] = [-2, -1, 0,
+                                    -1, 1, 1,
+                                    0, 1, 2]
+            return weights.withUnsafeBufferPointer { buffer in
+                MTIMPSConvolutionFilter(kernelWidth: 3, kernelHeight: 3, weights: buffer.baseAddress!)
+            }
+        }),
+        Self("Hexagonal Bokeh Blur") {
+            let filter = MTIHexagonalBokehBlurFilter()
+            filter.radius = 15
+            filter.brightness = 0.5
+            return { image in
+                filter.inputImage = image.withSamplerDescriptor(
+                    .defaultSamplerDescriptor(withAddressMode: .clampToEdge)
+                )
+                return filter.outputImage!
+            }
+        },
+        Self("High Pass Skin Smoothing", makeFilter: applying({
+            let filter = MTIHighPassSkinSmoothingFilter()
+            filter.amount = 1
+            filter.radius = 8
+            return filter
+        }, inputImage: \.inputImage)),
+    ]
+
+    private static let stylize: [Self] = {
+        var effects: [Self] = [
+            Self("Color Halftone", makeFilter: applying {
+                let filter = MTIColorHalftoneFilter()
+                filter.scale = 16
+                return filter
+            }),
+            Self("Dot Screen", makeFilter: applying {
+                let filter = MTIDotScreenFilter()
+                filter.scale = 12
+                return filter
+            }),
+            Self("Pixellate", makeFilter: applying {
+                let filter = MTIPixellateFilter()
+                filter.scale = CGSize(width: 16, height: 16)
+                return filter
+            }),
+            Self("Bulge Distortion") {
+                let filter = MTIBulgeDistortionFilter()
+                filter.scale = 0.5
+                return { image in
+                    filter.center = simd_make_float2(
+                        Float(image.size.width / 2),
+                        Float(image.size.height / 2)
+                    )
+                    filter.radius = Float(min(image.size.width, image.size.height) / 2)
+                    filter.inputImage = image
+                    return filter.outputImage!
+                }
+            },
+            Self("Round Corner") {
+                let filter = MTIRoundCornerFilter()
+                filter.cornerCurve = .continuous
+                return { image in
+                    filter.cornerRadius = MTICornerRadius(
+                        Float(min(image.size.width, image.size.height) / 8)
+                    )
+                    filter.inputImage = image
+                    return filter.outputImage!
+                }
+            },
+        ]
+        return effects
+    }()
+
+    private static let geometry: [Self] = [
+        Self("Crop", makeFilter: applying {
+            let filter = MTICropFilter()
+            filter.cropRegion = .fractional(CGRect(x: 0.25, y: 0.25, width: 0.5, height: 0.5))
+            return filter
+        }),
+        Self("Transform", makeFilter: applying {
+            let filter = MTITransformFilter()
+            filter.transform = CATransform3DMakeRotation(.pi / 12, 0, 0, 1)
+            return filter
+        }),
+    ]
+
+    private static let compositing: [Self] = [
+        Self("Blend (Multiply)") {
+            let filter = MTIBlendFilter(blendMode: .multiply)
+            let backgroundImage = makeDemoImageProvider()
+            return { image in
+                filter.inputBackgroundImage = backgroundImage(image.size)
+                filter.inputImage = image
+                return filter.outputImage!
+            }
+        },
+        Self("Blend with Mask") {
+            let filter = MTIBlendWithMaskFilter()
+            let backgroundImage = makeDemoImageProvider()
+            let maskImage = makeImageProvider { size in
+                RadialGradientImage.makeImage(size: size)
+            }
+            return { image in
+                filter.inputBackgroundImage = backgroundImage(image.size)
+                filter.inputImage = image
+                filter.inputMask = MTIMask(
+                    content: maskImage(image.size),
+                    component: .red,
+                    mode: .normal
+                )
+                return filter.outputImage!
+            }
+        },
+        Self("Chroma Key Blend") {
+            let filter = MTIChromaKeyBlendFilter()
+            filter.color = MTIColor(red: 0, green: 1, blue: 0, alpha: 1)
+            filter.thresholdSensitivity = 0.4
+            filter.smoothing = 0.1
+            let backgroundImage = makeDemoImageProvider()
+            return { image in
+                filter.inputBackgroundImage = backgroundImage(image.size)
+                filter.inputImage = image
+                return filter.outputImage!
+            }
+        },
+        Self("Multilayer Compositing") {
+            let filter = MultilayerCompositingFilter()
+            let overlayImage = makeImageProvider { size in
+                DemoImages.makeSymbolImage(
+                    named: "sparkles",
+                    aspectFitIn: CGSize(width: size.width / 3, height: size.height / 3)
+                )
+            }
+            return { image in
+                let overlay = overlayImage(image.size)
+                filter.inputBackgroundImage = image
+                filter.layers = [
+                    MultilayerCompositingFilter.Layer(content: overlay)
+                        .tintColor(MTIColor(red: 210 / 255.0, green: 180 / 255.0, blue: 40 / 255.0, alpha: 1))
+                        .frame(
+                            center: CGPoint(x: image.size.width / 2, y: image.size.height / 2),
+                            size: overlay.size,
+                            layoutUnit: .pixel
+                        )
+                        .blendMode(.hardLight),
+                ]
+                return filter.outputImage!
+            }
+        },
+    ]
+
+    private static let analysis: [Self] = [
+        Self("Histogram Display") {
+            let histogramFilter = MTIMPSHistogramFilter()
+            let displayFilter = MTIHistogramDisplayFilter()
+            return { image in
+                histogramFilter.inputImage = image
+                displayFilter.outputSize = image.size
+                displayFilter.inputImage = histogramFilter.outputImage
+                return displayFilter.outputImage!
+            }
+        },
+    ]
+
+    private static let coreImage: [Self] = [
+        Self("CIPhotoEffectInstant", makeFilter: applying({
+            let filter = MTICoreImageUnaryFilter()
+            filter.filter = CIFilter(name: "CIPhotoEffectInstant")
+            return filter
+        }, inputImage: \.inputImage)),
+        Self("CIBloom") {
+            { image in
+                MTICoreImageKernel.image(byProcessing: [image], using: { inputs in
+                    let extent = inputs[0].extent
+                    return inputs[0].clampedToExtent().applyingFilter("CIBloom").cropped(to: extent)
+                }, outputDimensions: image.dimensions)
+            }
+        },
+    ]
+}
 
 struct CameraFilterView: View {
     @StateObject private var capturePipeline = CapturePipeline()
-    @State private var isRecordButtonEnabled: Bool = true
-    @State private var isVideoPlayerPresented: Bool = false
-    @State private var error: Error?
-    @State private var videoPlayer: AVPlayer?
 
     var body: some View {
-        ZStack {
-            VStack {
-                Group {
-                    if let cgImage = capturePipeline.previewImage {
-                        Image(cgImage: cgImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } else {
-                        cameraUnavailableView
-                    }
-                }
-                .overlay(controlsView)
-                Button(capturePipeline.state.isRecording ? "Stop Recording" : "Start Recording", action: {
-                    if capturePipeline.state.isRecording {
-                        isRecordButtonEnabled = false
-                        capturePipeline.stopRecording(completion: { result in
-                            isRecordButtonEnabled = true
-                            switch result {
-                            case let .success(url):
-                                videoPlayer = AVPlayer(url: url)
-                                isVideoPlayerPresented = true
-                            case let .failure(error):
-                                showError(error)
-                            }
-                        })
-                    } else {
-                        videoPlayer = nil
-                        isVideoPlayerPresented = false
-                        do {
-                            try capturePipeline.startRecording()
-                        } catch {
-                            showError(error)
-                        }
-                    }
-                })
-                .disabled(!isRecordButtonEnabled)
-                .roundedRectangleButtonStyle()
-                .largeControlSize()
-                .padding()
-            }
-            if let error {
-                Text(error.localizedDescription)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10)
-                        .foregroundColor(Color.black.opacity(0.7)))
-            }
-        }
-        .onAppear(perform: {
-            capturePipeline.startRunningCaptureSession()
-        })
-        .onDisappear(perform: {
-            capturePipeline.stopRunningCaptureSession()
-        })
-        .sheet(isPresented: $isVideoPlayerPresented, content: {
-            if let player = videoPlayer {
-                VideoPlayer(player: player).onAppear(perform: {
-                    player.play()
-                })
-                .frame(minHeight: 480)
-                .overlay(videoPlayerOverlay)
-            }
-        })
-        .toolbar(content: { Spacer() })
-        .inlineNavigationBarTitle("Camera")
-    }
-
-    private func showError(_ error: Error) {
-        withAnimation {
-            isRecordButtonEnabled = false
-            self.error = error
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation {
-                isRecordButtonEnabled = true
-                self.error = nil
-            }
-        }
-    }
-
-    private var videoPlayerOverlay: some View {
         VStack {
-            HStack {
-                Button("Dismiss", action: {
-                    isVideoPlayerPresented = false
-                }).roundedRectangleButtonStyle()
-                Spacer()
+            Group {
+                if let cgImage = capturePipeline.previewImage {
+                    Image(cgImage: cgImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } else {
+                    cameraUnavailableView
+                }
             }
-            Spacer()
-        }.padding()
-    }
-
-    private var controlsView: some View {
-        VStack(alignment: .trailing) {
-            HStack {
-                Spacer()
-                Picker(selection: $capturePipeline.effect, label: Text(effectPickerLabel), content: {
-                    ForEach(CapturePipeline.Effect.allCases) { effect in
-                        Text(effect.rawValue).tag(effect)
-                    }
-                })
-                .scaledToFit()
-                .pickerStyle(MenuPickerStyle())
-                .roundedRectangleButtonStyle()
-                .largeControlSize()
-                .animation(.none)
-                Button(action: { [capturePipeline] in
-                           capturePipeline.toggleVideoMirrored()
-                       },
-                       label: { Image(
-                           systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right"
-                       )
-                       })
-                       .roundedRectangleButtonStyle()
-                       .largeControlSize()
-            }.padding()
+            .frame(maxWidth: .infinity)
+            Picker("", selection: $capturePipeline.effect) {
+                ForEach(CapturePipeline.Effect.all) { effect in
+                    Text(effect.name)
+                        .tag(effect)
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+            .padding([.horizontal])
             Spacer()
         }
-    }
-
-    private var effectPickerLabel: String {
-        #if os(iOS)
-        return capturePipeline.effect.rawValue
-        #else
-        return ""
-        #endif
+        .onAppear {
+            capturePipeline.startRunningCaptureSession()
+        }
+        .onDisappear {
+            capturePipeline.stopRunningCaptureSession()
+        }
+        .inlineNavigationBarTitle("Camera")
     }
 
     private var cameraUnavailableView: some View {
         Rectangle()
             .foregroundColor(Color.gray.opacity(0.5))
-            .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
-            .overlay(Image(systemName: "video.fill").font(.system(size: 32))
+            .aspectRatio(CGSize(width: 1, height: 0.75), contentMode: .fit)
+            .overlay(Image(systemName: "video.fill")
+                .font(.system(size: 32))
                 .foregroundColor(Color.white.opacity(0.5)))
     }
 }

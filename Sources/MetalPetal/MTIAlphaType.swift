@@ -43,7 +43,7 @@ extension MTIAlphaType: CustomStringConvertible {
 public typealias MTIAlphaTypeHandlingOutputAlphaTypeRule = ([MTIAlphaType]) -> MTIAlphaType
 
 /// Describes how a image processing unit handles alpha types.
-public final class MTIAlphaTypeHandlingRule: NSObject, NSCopying {
+public final class MTIAlphaTypeHandlingRule {
     /// Acceptable alpha types.
     public let acceptableAlphaTypes: [MTIAlphaType]
     private let outputAlphaTypeHandler: MTIAlphaTypeHandlingOutputAlphaTypeRule?
@@ -56,14 +56,12 @@ public final class MTIAlphaTypeHandlingRule: NSObject, NSCopying {
         self.acceptableAlphaTypes = acceptableAlphaTypes
         self.outputAlphaTypeHandler = outputAlphaTypeHandler
         outputAlphaTypeValue = .unknown
-        super.init()
     }
 
     public init(acceptableAlphaTypes: [MTIAlphaType], outputAlphaType: MTIAlphaType) {
         self.acceptableAlphaTypes = acceptableAlphaTypes
         outputAlphaTypeHandler = nil
         outputAlphaTypeValue = outputAlphaType
-        super.init()
     }
 
     public convenience init(
@@ -78,10 +76,6 @@ public final class MTIAlphaTypeHandlingRule: NSObject, NSCopying {
             acceptableAlphaTypes: [.premultiplied, .nonPremultiplied, .alphaIsOne],
             outputAlphaTypeHandler: handler
         )
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public func canAcceptAlphaType(_ alphaType: MTIAlphaType) -> Bool {
@@ -99,7 +93,6 @@ public final class MTIAlphaTypeHandlingRule: NSObject, NSCopying {
     public func outputAlphaType(forInputImages inputImages: [MTIImage]) -> MTIAlphaType {
         if let handler = outputAlphaTypeHandler {
             let alphaTypes = inputImages.map(\.alphaType)
-            assert(Set(alphaTypes).isSubset(of: Set(acceptableAlphaTypes)))
             return handler(alphaTypes)
         } else {
             return outputAlphaTypeValue
@@ -118,16 +111,6 @@ public final class MTIAlphaTypeHandlingRule: NSObject, NSCopying {
         .alphaIsOne,
         .premultiplied,
     ]) { inputAlphaTypes in
-        assert(Set(inputAlphaTypes).count == 1)
-        return inputAlphaTypes.first ?? .unknown
-    }
-
-    public func _canHandleAlphaTypes(in images: [MTIImage]) -> Bool {
-        /* Alpha Type Assert */
-        // https://github.com/MetalPetal/MetalPetal#alpha-types
-        for image in images where !canAcceptAlphaType(image.alphaType) {
-            return false
-        }
-        return true
+        inputAlphaTypes.first ?? .unknown
     }
 }

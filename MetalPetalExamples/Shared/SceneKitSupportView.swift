@@ -25,9 +25,9 @@ struct SceneKitSupportView: View {
             func makeFilter() -> Filter {
                 switch self {
                 case .none:
-                    return { image in image }
+                    return { $0 }
                 case .grayscale:
-                    return { image in image.adjusting(saturation: 0) }
+                    return { $0.adjusting(saturation: 0) }
                 case .colorHalftone:
                     let filter = MTIColorHalftoneFilter()
                     filter.scale = 8
@@ -132,14 +132,11 @@ struct SceneKitSupportView: View {
                 })
                 .pickerWidthLimit(180)
                 .roundedRectangleButtonStyle()
-                .largeControlSize()
                 .pickerStyle(MenuPickerStyle())
-                .animation(.none)
                 Spacer()
             }
             Spacer()
         }.padding())
-        .toolbar(content: { Spacer() })
         .inlineNavigationBarTitle("Working with SceneKit")
     }
 

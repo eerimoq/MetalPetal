@@ -42,7 +42,7 @@ struct SimpleImageFilterView: View {
                 Text(error.localizedDescription)
             }
         }
-        .toolbar(content: {
+        .toolbar {
             ImagePicker(title: "Choose Image", handler: { url in
                 if let image = ImageUtilities.loadUserPickedImage(
                     from: url,
@@ -51,7 +51,7 @@ struct SimpleImageFilterView: View {
                     inputImage = image
                 }
             })
-        })
+        }
         .inlineNavigationBarTitle("Simple Filter")
     }
 }
@@ -72,7 +72,6 @@ struct SimpleImageFilterViewMTKDriven: View {
                 print(error)
             }
         }
-        .toolbar(content: { Spacer() })
         .inlineNavigationBarTitle("Simple Filter")
     }
 }

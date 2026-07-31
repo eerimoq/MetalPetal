@@ -16,7 +16,7 @@ public struct MTICoreImageKernel {
         case nilOutput
     }
 
-    private final class Promise: NSObject, NSCopying, MTIImagePromise {
+    private final class Promise: MTIImagePromise {
         let dimensions: MTITextureDimensions
         let dependencies: [MTIImage]
         let alphaType: MTIAlphaType
@@ -32,17 +32,12 @@ public struct MTICoreImageKernel {
             colorSpace: CGColorSpace?,
             alphaType: MTIAlphaType
         ) {
-            assert(dimensions.depth == 1)
             dependencies = inputs
             self.filter = filter
             self.dimensions = dimensions
             self.pixelFormat = pixelFormat
             self.colorSpace = colorSpace
             self.alphaType = alphaType
-        }
-
-        func copy(with _: NSZone? = nil) -> Any {
-            self
         }
 
         private func ciImage(for mtiImage: MTIImage, from texture: MTLTexture) throws -> CIImage {
@@ -75,7 +70,7 @@ public struct MTICoreImageKernel {
                     guard let tempTexture = renderingContext.context.device
                         .makeTexture(descriptor: textureDescriptor)
                     else {
-                        throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                        throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
                     }
                     let renderPassDescriptor = MTLRenderPassDescriptor()
                     renderPassDescriptor.colorAttachments[0].texture = tempTexture
@@ -84,10 +79,9 @@ public struct MTICoreImageKernel {
                     guard let commandEncoder = renderingContext.commandBuffer
                         .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
                     else {
-                        throw _MTIErrorCreate(
-                            .failedToCreateCommandEncoder,
-                            "MTIErrorFailedToCreateCommandEncoder",
-                            nil
+                        throw MTIError(
+                            code: .failedToCreateCommandEncoder,
+                            message: "MTIErrorFailedToCreateCommandEncoder"
                         )
                     }
                     let pipeline = try (renderingContext.context.kernelState(
@@ -133,7 +127,6 @@ public struct MTICoreImageKernel {
             case .premultiplied:
                 renderDestination.alphaMode = .premultiplied
             case .unknown:
-                assertionFailure()
                 renderDestination.alphaMode = .none
             }
             renderDestination.colorSpace = colorSpace
@@ -145,8 +138,7 @@ public struct MTICoreImageKernel {
         }
 
         func updatingDependencies(_ dependencies: [MTIImage]) -> Promise {
-            assert(dependencies.count == self.dependencies.count)
-            return Promise(
+            Promise(
                 inputs: dependencies,
                 filter: filter,
                 dimensions: dimensions,
@@ -233,7 +225,6 @@ public final class MTICoreImageUnaryFilter: MTIUnaryFilter {
             if let output = filter.outputImage {
                 dimensions = MTITextureDimensions(cgSize: output.extent.size)
             } else {
-                assertionFailure()
                 dimensions = inputImage.dimensions
             }
         }

@@ -8,18 +8,12 @@
 import Foundation
 import Metal
 
-public final class MTIComputePipeline: NSObject, NSCopying {
+public final class MTIComputePipeline {
     public let state: MTLComputePipelineState
-
     public let reflection: MTLComputePipelineReflection
 
     public init(state: MTLComputePipelineState, reflection: MTLComputePipelineReflection) {
         self.state = state
         self.reflection = reflection
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 }

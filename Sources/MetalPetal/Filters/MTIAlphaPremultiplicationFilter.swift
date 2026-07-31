@@ -8,7 +8,9 @@
 import Foundation
 import Metal
 
-public final class MTIUnpremultiplyAlphaFilter: NSObject, MTIUnaryFilter {
+public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
 
@@ -54,7 +56,9 @@ public final class MTIUnpremultiplyAlphaFilter: NSObject, MTIUnaryFilter {
     }
 }
 
-public final class MTIPremultiplyAlphaFilter: NSObject, MTIUnaryFilter {
+public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
 

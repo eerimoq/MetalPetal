@@ -5698,7 +5698,7 @@ namespace metalpetal {
 
 """#
 
-func _MTISwiftPMBuiltinLibrarySourceURL() -> URL {
+func MTISwiftPMBuiltinLibrarySourceURL() -> URL {
     enum Static {
         static let url: URL = {
             #if targetEnvironment(simulator)

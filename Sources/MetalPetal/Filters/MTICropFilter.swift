@@ -17,13 +17,15 @@ import Metal
 // Floor           1.2 | 1.2  | 1.2  | 1.3  | 1.2
 // Ceiling         1.2 | 1.3  | 1.3  | 1.4  | 1.3
 
-public enum MTICropFilterRoundingMode: UInt {
+public enum MTICropFilterRoundingMode: Int {
     case plain
     case ceiling
     case floor
 }
 
-public final class MTICropFilter: NSObject, MTIUnaryFilter {
+public final class MTICropFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var cropRegion: MTICropRegion = .init(

@@ -6,7 +6,7 @@
 import Foundation
 import Metal
 
-public final class MTIMPSUnsharpMaskFilter: NSObject, MTIUnaryFilter {
+public final class MTIMPSUnsharpMaskFilter: MTIUnaryFilter {
     public var inputImage: MTIImage? {
         didSet {
             gaussianBlurFilter.inputImage = inputImage
@@ -28,8 +28,7 @@ public final class MTIMPSUnsharpMaskFilter: NSObject, MTIUnaryFilter {
     public var threshold: Float = 0
     private let gaussianBlurFilter = MTIMPSGaussianBlurFilter()
 
-    override public init() {
-        super.init()
+    public init() {
         gaussianBlurFilter.radius = radius
     }
 

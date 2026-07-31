@@ -9,19 +9,13 @@ import Accelerate
 import Foundation
 import simd
 
-public struct MTIColorMatrix {
+public struct MTIColorMatrix: Equatable {
     public var matrix: simd_float4x4
     public var bias: simd_float4
 
     public init(matrix: simd_float4x4, bias: simd_float4) {
         self.matrix = matrix
         self.bias = bias
-    }
-}
-
-extension MTIColorMatrix: Equatable {
-    public static func == (lhs: MTIColorMatrix, rhs: MTIColorMatrix) -> Bool {
-        lhs.isEqual(to: rhs)
     }
 }
 
@@ -46,12 +40,8 @@ public extension MTIColorMatrix {
         bias: SIMD4<Float>(1, 1, 1, 0)
     )
 
-    func isEqual(to other: MTIColorMatrix) -> Bool {
-        matrix == other.matrix && bias == other.bias
-    }
-
     var isIdentity: Bool {
-        isEqual(to: MTIColorMatrix.identity)
+        self == .identity
     }
 
     func concat(with other: MTIColorMatrix) -> MTIColorMatrix {

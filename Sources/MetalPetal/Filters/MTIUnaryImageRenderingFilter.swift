@@ -8,19 +8,24 @@
 import CoreGraphics
 import Foundation
 import Metal
+import os
 import simd
 
-public class MTIUnaryImageRenderingFilter: NSObject, MTIUnaryFilter {
+public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var orientation: MTIImageOrientation = .up
     private static var kernels: [MTIFunctionDescriptor: MTIRenderPipelineKernel] = [:]
-    private static let kernelsLock = MTILockCreate()
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     public static func kernel() -> MTIRenderPipelineKernel {
         let fragmentFunctionDescriptor = fragmentFunctionDescriptor()
         kernelsLock.lock()
-        defer { kernelsLock.unlock() }
+        defer {
+            kernelsLock.unlock()
+        }
         if let kernel = kernels[fragmentFunctionDescriptor] {
             return kernel
         }

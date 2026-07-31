@@ -43,7 +43,7 @@ public struct MTIVectorSIMDTypeSupportCodeGenerator {
 
         import Foundation
         import simd
-        // WARNING: MTIVector.isEqual(_:) may not work on MTIVector which contains a simd_type3 or simd_typeNx3 value.
+        // WARNING: MTIVector equality may not work for a MTIVector holding a simd_type3 or simd_typeNx3 value.
 
         extension MTIVector {
 
@@ -62,16 +62,16 @@ public struct MTIVectorSIMDTypeSupportCodeGenerator {
                     public convenience init(value: \(swiftType)) {
                         var v = value
                         let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
-                        let scalars: [\(scalarType)] = withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(scalarType).self)) }
-                        self.init(\(type.scalarValuesInitializerLabel): scalars, count: UInt(count))
+                        let scalars: [\(scalarType)] = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(scalarType).self)) }
+                        self.init(\(type.scalarValuesInitializerLabel): scalars, count: count)
                     }
 
                     public var \(type.getterForMTIVector): \(swiftType) {
                         var value = \(swiftType)()
                         if scalarType == .\(type.scalarTypeCaseName) && byteLength == MemoryLayout<\(swiftType)>.size {
-                            withUnsafeMutableBytes(of: &value) { memcpy($0.baseAddress!, bytes(), MemoryLayout<\(swiftType)>.size) }
-                        } else {
-                            assertionFailure("Cannot get a \(swiftType) value from \\(self)")
+                            withUnsafeBytes { source in
+                                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<\(swiftType)>.size) }
+                            }
                         }
                         return value
                     }

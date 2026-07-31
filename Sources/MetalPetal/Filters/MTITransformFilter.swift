@@ -48,7 +48,7 @@ public func MTITransformFilterApplyTransformToImage(
     _ image: MTIImage,
     _ transform: CATransform3D,
     _ fieldOfView: Float,
-    _ rasterSampleCount: UInt,
+    _ rasterSampleCount: Int,
     _ viewport: MTITransformFilter.Viewport,
     _ outputPixelFormat: MTLPixelFormat
 ) -> MTIImage {
@@ -95,12 +95,14 @@ public func MTITransformFilterApplyTransformToImage(
         parameters: [:]
     )
     return [command].makeImages(
-        rasterSampleCount: Int(rasterSampleCount),
+        rasterSampleCount: rasterSampleCount,
         outputDescriptors: [outputDescriptor]
     )[0]
 }
 
-public final class MTITransformFilter: NSObject, MTIUnaryFilter {
+public final class MTITransformFilter: MTIUnaryFilter {
+    public init() {}
+
     public typealias Viewport = CGRect
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
@@ -111,7 +113,7 @@ public final class MTITransformFilter: NSObject, MTIUnaryFilter {
     /// matrix. Value in [0, M_PI) is valid. Defaults to 0.
     public var fieldOfView: Float = 0.0
     public var viewport: Viewport = CGRect(x: 0, y: 0, width: 0, height: 0)
-    public var rasterSampleCount: UInt = 1
+    public var rasterSampleCount: Int = 1
 
     public static func defaultViewport(for image: MTIImage) -> Viewport {
         let inputImageSize = image.size
@@ -169,7 +171,6 @@ public final class MTITransformFilter: NSObject, MTIUnaryFilter {
     }
 
     public var defaultViewport: Viewport {
-        assert(inputImage != nil)
         guard let inputImage else {
             return CGRect(x: 0, y: 0, width: 0, height: 0)
         }
@@ -177,7 +178,6 @@ public final class MTITransformFilter: NSObject, MTIUnaryFilter {
     }
 
     public var minimumEnclosingViewport: Viewport {
-        assert(inputImage != nil)
         guard let inputImage else {
             return CGRect(x: 0, y: 0, width: 0, height: 0)
         }

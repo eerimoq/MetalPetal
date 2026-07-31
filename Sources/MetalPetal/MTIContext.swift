@@ -11,6 +11,7 @@ import Foundation
 import Metal
 import MetalKit
 import MetalPerformanceShaders
+import os
 
 public let MTIContextDefaultLabel = "MetalPetal"
 
@@ -56,83 +57,71 @@ public final class MTIContextOptions {
     public var label: String = MTIContextDefaultLabel
 
     /// The built-in metal library URL.
-    public var defaultLibraryURL: URL!
+    public var defaultLibraryURL: URL
 
-    /// The texture loader to use. When this property is nil, the context uses `MTIDefaultTextureLoader`.
-    public var textureLoaderClass: (any MTITextureLoader.Type)?
+    /// Makes the texture loader to use. When nil, the context uses `MTIDefaultTextureLoader`.
+    public var makeTextureLoader: ((MTLDevice) -> any MTITextureLoader)?
 
-    /// The core video - metal texture bridge class to use.
-    public var coreVideoMetalTextureBridgeClass: (any MTICVMetalTextureBridging.Type)?
+    /// Makes the core video - metal texture bridge to use. When nil, the context uses
+    /// `MTICVMetalIOSurfaceBridge`.
+    public var makeCoreVideoMetalTextureBridge: ((MTLDevice) throws -> any MTICVMetalTextureBridging)?
 
-    /// The texture pool class to use.
-    public var texturePoolClass: (any MTITexturePool.Type)?
+    /// Makes the texture pool to use. When nil, the context picks a heap or device pool based on what
+    /// the device supports.
+    public var makeTexturePool: ((MTLDevice) -> any MTITexturePool)?
 
     public init() {
-        #if SWIFT_PACKAGE
-        defaultLibraryURL = _MTISwiftPMBuiltinLibrarySourceURL()
-        #else
-        defaultLibraryURL = MTIDefaultLibraryURLForBundle(Bundle(for: MTIContext.self))
-        #endif
+        // MetalPetal ships no `default.metallib`; the built-in shaders are compiled at runtime from the
+        // source embedded in `MTISwiftPMBuiltinLibrarySupport.swift`.
+        defaultLibraryURL = MTISwiftPMBuiltinLibrarySourceURL()
     }
 }
 
 /// An evaluation context for rendering image processing results.
-public final class MTIContext: NSObject {
+public final class MTIContext {
     public let workingPixelFormat: MTLPixelFormat
-
     public let isRenderGraphOptimizationEnabled: Bool
-
     public let label: String
-
     /// Whether the device supports MetalPerformanceShaders.
     public let isMetalPerformanceShadersSupported: Bool
-
     /// Whether the device supports YCbCr pixel formats.
     public let isYCbCrPixelFormatSupported: Bool
-
     /// Whether the device supports memoryless texture.
     public let isMemorylessTextureSupported: Bool
-
     /// Whether the device supports programmable blending.
     public let isProgrammableBlendingSupported: Bool
-
     /// Whether the default library is compiled with programmable blending support.
     public let defaultLibrarySupportsProgrammableBlending: Bool
-
     public let device: MTLDevice
-
     public let defaultLibrary: MTLLibrary
-
     public let commandQueue: MTLCommandQueue
-
     public let textureLoader: MTITextureLoader
-
     public let coreImageContext: CIContext
-
     public let coreVideoTextureBridge: MTICVMetalTextureBridging
-
-    private let texturePool: MTITexturePool
-
+    let texturePool: MTITexturePool
     private let defaultLibraryFunctionShort2FullNames: [String: String]
-
     private var libraryCache: [URL: MTLLibrary]
     private var functionCache: [MTIFunctionDescriptor: MTLFunction] = [:]
     private var renderPipelineCache: [MTLRenderPipelineDescriptor: MTIRenderPipeline] = [:]
     private var computePipelineCache: [MTLComputePipelineDescriptor: MTIComputePipeline] = [:]
     private var samplerStateCache: [MTISamplerDescriptor: MTLSamplerState] = [:]
-
-    private let kernelStateMap: NSMapTable<AnyObject, NSMutableDictionary>
-
+    private let kernelStateMap: NSMapTable<AnyObject, KernelStateStore>
     private var promiseKeyValueTables: [String: MTIWeakToStrongObjectsMapTable<AnyObject, AnyObject>] = [:]
-    private let promiseKeyValueTablesLock = MTILockCreate()
-
+    private let promiseKeyValueTablesLock = OSAllocatedUnfairLock()
     private var imageKeyValueTables: [String: MTIWeakToStrongObjectsMapTable<AnyObject, AnyObject>] = [:]
-    private let imageKeyValueTablesLock = MTILockCreate()
-
+    private let imageKeyValueTablesLock = OSAllocatedUnfairLock()
     private let promiseRenderTargetTable: NSMapTable<AnyObject, MTIImagePromiseRenderTarget>
-    private let promiseRenderTargetTableLock = MTILockCreate()
+    private let promiseRenderTargetTableLock = OSAllocatedUnfairLock()
+    private let renderingLock = OSAllocatedUnfairLock()
 
-    private let renderingLock = MTILockCreate()
+    /// Kernel states for one kernel, keyed by `MTIKernelConfiguration.identifier`. A reference type so it
+    /// can be an `NSMapTable` value; the map table holds kernels weakly.
+    private final class KernelStateStore {
+        var states: [AnyHashable: Any] = [:]
+    }
+
+    /// Stand-in cache key for a kernel invoked without a configuration. All instances compare equal.
+    private struct MTIKernelNoConfiguration: Hashable {}
 
     deinit {
         MTIMemoryWarningObserver.removeMemoryWarningHandler(self)
@@ -145,41 +134,32 @@ public final class MTIContext: NSObject {
     public init(device: MTLDevice, options: MTIContextOptions) throws {
         #if targetEnvironment(simulator)
         if !MTIContext.enablesSimulatorSupport {
-            throw _MTIErrorCreate(
-                .featureNotAvailableOnSimulator,
-                "MTIErrorFeatureNotAvailableOnSimulator",
-                ["MTIFeatureNotAvailable": "MTIContext"]
+            throw MTIError(
+                code: .featureNotAvailableOnSimulator,
+                message: "MTIContext is not available on the simulator."
             )
         }
         #endif
-
-        let defaultLibrary: MTLLibrary
-        if options.defaultLibraryURL?.scheme == MTIURLSchemeForLibraryWithSource {
-            defaultLibrary = try MTILibrarySourceRegistration.shared.newLibrary(
+        let defaultLibrary: MTLLibrary = if options.defaultLibraryURL
+            .scheme == MTIURLSchemeForLibraryWithSource
+        {
+            try MTILibrarySourceRegistration.shared.newLibrary(
                 with: options.defaultLibraryURL,
                 device: device
             )
-        } else if let path = options.defaultLibraryURL?.path {
-            defaultLibrary = try device.makeLibrary(filepath: path)
         } else {
-            throw _MTIErrorCreate(.defaultLibraryNotFound, "MTIErrorDefaultLibraryNotFound", nil)
+            try device.makeLibrary(URL: options.defaultLibraryURL)
         }
-
         var short2FullNames: [String: String] = [:]
         for name in defaultLibrary.functionNames {
             let nameComponents = name.components(separatedBy: "::")
             if nameComponents.count > 1, let shortName = nameComponents.last {
-                assert(
-                    short2FullNames[shortName] == nil,
-                    "Duplicated function short name in default library: \(shortName)"
-                )
                 short2FullNames[shortName] = name
             }
         }
         defaultLibraryFunctionShort2FullNames = short2FullNames
         defaultLibrarySupportsProgrammableBlending = defaultLibrary.functionNames
             .contains("mti_haveColorArguments")
-
         label = options.label
         workingPixelFormat = options.workingPixelFormat
         isRenderGraphOptimizationEnabled = options.enablesRenderGraphOptimization
@@ -189,28 +169,20 @@ public final class MTIContext: NSObject {
         let commandQueue = device.makeCommandQueue()!
         commandQueue.label = options.label
         self.commandQueue = commandQueue
-
         isMetalPerformanceShadersSupported = MTIMPSSupportsMTLDevice(device)
         isYCbCrPixelFormatSupported = options
             .enablesYCbCrPixelFormatSupport && MTIDeviceSupportsYCBCRPixelFormat(device)
         isMemorylessTextureSupported = MTIContext.deviceSupportsMemorylessTexture(device)
         isProgrammableBlendingSupported = MTIContext.deviceSupportsProgrammableBlending(device)
-
-        let textureLoaderClass: any MTITextureLoader.Type = options
-            .textureLoaderClass ?? MTIDefaultTextureLoader.self
-        textureLoader = textureLoaderClass.makeTextureLoader(device: device)
-
-        let texturePoolClass: any MTITexturePool.Type = if let specified = options.texturePoolClass {
-            specified
+        textureLoader = options.makeTextureLoader?(device) ?? MTIDefaultTextureLoader(device: device)
+        texturePool = if let makeTexturePool = options.makeTexturePool {
+            makeTexturePool(device)
         } else if MTIHeapTexturePool.isSupported(on: device) {
-            MTIHeapTexturePool.self
+            MTIHeapTexturePool(device: device)
         } else {
-            MTIDeviceTexturePool.self
+            MTIDeviceTexturePool(device: device)
         }
-        texturePool = texturePoolClass.newTexturePool(with: device)
-
         libraryCache = [options.defaultLibraryURL: defaultLibrary]
-
         kernelStateMap = NSMapTable(
             keyOptions: [.weakMemory, .objectPointerPersonality],
             valueOptions: [.strongMemory]
@@ -219,24 +191,11 @@ public final class MTIContext: NSObject {
             keyOptions: [.weakMemory, .objectPointerPersonality],
             valueOptions: [.weakMemory]
         )
-
-        let coreVideoMetalTextureBridgeClass: any MTICVMetalTextureBridging.Type =
-            options.coreVideoMetalTextureBridgeClass ?? MTICVMetalIOSurfaceBridge.self
-        coreVideoTextureBridge = try coreVideoMetalTextureBridgeClass
-            .makeCoreVideoMetalTextureBridge(device: device)
-
-        super.init()
-
+        coreVideoTextureBridge = try options.makeCoreVideoMetalTextureBridge?(device)
+            ?? MTICVMetalIOSurfaceBridge(device: device)
         if options.automaticallyReclaimsResources {
             MTIMemoryWarningObserver.addMemoryWarningHandler(self)
         }
-
-        if isProgrammableBlendingSupported {
-            // We assume that on a device which supports programmable blending, memoryless textures are also
-            // supported.
-            assert(isMemorylessTextureSupported)
-        }
-
         MTIContext.markInstanceCreation(self)
     }
 
@@ -247,27 +206,15 @@ public final class MTIContext: NSObject {
         return MTIMPSSupportsMTLDevice(device)
     }()
 
-    // `texturePool` is a private property typed as the Swift `MTITexturePool` protocol, so it can't be
-    // `@objc`.
-    // Expose it via KVC so tooling/tests that inspect the pool keep working.
-    override public func value(forKey key: String) -> Any? {
-        if key == "texturePool" {
-            return texturePool
-        }
-        return super.value(forKey: key)
-    }
-
     public func reclaimResources() {
         texturePool.flush()
         coreVideoTextureBridge.flushCache()
         coreImageContext.clearCaches()
-
         imageKeyValueTablesLock.lock()
         for (_, table) in imageKeyValueTables {
             table.compact()
         }
         imageKeyValueTablesLock.unlock()
-
         promiseKeyValueTablesLock.lock()
         for (_, table) in promiseKeyValueTables {
             table.compact()
@@ -312,7 +259,7 @@ public final class MTIContext: NSObject {
 
     // MARK: - Instance Tracking
 
-    private static let instancesLock = MTILockCreate()
+    private static let instancesLock = OSAllocatedUnfairLock()
     private static let allInstances = NSPointerArray.weakObjects()
 
     private static func instancesTracking(_ action: (NSPointerArray) -> Void) {
@@ -329,16 +276,16 @@ public final class MTIContext: NSObject {
         }
     }
 
-    // MARK: - Simulator Support
-
-    private static let enablesSimulatorSupportLock = MTILockCreate()
+    private static let enablesSimulatorSupportLock = OSAllocatedUnfairLock()
     private static var _enablesSimulatorSupport = true
 
     /// Whether to render on iOS simulators. The default value is YES.
     public static var enablesSimulatorSupport: Bool {
         get {
             enablesSimulatorSupportLock.lock()
-            defer { enablesSimulatorSupportLock.unlock() }
+            defer {
+                enablesSimulatorSupportLock.unlock()
+            }
             return _enablesSimulatorSupport
         }
         set {
@@ -349,22 +296,16 @@ public final class MTIContext: NSObject {
     }
 }
 
-// MARK: - MTIMemoryWarningHandling
-
 extension MTIContext: MTIMemoryWarningHandling {
     public func handleMemoryWarning() {
         reclaimResources()
     }
 }
 
-// MARK: - Internal
-
 private let MTIContextRenderingLockNotLockedErrorDescription =
     "Context is performing a render-releated operation without acquiring the renderingLock."
 
 public extension MTIContext {
-    // MARK: Render Target
-
     func makeRenderTarget(texture: MTLTexture) -> MTIImagePromiseRenderTarget {
         MTIImagePromiseRenderTarget(texture: texture)
     }
@@ -376,8 +317,6 @@ public extension MTIContext {
         return MTIImagePromiseRenderTarget(reusableTexture: texture)
     }
 
-    // MARK: Lock
-
     func lockForRendering() {
         renderingLock.lock()
     }
@@ -386,24 +325,20 @@ public extension MTIContext {
         renderingLock.unlock()
     }
 
-    // MARK: Cache
-
     internal func library(with url: URL) throws -> MTLLibrary {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
         if let library = libraryCache[url] {
             return library
         }
         let library: MTLLibrary = if url.scheme == MTIURLSchemeForLibraryWithSource {
             try MTILibrarySourceRegistration.shared.newLibrary(with: url, device: device)
         } else {
-            try device.makeLibrary(filepath: url.path)
+            try device.makeLibrary(URL: url)
         }
         libraryCache[url] = library
         return library
     }
 
     func function(with descriptor: MTIFunctionDescriptor) throws -> MTLFunction {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
         if let cachedFunction = functionCache[descriptor] {
             return cachedFunction
         }
@@ -411,23 +346,19 @@ public extension MTIContext {
         if let libraryURL = descriptor.libraryURL {
             library = try self.library(with: libraryURL)
         }
-
         var functionName = descriptor.name
         if library === defaultLibrary {
             functionName = defaultLibraryFunctionShort2FullNames[descriptor.name] ?? functionName
         }
-
         let function: MTLFunction? = if let constantValues = descriptor.constantValues {
             try library.makeFunction(name: functionName, constantValues: constantValues)
         } else {
             library.makeFunction(name: functionName)
         }
-
         guard let function else {
-            throw _MTIErrorCreate(
-                .functionNotFound,
-                "MTIErrorFunctionNotFound",
-                ["MTIFunctionDescriptor": descriptor]
+            throw MTIError(
+                code: .functionNotFound,
+                message: "MTIErrorFunctionNotFound"
             )
         }
         functionCache[descriptor] = function
@@ -437,7 +368,6 @@ public extension MTIContext {
     func renderPipeline(with renderPipelineDescriptor: MTLRenderPipelineDescriptor) throws
         -> MTIRenderPipeline
     {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
         if let renderPipeline = renderPipelineCache[renderPipelineDescriptor] {
             return renderPipeline
         }
@@ -445,7 +375,7 @@ public extension MTIContext {
         var reflection: MTLRenderPipelineReflection?
         let renderPipelineState = try device.makeRenderPipelineState(
             descriptor: renderPipelineDescriptor,
-            options: .argumentInfo,
+            options: .bindingInfo,
             reflection: &reflection
         )
         let renderPipeline = MTIRenderPipeline(state: renderPipelineState, reflection: reflection!)
@@ -456,7 +386,6 @@ public extension MTIContext {
     func computePipeline(with computePipelineDescriptor: MTLComputePipelineDescriptor) throws
         -> MTIComputePipeline
     {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
         if let computePipeline = computePipelineCache[computePipelineDescriptor] {
             return computePipeline
         }
@@ -464,7 +393,7 @@ public extension MTIContext {
         var reflection: MTLComputePipelineReflection?
         let computePipelineState = try device.makeComputePipelineState(
             descriptor: computePipelineDescriptor,
-            options: .argumentInfo,
+            options: .bindingInfo,
             reflection: &reflection
         )
         let computePipeline = MTIComputePipeline(state: computePipelineState, reflection: reflection!)
@@ -473,40 +402,37 @@ public extension MTIContext {
     }
 
     func kernelState(for kernel: MTIKernel, configuration: MTIKernelConfiguration?) throws -> Any {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
-        let states = kernelStateMap.object(forKey: kernel)
-        let cacheKey: NSCopying = configuration?.identifier ?? NSNull()
-        if let cachedState = states?.object(forKey: cacheKey) {
+        let cacheKey: AnyHashable = configuration?.identifier ?? AnyHashable(MTIKernelNoConfiguration())
+        if let cachedState = kernelStateMap.object(forKey: kernel)?.states[cacheKey] {
             return cachedState
         }
         let newState = try kernel.makeKernelState(context: self, configuration: configuration)
-        if let states {
-            states.setObject(newState, forKey: cacheKey)
+        if let states = kernelStateMap.object(forKey: kernel) {
+            states.states[cacheKey] = newState
         } else {
-            let newStates = NSMutableDictionary()
-            newStates.setObject(newState, forKey: cacheKey)
+            let newStates = KernelStateStore()
+            newStates.states[cacheKey] = newState
             kernelStateMap.setObject(newStates, forKey: kernel)
         }
         return newState
     }
 
     func samplerState(with descriptor: MTISamplerDescriptor) throws -> MTLSamplerState {
-        assert(renderingLock.tryLock() == false, MTIContextRenderingLockNotLockedErrorDescription)
         if let state = samplerStateCache[descriptor] {
             return state
         }
         guard let state = device.makeSamplerState(descriptor: descriptor.makeMTLSamplerDescriptor()) else {
-            throw _MTIErrorCreate(.failedToCreateSamplerState, "MTIErrorFailedToCreateSamplerState", nil)
+            throw MTIError(code: .failedToCreateSamplerState, message: "MTIErrorFailedToCreateSamplerState")
         }
         samplerStateCache[descriptor] = state
         return state
     }
 
-    // MARK: Privately Used Caches
-
     func value(forPromise promise: Any, in tableName: MTIContextPromiseAssociatedValueTableName) -> Any? {
         promiseKeyValueTablesLock.lock()
-        defer { promiseKeyValueTablesLock.unlock() }
+        defer {
+            promiseKeyValueTablesLock.unlock()
+        }
         return promiseKeyValueTables[tableName.rawValue]?.object(forKey: promise as AnyObject)
     }
 
@@ -516,7 +442,9 @@ public extension MTIContext {
         in tableName: MTIContextPromiseAssociatedValueTableName
     ) {
         promiseKeyValueTablesLock.lock()
-        defer { promiseKeyValueTablesLock.unlock() }
+        defer {
+            promiseKeyValueTablesLock.unlock()
+        }
         let table: MTIWeakToStrongObjectsMapTable<AnyObject, AnyObject>
         if let existing = promiseKeyValueTables[tableName.rawValue] {
             table = existing
@@ -529,13 +457,17 @@ public extension MTIContext {
 
     func value(forImage image: Any, in tableName: MTIContextImageAssociatedValueTableName) -> Any? {
         imageKeyValueTablesLock.lock()
-        defer { imageKeyValueTablesLock.unlock() }
+        defer {
+            imageKeyValueTablesLock.unlock()
+        }
         return imageKeyValueTables[tableName.rawValue]?.object(forKey: image as AnyObject)
     }
 
     func setValue(_ value: Any?, forImage image: Any, in tableName: MTIContextImageAssociatedValueTableName) {
         imageKeyValueTablesLock.lock()
-        defer { imageKeyValueTablesLock.unlock() }
+        defer {
+            imageKeyValueTablesLock.unlock()
+        }
         let table: MTIWeakToStrongObjectsMapTable<AnyObject, AnyObject>
         if let existing = imageKeyValueTables[tableName.rawValue] {
             table = existing
@@ -554,30 +486,28 @@ public extension MTIContext {
 
     func renderTarget(for promise: Any) -> MTIImagePromiseRenderTarget? {
         promiseRenderTargetTableLock.lock()
-        defer { promiseRenderTargetTableLock.unlock() }
+        defer {
+            promiseRenderTargetTableLock.unlock()
+        }
         return promiseRenderTargetTable.object(forKey: promise as AnyObject)
     }
 }
 
-// MARK: - MTIImagePromiseRenderTarget
-
-public final class MTIImagePromiseRenderTarget: NSObject {
+public final class MTIImagePromiseRenderTarget {
     private let nonreusableTexture: MTLTexture?
     private let reusableTexture: MTIReusableTexture?
 
     fileprivate init(texture: MTLTexture) {
         nonreusableTexture = texture
         reusableTexture = nil
-        super.init()
     }
 
     fileprivate init(reusableTexture: MTIReusableTexture) {
         nonreusableTexture = nil
         self.reusableTexture = reusableTexture
-        super.init()
     }
 
-    @objc public var texture: MTLTexture? {
+    public var texture: MTLTexture? {
         if let nonreusableTexture {
             return nonreusableTexture
         }
@@ -595,8 +525,6 @@ public final class MTIImagePromiseRenderTarget: NSObject {
         reusableTexture?.releaseTexture()
     }
 }
-
-// MARK: - CGImage Creation
 
 public extension MTIContext {
     func startTaskToCreateCGImage(

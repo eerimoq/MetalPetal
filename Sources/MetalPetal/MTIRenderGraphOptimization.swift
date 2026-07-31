@@ -5,18 +5,21 @@
 
 import Foundation
 
-public final class MTIRenderGraphNode: NSObject {
+public final class MTIRenderGraphNode {
     public var inputs: [MTIRenderGraphNode]?
     public var image: MTIImage?
-
     fileprivate var outputs = Set<ObjectIdentifier>()
+
+    public init() {}
 
     public var uniqueDependentCount: Int {
         outputs.count
     }
 }
 
-public final class MTIRenderGraphOptimizer: NSObject {
+public final class MTIRenderGraphOptimizer {
+    public init() {}
+
     private static func node(
         for image: MTIImage,
         dependent: MTIRenderGraphNode,
@@ -151,8 +154,12 @@ func MTIColorMatrixRenderGraphNodeOptimize(_ node: MTIRenderGraphNode) {
     }
     let recipe = v.recipe
     let lastNode = node.inputs![0]
-    guard let lastImage = lastNode.image else { return }
-    guard let command = recipe.renderCommands.first else { return }
+    guard let lastImage = lastNode.image else {
+        return
+    }
+    guard let command = recipe.renderCommands.first else {
+        return
+    }
     guard recipe.renderCommands.count == 1,
           lastNode.uniqueDependentCount == 1,
           command.kernel === MTIColorMatrixFilter.kernel(),
@@ -164,8 +171,8 @@ func MTIColorMatrixRenderGraphNodeOptimize(_ node: MTIRenderGraphNode) {
     guard let lastCommand = lastPromise.recipe.renderCommands.first,
           lastPromise.recipe.renderCommands.count == 1,
           lastImage.cachePolicy == .transient,
-          lastCommand.geometry.isEqual(MTIVertices.fullViewportSquare),
-          (lastPromise.recipe.outputDescriptors as NSArray).isEqual(to: recipe.outputDescriptors),
+          (lastCommand.geometry as? MTIVertices) == MTIVertices.fullViewportSquare,
+          lastPromise.recipe.outputDescriptors == recipe.outputDescriptors,
           lastCommand.kernel === MTIColorMatrixFilter.kernel()
     else {
         return

@@ -9,11 +9,7 @@ import Foundation
 import MetalPetal
 import SwiftUI
 
-private class PointVertices: NSObject, MTIGeometry {
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
+private class PointVertices: MTIGeometry {
     func encodeDrawCall(
         with commandEncoder: MTLRenderCommandEncoder,
         context _: MTIGeometryRenderingContext
@@ -45,7 +41,7 @@ private class FrameDataBuffer: ObservableObject {
         }
         return MTIDataBuffer(
             bytes: particles,
-            length: UInt(MemoryLayout<ParticleData>.size * BouncingBallsView.numberOfParticles),
+            length: MemoryLayout<ParticleData>.stride * BouncingBallsView.numberOfParticles,
             options: .init()
         )!
     }
@@ -69,30 +65,17 @@ struct BouncingBallsView: View {
 
     var body: some View {
         MetalKitView(device: renderContext.device) { view in
-            let computeOutput = computeKernel.apply(toInputImages: [],
-                                                    parameters: ["data": frameDataBuffer
-                                                        .buffer],
-                                                    dispatchOptions: .init(
-                                                        threads: MTLSize(width: 1024,
-                                                                         height: 1,
-                                                                         depth: 1),
-                                                        threadgroups: MTLSize(
-                                                            width: 32,
-                                                            height: 1,
-                                                            depth: 1
-                                                        ),
-                                                        threadsPerThreadgroup: MTLSize(
-                                                            width: 32,
-                                                            height: 1,
-                                                            depth: 1
-                                                        )
-                                                    ),
-                                                    outputTextureDimensions: MTITextureDimensions(
-                                                        width: 1,
-                                                        height: 1,
-                                                        depth: 1
-                                                    ),
-                                                    outputPixelFormat: .unspecified)
+            let computeOutput = computeKernel.apply(
+                toInputImages: [],
+                parameters: ["data": frameDataBuffer.buffer],
+                dispatchOptions: .init(
+                    threads: MTLSize(width: 1024, height: 1, depth: 1),
+                    threadgroups: MTLSize(width: 32, height: 1, depth: 1),
+                    threadsPerThreadgroup: MTLSize(width: 32, height: 1, depth: 1)
+                ),
+                outputTextureDimensions: MTITextureDimensions(width: 1, height: 1, depth: 1),
+                outputPixelFormat: .unspecified
+            )
             // There's no actual image data in computeOutput. It is used to build the dependency between the
             // compute command and the render command.
             let renderCommand = MTIRenderCommand(
@@ -117,11 +100,12 @@ struct BouncingBallsView: View {
             } catch {
                 print(error)
             }
-        }.toolbar(content: {
+        }
+        .toolbar {
             Button("Reset") { [frameDataBuffer] in
                 frameDataBuffer.reset()
             }
-        })
+        }
         .inlineNavigationBarTitle("Particles")
     }
 }

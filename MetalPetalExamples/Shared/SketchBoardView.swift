@@ -160,7 +160,6 @@ struct SketchBoardView: View {
                         c1: previousLocation,
                         end: mid2
                     )
-
                     let tintColor: MTIColor = switch brushColor {
                     case .dynamic:
                         MTIColor(
@@ -236,7 +235,8 @@ struct SketchBoardView: View {
                 renderer.moveStroke(to: point)
             }, boundsChangedHandler: { [renderer] bounds in
                 renderer.updateCanvasSize(bounds.size)
-            }).frame(maxWidth: .infinity, maxHeight: .infinity)
+            })
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack {
                 Spacer()
                 VStack(alignment: .leading, spacing: 12) {
@@ -266,9 +266,11 @@ struct SketchBoardView: View {
                     }
                     HStack {
                         Group {
-                            Circle().frame(width: renderer.brushSize, height: renderer.brushSize)
+                            Circle()
+                                .frame(width: renderer.brushSize, height: renderer.brushSize)
                                 .foregroundColor(Color.secondary.opacity(0.5))
-                        }.frame(width: BrushColorButton.preferredSize, height: BrushColorButton.preferredSize)
+                        }
+                        .frame(width: BrushColorButton.preferredSize, height: BrushColorButton.preferredSize)
                         Slider(value: $renderer.brushSize, in: 6 ... BrushColorButton.preferredSize)
                             .accentColor(Color.secondary.opacity(0.5))
                     }
@@ -279,11 +281,11 @@ struct SketchBoardView: View {
                 .padding()
             }
         }
-        .toolbar(content: {
+        .toolbar {
             Button("Reset", action: { [renderer] in
                 renderer.reset()
             })
-        })
+        }
         .inlineNavigationBarTitle("Sketch Board")
     }
 

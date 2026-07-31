@@ -14,20 +14,19 @@ public protocol MTIDrawableProvider: AnyObject {
     func renderPassDescriptor(for request: MTIDrawableRenderingRequest) -> MTLRenderPassDescriptor?
 }
 
-public enum MTIDrawableRenderingResizingMode: UInt {
+public enum MTIDrawableRenderingResizingMode: Int {
     case scale
     case aspect
     case aspectFill
 }
 
-public final class MTIDrawableRenderingRequest: NSObject {
+public final class MTIDrawableRenderingRequest {
     public weak var drawableProvider: MTIDrawableProvider?
     public let resizingMode: MTIDrawableRenderingResizingMode
 
     public init(drawableProvider: MTIDrawableProvider, resizingMode: MTIDrawableRenderingResizingMode) {
         self.drawableProvider = drawableProvider
         self.resizingMode = resizingMode
-        super.init()
     }
 }
 

@@ -16,7 +16,7 @@ public extension MTICVPixelBufferRenderingAPI {
     static let `default` = MTICVPixelBufferRenderingAPI.metalPetal
 }
 
-public final class MTICVPixelBufferRenderingOptions: NSObject, NSCopying {
+public final class MTICVPixelBufferRenderingOptions {
     public let renderingAPI: MTICVPixelBufferRenderingAPI
 
     // An option for treating the pixel buffer data as sRGB image data. Specifying whether to create
@@ -26,11 +26,6 @@ public final class MTICVPixelBufferRenderingOptions: NSObject, NSCopying {
     public init(renderingAPI: MTICVPixelBufferRenderingAPI, sRGB: Bool) {
         self.renderingAPI = renderingAPI
         self.sRGB = sRGB
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public static let `default` = MTICVPixelBufferRenderingOptions(renderingAPI: .default, sRGB: false)

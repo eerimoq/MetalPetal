@@ -108,11 +108,9 @@ struct BokehEffectView: View {
                         ForEach(BokehShape.all) { shape in
                             Text(shape.id).tag(shape)
                         }
-                    }).pickerStyle(SegmentedPickerStyle()).largeControlSize().padding([
-                        .leading,
-                        .trailing,
-                        .top,
-                    ])
+                    })
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding([.leading, .trailing, .top])
                     switch bokehShape {
                     case .hexagon:
                         VStack {
@@ -195,13 +193,13 @@ struct BokehEffectView: View {
                 }.linkButtonStyle()
             }
         }, isHidden: !showsNote)
-        .toolbar(content: {
+        .toolbar {
             Button(action: { [$showsNote] in
                 $showsNote.wrappedValue.toggle()
             }, label: {
                 Image(systemName: "info.circle")
             })
-        })
+        }
         .inlineNavigationBarTitle("Bokeh")
     }
 }

@@ -17,27 +17,19 @@ public enum MTICVMetalIOSurfaceBridgeError: Int {
     case coreVideoDoesNotSupportIOSurface = 10003
 }
 
-private final class MTICVMetalIOSurfaceBridgeTexture: NSObject, MTICVMetalTexture {
+private final class MTICVMetalIOSurfaceBridgeTexture: MTICVMetalTexture {
     let texture: MTLTexture
 
     init(texture: MTLTexture) {
         self.texture = texture
-        super.init()
     }
 }
 
-public final class MTICVMetalIOSurfaceBridge: NSObject, MTICVMetalTextureBridging {
+public final class MTICVMetalIOSurfaceBridge: MTICVMetalTextureBridging {
     private let device: MTLDevice
 
     public init(device: MTLDevice) {
         self.device = device
-        super.init()
-    }
-
-    public static func makeCoreVideoMetalTextureBridge(device: MTLDevice) throws
-        -> MTICVMetalTextureBridging
-    {
-        MTICVMetalIOSurfaceBridge(device: device)
     }
 
     public func makeTexture(

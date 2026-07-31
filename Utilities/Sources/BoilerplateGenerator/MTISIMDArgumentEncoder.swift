@@ -18,7 +18,7 @@ fileprivate let template: String = """
 
 import Foundation
 import Metal
-@objc(MTISIMDArgumentEncoder) public class MTISIMDArgumentEncoder: NSObject, MTIFunctionArgumentEncoding {
+public enum MTISIMDArgumentEncoder: MTIFunctionArgumentEncoding {
     
     public enum Error: String, Swift.Error, LocalizedError {
         case argumentTypeMismatch
@@ -27,7 +27,7 @@ import Metal
         }
     }
     
-    public static func encodeValue(_ value: Any, argument: MTLArgument, proxy: MTIFunctionArgumentEncodingProxy) throws {
+    public static func encodeValue(_ value: Any, binding: any MTLBufferBinding, proxy: MTIFunctionArgumentEncodingProxy) throws {
         switch value {
 {MTI_SIMD_SHADER_ARGUMENT_ENCODER_GENERATED}
         default:
@@ -37,7 +37,7 @@ import Metal
 
     private static func encode<T>(_ value: T, proxy: MTIFunctionArgumentEncodingProxy) {
         withUnsafePointer(to: value) { ptr in
-            proxy.encodeBytes(ptr, length: UInt(MemoryLayout.size(ofValue: value)))
+            proxy.encodeBytes(ptr, length: MemoryLayout.size(ofValue: value))
         }
     }
 }
@@ -53,7 +53,7 @@ public struct MTISIMDShaderArgumentEncoderGenerator {
                 content.append(
                 """
                         case let v as SIMD\(count)<\(simdType.scalarType.swiftTypeName)>:
-                            guard argument.bufferDataType == .\(simdType.scalarType.description(capitalized: false))\(count) else {
+                            guard binding.bufferDataType == .\(simdType.scalarType.description(capitalized: false))\(count) else {
                                 throw Error.argumentTypeMismatch
                             }
                             encode(v, proxy: proxy)
@@ -63,7 +63,7 @@ public struct MTISIMDShaderArgumentEncoderGenerator {
                 content.append(
                 """
                         case let v as \(simdType.scalarType.description(capitalized: false))\(c)x\(r):
-                            guard argument.bufferDataType == .\(simdType.scalarType.description(capitalized: false))\(c)x\(r) else {
+                            guard binding.bufferDataType == .\(simdType.scalarType.description(capitalized: false))\(c)x\(r) else {
                                 throw Error.argumentTypeMismatch
                             }
                             encode(v, proxy: proxy)
@@ -75,7 +75,7 @@ public struct MTISIMDShaderArgumentEncoderGenerator {
                 """
                 #if !os(tvOS)
                         case let v as MTLPackedFloat3:
-                            guard argument.bufferDataType == .float3 else {
+                            guard binding.bufferDataType == .float3 else {
                                 throw Error.argumentTypeMismatch
                             }
                             encode(v, proxy: proxy)

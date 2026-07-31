@@ -9,7 +9,6 @@ import Foundation
 import PhotosUI
 import SwiftUI
 
-/// For demo purpose only. Do not use this in production.
 struct VideoPicker: View {
     private let handler: (URL) -> Void
     private let title: String
@@ -149,9 +148,7 @@ struct ImagePicker: View {
     var body: some View {
         #if os(iOS)
         return Button(title, action: { [handler] in
-            if let rootWindow = UIApplication.shared.windows.first(where: { $0.isHidden == false }),
-               let viewController = rootWindow.rootViewController
-            {
+            if let viewController = UIApplication.shared.activeWindow?.rootViewController {
                 var configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
                 configuration.filter = .images
                 configuration.selectionLimit = 1

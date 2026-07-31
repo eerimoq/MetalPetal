@@ -10,7 +10,7 @@ import CoreImage
 import Foundation
 import Metal
 
-public final class MTICIImageRenderingOptions: NSObject, NSCopying {
+public final class MTICIImageRenderingOptions {
     public let colorSpace: CGColorSpace?
     public let isFlipped: Bool
     public let destinationPixelFormat: MTLPixelFormat
@@ -26,7 +26,6 @@ public final class MTICIImageRenderingOptions: NSObject, NSCopying {
         self.alphaMode = alphaMode
         self.colorSpace = colorSpace
         isFlipped = flipped
-        super.init()
     }
 
     public convenience init(
@@ -42,10 +41,6 @@ public final class MTICIImageRenderingOptions: NSObject, NSCopying {
         )
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     public static let `default` = MTICIImageRenderingOptions(
         destinationPixelFormat: .bgra8Unorm,
         colorSpace: CGColorSpaceCreateDeviceRGB(),
@@ -53,18 +48,13 @@ public final class MTICIImageRenderingOptions: NSObject, NSCopying {
     )
 }
 
-public final class MTICIImageCreationOptions: NSObject, NSCopying {
+public final class MTICIImageCreationOptions {
     public let colorSpace: CGColorSpace?
     public let isFlipped: Bool
 
     public init(colorSpace: CGColorSpace?, flipped: Bool) {
         self.colorSpace = colorSpace
         isFlipped = flipped
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public static let `default` = MTICIImageCreationOptions(

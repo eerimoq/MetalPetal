@@ -6,7 +6,9 @@
 import Foundation
 import Metal
 
-public final class MTIMPSDefinitionFilter: NSObject, MTIUnaryFilter {
+public final class MTIMPSDefinitionFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage? {
         didSet {
             blurFilter.inputImage = inputImage

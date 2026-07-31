@@ -21,7 +21,7 @@ struct VideoProcessorView: View {
         private var exportSession: AssetExportSession?
         @Published var exportProgress: Progress?
 
-        func updateVideoURL(_ url: URL) {
+        func updateVideoURL(_ url: URL) async throws {
             let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
             let presentationSize = asset.presentationVideoSize ?? CGSize(width: 720, height: 720)
             let pixellateFilter = MTIPixellateFilter()
@@ -49,7 +49,7 @@ struct VideoProcessorView: View {
             let watermarkMaskImage = mask
             let watermarkMaskTransformFilter = MTITransformFilter()
             watermarkMaskTransformFilter.inputImage = watermarkMaskImage
-            let videoComposition = MTIVideoComposition(
+            let videoComposition = try await MTIVideoComposition(
                 asset: asset,
                 context: renderContext,
                 queue: DispatchQueue.main,
@@ -148,60 +148,57 @@ struct VideoProcessorView: View {
     var body: some View {
         Group {
             if let videoPlayer = videoProcessor.videoPlayer {
-                VideoPlayer(player: videoPlayer).toolbar(content: {
-                    if let progress = videoProcessor.exportProgress {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Exporting...").font(.footnote).foregroundColor(.secondary)
-                            ProgressView(value: progress.fractionCompleted)
-                                .progressViewStyle(LinearProgressViewStyle()).frame(width: 72)
-                                .smallControlSize()
-                        }
-                    } else {
-                        Button("Export", action: { [videoProcessor] in
-                            videoProcessor.export { result in
-                                switch result {
-                                case let .success(outputURL):
-                                    #if os(macOS)
-                                    let savePanel = NSSavePanel()
-                                    savePanel.nameFieldStringValue = "video." + outputURL.pathExtension
-                                    if savePanel.runModal() == .OK, let url = savePanel.url {
-                                        do {
-                                            try? FileManager.default.removeItem(at: url)
-                                            try FileManager.default.moveItem(at: outputURL, to: url)
-                                        } catch {
-                                            VideoProcessorView.showErrorAlert(error: error)
-                                        }
-                                    } else {
-                                        try? FileManager.default.removeItem(at: outputURL)
-                                    }
-                                    #else
-                                    // For demo purpose only. This is not the best practice of presenting an
-                                    // UIActivityViewController in SwiftUI.
-                                    let activityViewController = UIActivityViewController(
-                                        activityItems: [outputURL],
-                                        applicationActivities: nil
-                                    )
-                                    activityViewController.completionWithItemsHandler = { _, _, _, _ in
-                                        try? FileManager.default.removeItem(at: outputURL)
-                                    }
-                                    UIApplication.shared.topMostViewController?.present(
-                                        activityViewController,
-                                        animated: true,
-                                        completion: nil
-                                    )
-                                    #endif
-                                case let .failure(error):
-                                    VideoProcessorView.showErrorAlert(error: error)
-                                }
+                VideoPlayer(player: videoPlayer)
+                    .toolbar {
+                        if let progress = videoProcessor.exportProgress {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Exporting...").font(.footnote).foregroundColor(.secondary)
+                                ProgressView(value: progress.fractionCompleted)
+                                    .progressViewStyle(LinearProgressViewStyle()).frame(width: 72)
+                                    .smallControlSize()
                             }
-                        })
+                        } else {
+                            Button("Export", action: { [videoProcessor] in
+                                videoProcessor.export { result in
+                                    switch result {
+                                    case let .success(outputURL):
+                                        #if os(macOS)
+                                        let savePanel = NSSavePanel()
+                                        savePanel.nameFieldStringValue = "video." + outputURL.pathExtension
+                                        if savePanel.runModal() == .OK, let url = savePanel.url {
+                                            do {
+                                                try? FileManager.default.removeItem(at: url)
+                                                try FileManager.default.moveItem(at: outputURL, to: url)
+                                            } catch {
+                                                VideoProcessorView.showErrorAlert(error: error)
+                                            }
+                                        } else {
+                                            try? FileManager.default.removeItem(at: outputURL)
+                                        }
+                                        #else
+                                        let activityViewController = UIActivityViewController(
+                                            activityItems: [outputURL],
+                                            applicationActivities: nil
+                                        )
+                                        activityViewController.completionWithItemsHandler = { _, _, _, _ in
+                                            try? FileManager.default.removeItem(at: outputURL)
+                                        }
+                                        UIApplication.shared.topMostViewController?.present(
+                                            activityViewController,
+                                            animated: true,
+                                            completion: nil
+                                        )
+                                        #endif
+                                    case let .failure(error):
+                                        VideoProcessorView.showErrorAlert(error: error)
+                                    }
+                                }
+                            })
+                        }
                     }
-                })
             } else {
                 videoPicker
                     .roundedRectangleButtonStyle()
-                    .largeControlSize()
-                    .toolbar(content: { Spacer() })
             }
         }
         .inlineNavigationBarTitle("Video Processing")
@@ -209,7 +206,13 @@ struct VideoProcessorView: View {
 
     private var videoPicker: some View {
         VideoPicker(title: "Choose Video") { url in
-            videoProcessor.updateVideoURL(url)
+            Task { @MainActor in
+                do {
+                    try await videoProcessor.updateVideoURL(url)
+                } catch {
+                    VideoProcessorView.showErrorAlert(error: error)
+                }
+            }
         }
     }
 

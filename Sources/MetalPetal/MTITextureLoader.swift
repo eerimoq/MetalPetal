@@ -16,28 +16,19 @@ import Metal
 
 /// Abstract interface for texture loaders.
 public protocol MTITextureLoader: AnyObject {
-    static func makeTextureLoader(device: MTLDevice) -> MTITextureLoader
-
     func newTexture(with cgImage: CGImage, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
-
     func newTexture(withContentsOf url: URL, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
-
     func newTexture(
         withName name: String,
         scaleFactor: CGFloat,
         bundle: Bundle?,
         options: [MTKTextureLoader.Option: Any]?
     ) throws -> MTLTexture
-
     func newTexture(with mdlTexture: MDLTexture, options: [MTKTextureLoader.Option: Any]?) throws
         -> MTLTexture
 }
 
 extension MTKTextureLoader: MTITextureLoader {
-    public static func makeTextureLoader(device: MTLDevice) -> MTITextureLoader {
-        MTKTextureLoader(device: device)
-    }
-
     public func newTexture(with cgImage: CGImage,
                            options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
     {
@@ -71,29 +62,15 @@ extension MTKTextureLoader: MTITextureLoader {
 /// textures. When an image cannot be loaded with `MTKTextureLoader`, `MTIDefaultTextureLoader` draws the
 /// image
 /// to a 32bits/pixel BGRA `CVPixelBuffer` and creates a texture from that pixel buffer.
-public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
+public final class MTIDefaultTextureLoader: MTITextureLoader {
     private let internalLoader: MTKTextureLoader
-    private let cvMetalTextureBridging: MTICVMetalTextureBridging?
-    private let error: Error?
+    private let cvMetalTextureBridging: MTICVMetalIOSurfaceBridge
     private let device: MTLDevice
 
     public init(device: MTLDevice) {
         self.device = device
         internalLoader = MTKTextureLoader(device: device)
-        var bridge: MTICVMetalTextureBridging?
-        var bridgeError: Error?
-        do {
-            bridge = try MTICVMetalIOSurfaceBridge.makeCoreVideoMetalTextureBridge(device: device)
-        } catch {
-            bridgeError = error
-        }
-        cvMetalTextureBridging = bridge
-        error = bridgeError
-        super.init()
-    }
-
-    public static func makeTextureLoader(device: MTLDevice) -> MTITextureLoader {
-        MTIDefaultTextureLoader(device: device)
+        cvMetalTextureBridging = MTICVMetalIOSurfaceBridge(device: device)
     }
 
     private func prefersCVPixelBufferLoader(for properties: MTIImageProperties?) -> Bool {
@@ -118,10 +95,6 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         properties: MTIImageProperties,
         options: [MTKTextureLoader.Option: Any]?
     ) throws -> MTLTexture {
-        if let error {
-            throw error
-        }
-
         let pixelBufferAttributes: [CFString: Any] = [
             kCVPixelBufferIOSurfacePropertiesKey: [String: Any]() as CFDictionary,
         ]
@@ -135,7 +108,7 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
             &pixelBufferOut
         )
         guard let pixelBuffer = pixelBufferOut else {
-            throw _MTIErrorCreate(.failedToCreateCVPixelBuffer, "MTIErrorFailedToCreateCVPixelBuffer", nil)
+            throw MTIError(code: .failedToCreateCVPixelBuffer, message: "MTIErrorFailedToCreateCVPixelBuffer")
         }
 
         let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
@@ -150,10 +123,9 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
             bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
         ) else {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-            throw _MTIErrorCreate(
-                .textureLoaderFailedToCreateCGContext,
-                "MTIErrorTextureLoaderFailedToCreateCGContext",
-                nil
+            throw MTIError(
+                code: .textureLoaderFailedToCreateCGContext,
+                message: "MTIErrorTextureLoaderFailedToCreateCGContext"
             )
         }
 
@@ -166,7 +138,7 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
         }
         #if os(iOS) && !targetEnvironment(macCatalyst)
         // Workaround for #64. See https://github.com/MetalPetal/MetalPetal/issues/64
-        if !device.supportsFeatureSet(.iOS_GPUFamily2_v1) {
+        if !device.supportsFamily(.apple2) {
             shouldFallbackToMTKTextureLoader = true
         }
         #endif
@@ -190,10 +162,9 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
 
             guard let sanitizedCGImage else {
-                throw _MTIErrorCreate(
-                    .textureLoaderFailedToCreateCGImage,
-                    "MTIErrorTextureLoaderFailedToCreateCGImage",
-                    nil
+                throw MTIError(
+                    code: .textureLoaderFailedToCreateCGImage,
+                    message: "MTIErrorTextureLoaderFailedToCreateCGImage"
                 )
             }
             return try internalLoader.newTexture(cgImage: sanitizedCGImage, options: options)
@@ -239,14 +210,11 @@ public final class MTIDefaultTextureLoader: NSObject, MTITextureLoader {
             {
                 textureDescriptor.cpuCacheMode = mode
             }
-            guard let cvTexture = try cvMetalTextureBridging?.makeTexture(
+            return try cvMetalTextureBridging.makeTexture(
                 with: pixelBuffer,
                 textureDescriptor: textureDescriptor,
                 planeIndex: 0
-            ) else {
-                throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
-            }
-            return cvTexture.texture
+            ).texture
         }
     }
 

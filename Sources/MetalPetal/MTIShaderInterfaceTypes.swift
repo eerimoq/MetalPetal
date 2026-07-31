@@ -20,20 +20,15 @@ public struct MTICLAHELUTGeneratorInputParameters {
 
 public struct MTIMultilayerCompositingLayerShadingParameters {
     public var canvasSize: simd_float2 = .init()
-
     public var opacity: Float = 0
-
     public var maskComponent: Int32 = 0
     public var maskHasPremultipliedAlpha: Bool = false
     public var maskUsesOneMinusValue: Bool = false
-
     public var compositingMaskComponent: Int32 = 0
     public var compositingMaskHasPremultipliedAlpha: Bool = false
     public var compositingMaskUsesOneMinusValue: Bool = false
-
     public var tintColor: simd_float4 = .init()
     public var cornerRadius: simd_float4 = .init()
-
     public var layerSize: simd_float2 = .init()
 
     public init() {}

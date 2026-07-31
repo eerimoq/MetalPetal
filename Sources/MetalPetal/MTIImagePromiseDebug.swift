@@ -28,12 +28,11 @@ public func MTIImagePromiseDebugIdentifierForObject(_ object: Any) -> String {
     return String(string.dropFirst(2))
 }
 
-public final class MTIImagePromiseDebugInfo: NSObject {
+public final class MTIImagePromiseDebugInfo {
     public let identifier: String
     public let type: MTIImagePromiseType
     public let title: String
     public let content: Any?
-
     private let dimensions: MTITextureDimensions
     private let alphaType: MTIAlphaType
 
@@ -44,17 +43,15 @@ public final class MTIImagePromiseDebugInfo: NSObject {
         title = String(describing: Swift.type(of: promise))
         dimensions = promise.dimensions
         alphaType = promise.alphaType
-        super.init()
     }
 
-    override public var description: String {
+    public var description: String {
         "<\(Swift.type(of: self)): \(String(describing: content))>"
     }
 
-    fileprivate func layerRepresentation() -> CALayer {
+    private func layerRepresentation() -> CALayer {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let contentPadding: CGFloat = 10
-
         let foregroundColor = CGColor(colorSpace: colorSpace, components: [0.17, 0.17, 0.17, 1.0])!
         let backgroundColor: CGColor
         let borderColor: CGColor
@@ -66,7 +63,6 @@ public final class MTIImagePromiseDebugInfo: NSObject {
             backgroundColor = CGColor(colorSpace: colorSpace, components: [1.0, 0.8, 0.0, 1.0])!
             borderColor = CGColor(colorSpace: colorSpace, components: [1.0, 0.66, 0.0, 1.0])!
         }
-
         let baseLayer = CALayer()
         baseLayer.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
         baseLayer.borderWidth = 2
@@ -74,12 +70,10 @@ public final class MTIImagePromiseDebugInfo: NSObject {
         baseLayer.backgroundColor = backgroundColor
         baseLayer.borderColor = borderColor
         baseLayer.masksToBounds = true
-
         let titleBackgroundLayer = CALayer()
         titleBackgroundLayer.frame = CGRect(x: 0, y: 0, width: baseLayer.bounds.size.width, height: 24)
         titleBackgroundLayer.backgroundColor = borderColor
         baseLayer.addSublayer(titleBackgroundLayer)
-
         let titleLayer = CATextLayer()
         titleLayer.fontSize = 12
         titleLayer.string = title
@@ -92,7 +86,6 @@ public final class MTIImagePromiseDebugInfo: NSObject {
             height: titleLayerPreferredSize.height
         )
         titleBackgroundLayer.addSublayer(titleLayer)
-
         let contentTextLayer = CATextLayer()
         contentTextLayer.fontSize = 10
         var contentString = ""
@@ -116,14 +109,12 @@ public final class MTIImagePromiseDebugInfo: NSObject {
             width: contentTextLayerPreferredSize.width,
             height: contentTextLayerPreferredSize.height
         )
-
         baseLayer.frame = CGRect(
             x: 0,
             y: 0,
             width: baseLayer.frame.size.width,
             height: contentTextLayer.frame.maxY + contentPadding * 2
         )
-
         return baseLayer
     }
 
@@ -170,7 +161,9 @@ public final class MTIImagePromiseDebugInfo: NSObject {
         container: CALayer,
         promiseLayerTable: NSMutableDictionary
     ) {
-        guard let rootLayer = promiseLayerTable[promise] as? CALayer else { return }
+        guard let rootLayer = promiseLayerTable[promise] as? CALayer else {
+            return
+        }
         for image in promise.dependencies {
             makeConnection(
                 for: image.promise,

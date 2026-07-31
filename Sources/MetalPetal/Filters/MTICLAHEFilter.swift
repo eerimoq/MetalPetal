@@ -31,10 +31,10 @@ private final class MTICLAHELUTKernelState {
     }
 }
 
-private final class MTICLAHELUTKernel: NSObject, MTIKernel {
+private final class MTICLAHELUTKernel: MTIKernel {
     func makeKernelState(context: MTIContext, configuration _: MTIKernelConfiguration?) throws -> Any {
         guard context.isMetalPerformanceShadersSupported else {
-            throw _MTIErrorCreate(.mpsKernelNotSupported, "MTIErrorMPSKernelNotSupported", nil)
+            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
         }
         var info = MPSImageHistogramInfo()
         info.numberOfHistogramEntries = MTICLAHEHistogramBinCount
@@ -51,7 +51,7 @@ private final class MTICLAHELUTKernel: NSObject, MTIKernel {
     }
 }
 
-private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
+private final class MTICLAHELUTRecipe: MTIImagePromise {
     private let kernel: MTICLAHELUTKernel
     private let inputLightnessImage: MTIImage
     private let clipLimitValue: Int
@@ -66,8 +66,6 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
         clipLimit: Float,
         tileGridSize: MTICLAHESize
     ) {
-        assert(Int(inputLightnessImage.size.width) % tileGridSize
-            .width == 0 && Int(inputLightnessImage.size.height) % tileGridSize.height == 0)
         self.kernel = kernel
         self.tileGridSize = tileGridSize
         self.inputLightnessImage = inputLightnessImage
@@ -80,7 +78,6 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
             1
         )
         numberOfLUTs = tileGridSize.width * tileGridSize.height
-        super.init()
     }
 
     var dependencies: [MTIImage] {
@@ -96,16 +93,15 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
     }
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
-        assert(inputLightnessImage.alphaType == .alphaIsOne)
         let inputLightnessImageTexture = renderingContext.resolvedTexture(for: inputLightnessImage)
         guard let kernelState = try renderingContext.context
             .kernelState(for: kernel, configuration: nil) as? MTICLAHELUTKernelState
         else {
-            throw _MTIErrorCreate(.mpsKernelNotSupported, "MTIErrorMPSKernelNotSupported", nil)
+            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
         }
         let textureDescriptor = MTITextureDescriptor(pixelFormat: .r8Unorm,
-                                                     width: UInt(MTICLAHEHistogramBinCount),
-                                                     height: UInt(numberOfLUTs),
+                                                     width: Int(MTICLAHEHistogramBinCount),
+                                                     height: Int(numberOfLUTs),
                                                      mipmapped: false,
                                                      usage: [.shaderWrite, .shaderRead],
                                                      resourceOptions: .storageModePrivate)
@@ -120,7 +116,7 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
             length: histogramSize * numberOfLUTs,
             options: .storageModePrivate
         ) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
         for tileIndex in 0 ..< numberOfLUTs {
             let column = tileIndex % tileGridSize.width
@@ -142,7 +138,10 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
         parameters.totalPixelCountPerTile = UInt32(tileSize.width * tileSize.height)
         parameters.numberOfLUTs = UInt32(numberOfLUTs)
         guard let commandEncoder = renderingContext.commandBuffer.makeComputeCommandEncoder() else {
-            throw _MTIErrorCreate(.failedToCreateCommandEncoder, "MTIErrorFailedToCreateCommandEncoder", nil)
+            throw MTIError(
+                code: .failedToCreateCommandEncoder,
+                message: "MTIErrorFailedToCreateCommandEncoder"
+            )
         }
         commandEncoder.setComputePipelineState(kernelState.lutGeneratingPipeline.state)
         commandEncoder.setBuffer(histogramBuffer, offset: 0, index: 0)
@@ -160,13 +159,8 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
         return renderTarget
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 1)
-        return MTICLAHELUTRecipe(
+        MTICLAHELUTRecipe(
             kernel: kernel,
             inputLightnessImage: dependencies[0],
             clipLimit: clipLimit,
@@ -184,7 +178,9 @@ private final class MTICLAHELUTRecipe: NSObject, MTIImagePromise {
 }
 
 /// Performs Contrast Limited Adaptive Histogram Equalization. https://github.com/YuAo/Accelerated-CLAHE
-public final class MTICLAHEFilter: NSObject, MTIUnaryFilter {
+public final class MTICLAHEFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var clipLimit: Float = 2.0

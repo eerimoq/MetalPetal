@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import os
 
 public final class MTILinearToSRGBToneCurveFilter: MTIUnaryImageRenderingFilter {
     override public static func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
@@ -54,7 +55,9 @@ public enum MTIRGBColorSpace: Int {
     case itur709 = 2
 }
 
-public final class MTIRGBColorSpaceConversionFilter: NSObject, MTIUnaryFilter {
+public final class MTIRGBColorSpaceConversionFilter: MTIUnaryFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var inputColorSpace: MTIRGBColorSpace = .linearSRGB
@@ -71,7 +74,7 @@ public final class MTIRGBColorSpaceConversionFilter: NSObject, MTIUnaryFilter {
     }
 
     private static var kernels: [KernelConfiguration: MTIRenderPipelineKernel] = [:]
-    private static let kernelsLock = MTILockCreate()
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     private static func kernel(inputColorSpace: MTIRGBColorSpace,
                                outputColorSpace: MTIRGBColorSpace,
@@ -86,7 +89,9 @@ public final class MTIRGBColorSpaceConversionFilter: NSObject, MTIUnaryFilter {
             outputsOpaqueImage: outputAlphaType == .alphaIsOne
         )
         kernelsLock.lock()
-        defer { kernelsLock.unlock() }
+        defer {
+            kernelsLock.unlock()
+        }
         if let kernel = kernels[configuration] {
             return kernel
         }

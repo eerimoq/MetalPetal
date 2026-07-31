@@ -9,6 +9,7 @@
 
 import Foundation
 import Metal
+import os
 import QuartzCore
 import UIKit
 
@@ -76,7 +77,7 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
 
     public var automaticallyCreatesContext: Bool = true
 
-    private let lock: MTILocking = MTILockCreate()
+    private let lock = OSAllocatedUnfairLock()
 
     private var screenScale: CGFloat = 1.0
 
@@ -118,7 +119,6 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
             super.isOpaque
         }
         set {
-            assert(Thread.isMainThread)
             lock.lock()
             let oldOpaque = super.isOpaque
             super.isOpaque = newValue
@@ -158,7 +158,6 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     }
 
     private func setupContextIfNeeded() {
-        assert(lock.tryLock() == false)
         if _context == nil, contextCreationError == nil, automaticallyCreatesContext {
             do {
                 _context = try MTIContext(device: MTLCreateSystemDefaultDevice()!)
@@ -289,8 +288,6 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     // locking access
 
     private func renderImage(_ image: MTIImage?, completion: ((Error?) -> Void)?) {
-        assert(lock.tryLock() == false)
-
         setupContextIfNeeded()
 
         guard let context = _context else {
@@ -319,7 +316,12 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
             } catch {
                 #if DEBUG
                 if ProcessInfo.processInfo.environment["MTI_PRINT_ENABLED"] != nil {
-                    NSLog("%@: Failed to render image %@ - %@", self, imageToRender, error as NSError)
+                    NSLog(
+                        "%@: Failed to render image %@ - %@",
+                        self,
+                        String(describing: imageToRender),
+                        error as NSError
+                    )
                 }
                 #endif
                 completion?(error)
@@ -338,14 +340,12 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
                 }
                 commandBuffer?.commit()
             } else {
-                completion?(_MTIErrorCreate(.emptyDrawable, "MTIErrorEmptyDrawable", nil))
+                completion?(MTIError(code: .emptyDrawable, message: "MTIErrorEmptyDrawable"))
             }
         }
     }
 
     private func updateContentScaleFactor() {
-        assert(lock.tryLock() == false)
-
         let renderLayer = renderLayer
         if backgroundAccessingBounds.size.width > 0, backgroundAccessingBounds.size.height > 0,
            let image = _image, image.size.width > 0, image.size.height > 0
@@ -370,12 +370,10 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     }
 
     private func invalidateCurrentDrawable() {
-        assert(lock.tryLock() == false)
         currentDrawableValid = false
     }
 
     private func requestNextDrawableIfNeeded() {
-        assert(lock.tryLock() == false)
         if !currentDrawableValid {
             currentDrawable = renderLayer.nextDrawable()
             currentDrawableValid = true
@@ -383,13 +381,11 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     }
 
     public func drawable(for _: MTIDrawableRenderingRequest) -> MTLDrawable? {
-        assert(lock.tryLock() == false)
         requestNextDrawableIfNeeded()
         return currentDrawable
     }
 
     public func renderPassDescriptor(for _: MTIDrawableRenderingRequest) -> MTLRenderPassDescriptor? {
-        assert(lock.tryLock() == false)
         requestNextDrawableIfNeeded()
         let descriptor = MTLRenderPassDescriptor()
         descriptor.colorAttachments[0].texture = currentDrawable?.texture

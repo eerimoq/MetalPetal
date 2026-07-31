@@ -9,21 +9,19 @@ import Foundation
 import Metal
 
 /// An immutable wrapper for MTLTextureDescriptor.
-public final class MTITextureDescriptor: NSObject, NSCopying {
+public final class MTITextureDescriptor: Hashable {
     private let metalTextureDescriptor: MTLTextureDescriptor
-
     private let cachedHashValue: Int
 
     public init(mtlTextureDescriptor textureDescriptor: MTLTextureDescriptor) {
         metalTextureDescriptor = textureDescriptor.copy() as! MTLTextureDescriptor
         cachedHashValue = textureDescriptor.hash
-        super.init()
     }
 
     public init(
         pixelFormat: MTLPixelFormat,
-        width: UInt,
-        height: UInt,
+        width: Int,
+        height: Int,
         mipmapped: Bool,
         usage: MTLTextureUsage
     ) {
@@ -36,13 +34,12 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
         textureDescriptor.usage = usage
         metalTextureDescriptor = textureDescriptor
         cachedHashValue = textureDescriptor.hash
-        super.init()
     }
 
     public init(
         pixelFormat: MTLPixelFormat,
-        width: UInt,
-        height: UInt,
+        width: Int,
+        height: Int,
         mipmapped: Bool,
         usage: MTLTextureUsage,
         resourceOptions: MTLResourceOptions
@@ -57,13 +54,12 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
         textureDescriptor.resourceOptions = resourceOptions
         metalTextureDescriptor = textureDescriptor
         cachedHashValue = textureDescriptor.hash
-        super.init()
     }
 
     public static func texture2DDescriptor(
         pixelFormat: MTLPixelFormat,
-        width: UInt,
-        height: UInt,
+        width: Int,
+        height: Int,
         usage: MTLTextureUsage
     ) -> MTITextureDescriptor {
         MTITextureDescriptor(
@@ -77,8 +73,8 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
 
     public static func texture2DDescriptor(
         pixelFormat: MTLPixelFormat,
-        width: UInt,
-        height: UInt,
+        width: Int,
+        height: Int,
         mipmapped: Bool,
         usage: MTLTextureUsage,
         resourceOptions: MTLResourceOptions
@@ -93,26 +89,19 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
         )
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     public func makeMTLTextureDescriptor() -> MTLTextureDescriptor {
         metalTextureDescriptor.copy() as! MTLTextureDescriptor
     }
 
-    override public var hash: Int {
-        cachedHashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(cachedHashValue)
     }
 
-    override public func isEqual(_ object: Any?) -> Bool {
-        if let other = object as? MTITextureDescriptor {
-            if other === self {
-                return true
-            }
-            return metalTextureDescriptor.isEqual(other.metalTextureDescriptor)
+    public static func == (lhs: MTITextureDescriptor, rhs: MTITextureDescriptor) -> Bool {
+        if lhs === rhs {
+            return true
         }
-        return false
+        return lhs.metalTextureDescriptor.isEqual(rhs.metalTextureDescriptor)
     }
 
     public var textureType: MTLTextureType {
@@ -123,16 +112,16 @@ public final class MTITextureDescriptor: NSObject, NSCopying {
         metalTextureDescriptor.pixelFormat
     }
 
-    public var width: UInt {
-        UInt(metalTextureDescriptor.width)
+    public var width: Int {
+        metalTextureDescriptor.width
     }
 
-    public var height: UInt {
-        UInt(metalTextureDescriptor.height)
+    public var height: Int {
+        metalTextureDescriptor.height
     }
 
-    public var depth: UInt {
-        UInt(metalTextureDescriptor.depth)
+    public var depth: Int {
+        metalTextureDescriptor.depth
     }
 
     public var resourceOptions: MTLResourceOptions {

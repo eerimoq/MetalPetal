@@ -206,29 +206,16 @@ public class MultilayerCompositingFilter: MTIFilter {
 
     public var rasterSampleCount: Int {
         get {
-            Int(internalFilter.rasterSampleCount)
+            internalFilter.rasterSampleCount
         }
         set {
-            internalFilter.rasterSampleCount = UInt(newValue)
+            internalFilter.rasterSampleCount = newValue
         }
     }
 
     private var internalFilter = MTIMultilayerCompositingFilter()
 
     public init() {}
-}
-
-public extension MultilayerCompositingFilter {
-    @available(
-        *,
-        deprecated,
-        message: "Use MultilayerCompositingFilter.Layer(content:).frame(...).opacity(...)... instead."
-    )
-    static func makeLayer(content: MTIImage, configurator: (_ layer: inout Layer) -> Void) -> Layer {
-        var layer = Layer(content: content)
-        configurator(&layer)
-        return layer
-    }
 }
 
 private extension MultilayerCompositingFilter.Layer {

@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import os
 
 private protocol MTITexturePoolInternal: MTITexturePool {
     func returnTexture(_ texture: MTLTexture, textureDescriptor: MTITextureDescriptor)
@@ -14,23 +15,18 @@ private protocol MTITexturePoolInternal: MTITexturePool {
 
 /// A texture pool which allocates and reuses metal textures.
 public protocol MTITexturePool: AnyObject {
-    static func newTexturePool(with device: MTLDevice) -> MTITexturePool
-
     func makeTexture(descriptor textureDescriptor: MTITextureDescriptor) throws -> MTIReusableTexture
-
     /// Frees as many textures from the pool as possible.
     func flush()
-
     /// The size in bytes occupied by idle resources.
     var idleResourceSize: Int { get }
-
     /// The count of idle resources.
     var idleResourceCount: Int { get }
 }
 
 /// A reusable texture from a texture pool.
 public final class MTIReusableTexture {
-    private let lock = MTILockCreate()
+    private let lock = OSAllocatedUnfairLock()
     private let textureDescriptor: MTITextureDescriptor
     private weak var pool: MTITexturePoolInternal?
     private var textureReferenceCount = 1
@@ -40,7 +36,7 @@ public final class MTIReusableTexture {
 
     fileprivate init(texture: MTLTexture, descriptor: MTITextureDescriptor, pool: MTITexturePoolInternal) {
         _texture = texture
-        textureDescriptor = descriptor.copy() as! MTITextureDescriptor
+        textureDescriptor = descriptor
         self.pool = pool
         valid = true
         heap = texture.heap
@@ -50,7 +46,9 @@ public final class MTIReusableTexture {
     /// returns nil.
     public var texture: MTLTexture? {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         return _texture
     }
 
@@ -58,15 +56,14 @@ public final class MTIReusableTexture {
     /// already been reused and no longer valid, this returns `false`.
     public func retainTexture() -> Bool {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         if valid {
-            if textureReferenceCount <= 0 {
-                NSException(
-                    name: .internalInconsistencyException,
-                    reason: "Retain a reusable texture after the _textureReferenceCount is less than 1.",
-                    userInfo: nil
-                ).raise()
-            }
+            precondition(
+                textureReferenceCount > 0,
+                "Retain a reusable texture after the textureReferenceCount is less than 1."
+            )
             textureReferenceCount += 1
             return true
         } else {
@@ -81,7 +78,6 @@ public final class MTIReusableTexture {
 
         lock.lock()
         textureReferenceCount -= 1
-        assert(textureReferenceCount >= 0, "Over release a reusable texture.")
         if textureReferenceCount == 0 {
             textureToReturn = _texture
             _texture = nil
@@ -103,18 +99,13 @@ public final class MTIReusableTexture {
 }
 
 /// Device allocated texture pool.
-public final class MTIDeviceTexturePool: NSObject, MTITexturePoolInternal {
-    private let lock = MTILockCreate()
+public final class MTIDeviceTexturePool: MTITexturePoolInternal {
+    private let lock = OSAllocatedUnfairLock()
     private let device: MTLDevice
     private var textureCache: [MTITextureDescriptor: [MTLTexture]] = [:]
 
     public init(device: MTLDevice) {
         self.device = device
-        super.init()
-    }
-
-    public static func newTexturePool(with device: MTLDevice) -> MTITexturePool {
-        MTIDeviceTexturePool(device: device)
     }
 
     public func makeTexture(descriptor textureDescriptor: MTITextureDescriptor) throws -> MTIReusableTexture {
@@ -128,7 +119,7 @@ public final class MTIDeviceTexturePool: NSObject, MTITexturePoolInternal {
 
         if texture == nil {
             guard let newTexture = textureDescriptor.makeTexture(device: device) else {
-                throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
             }
             texture = newTexture
         }
@@ -150,7 +141,9 @@ public final class MTIDeviceTexturePool: NSObject, MTITexturePoolInternal {
 
     public var idleResourceSize: Int {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         var size = 0
         for (_, textures) in textureCache {
             for texture in textures {
@@ -162,7 +155,9 @@ public final class MTIDeviceTexturePool: NSObject, MTITexturePoolInternal {
 
     public var idleResourceCount: Int {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         var count = 0
         for (_, textures) in textureCache {
             count += textures.count
@@ -184,25 +179,13 @@ private struct MTIHeapTextureReuseKey: Hashable {
 /// Heap texture pool. **May** have a smaller memory footprint than `MTIDeviceTexturePool` depending on your
 /// use case. `MTIHeapTexturePool` uses `MTLHeap`s for texture allocations. Heaps are reused based on the
 /// heap's size and resource options.
-public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
-    private let lock = MTILockCreate()
+public final class MTIHeapTexturePool: MTITexturePoolInternal {
+    private let lock = OSAllocatedUnfairLock()
     private let device: MTLDevice
     private var heaps: [MTIHeapTextureReuseKey: [MTLHeap]] = [:]
 
     public init(device: MTLDevice) {
-        assert(
-            MTIHeapTexturePool.isSupported(on: device),
-            """
-            MTIHeapTexturePool is not supported on device: \(device). \
-            See +[MTIHeapTexturePool isSupportedOnDevice:] for detail.
-            """
-        )
         self.device = device
-        super.init()
-    }
-
-    public static func newTexturePool(with device: MTLDevice) -> MTITexturePool {
-        MTIHeapTexturePool(device: device)
     }
 
     public func makeTexture(descriptor textureDescriptor: MTITextureDescriptor) throws -> MTIReusableTexture {
@@ -224,13 +207,13 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
                 heapDescriptor.hazardTrackingMode = .tracked
             }
             guard let newHeap = device.makeHeap(descriptor: heapDescriptor) else {
-                throw _MTIErrorCreate(.failedToCreateHeap, "MTIErrorFailedToCreateHeap", nil)
+                throw MTIError(code: .failedToCreateHeap, message: "MTIErrorFailedToCreateHeap")
             }
             heap = newHeap
         }
 
         guard let texture = textureDescriptor.makeTexture(heap: heap!) else {
-            throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
         }
 
         return MTIReusableTexture(texture: texture, descriptor: textureDescriptor, pool: self)
@@ -238,7 +221,6 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
 
     fileprivate func returnTexture(_ texture: MTLTexture, textureDescriptor: MTITextureDescriptor) {
         lock.lock()
-        assert(texture.heap != nil)
         let size = textureDescriptor.heapTextureSizeAndAlign(with: device).size
         let key = MTIHeapTextureReuseKey(size: size, resourceOptions: textureDescriptor.resourceOptions)
         texture.makeAliasable()
@@ -256,7 +238,9 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
 
     public var idleResourceSize: Int {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         var size = 0
         for (_, heapList) in heaps {
             for heap in heapList {
@@ -268,7 +252,9 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
 
     public var idleResourceCount: Int {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         var count = 0
         for (_, heapList) in heaps {
             count += heapList.count
@@ -282,6 +268,6 @@ public final class MTIHeapTexturePool: NSObject, MTITexturePoolInternal {
         // This is a hardware limitation on pre-A12 devices. Texture resolutions must be padded out to powers
         // of two internally. Non-heap allocations can use virtual memory tricks to minimize this cost but
         // heaps cannot.
-        device.supportsFamily(.apple5) || device.supportsFamily(.mac1) || device.supportsFamily(.macCatalyst1)
+        device.supportsFamily(.apple5) || device.supportsFamily(.mac2)
     }
 }

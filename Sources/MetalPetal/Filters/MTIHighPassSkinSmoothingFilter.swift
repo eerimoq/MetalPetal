@@ -9,7 +9,7 @@ import Foundation
 import Metal
 import MetalPerformanceShaders
 
-public final class MTIHighPassSkinSmoothingFilter: NSObject, MTIFilter {
+public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var amount: Float = 0.65
@@ -38,8 +38,7 @@ public final class MTIHighPassSkinSmoothingFilter: NSObject, MTIFilter {
     private let blurFilter = MTIMPSGaussianBlurFilter()
     private let toneCurveFilter = MTIRGBToneCurveFilter()
 
-    override public init() {
-        super.init()
+    public init() {
         blurFilter.radius = radius
         toneCurveFilter.rgbCompositeControlPoints = storedToneCurveControlPoints
     }

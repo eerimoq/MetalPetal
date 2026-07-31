@@ -43,7 +43,7 @@ public struct SwiftPackageGenerator: ParsableCommand {
         \##(source)
         """#
 
-        func _MTISwiftPMBuiltinLibrarySourceURL() -> URL {
+        func MTISwiftPMBuiltinLibrarySourceURL() -> URL {
             enum Static {
                 static let url: URL = {
                     #if targetEnvironment(simulator)

@@ -76,17 +76,15 @@ private func MTIMTLPixelFormat(forCVPixelFormatType type: OSType, sRGB: Bool) ->
         return sRGB ? .rgba8Unorm_srgb : .rgba8Unorm
     case kCVPixelFormatType_DisparityFloat16, kCVPixelFormatType_DepthFloat16,
          kCVPixelFormatType_OneComponent16Half:
-        assert(!sRGB)
         return .r16Float
     case kCVPixelFormatType_DisparityFloat32, kCVPixelFormatType_DepthFloat32,
          kCVPixelFormatType_OneComponent32Float:
-        assert(!sRGB)
         return .r32Float
     case kCVPixelFormatType_OneComponent8:
         #if os(iOS) && !targetEnvironment(macCatalyst)
         return sRGB ? .r8Unorm_srgb : .r8Unorm
         #else
-        assert(!sRGB) // R8Unorm_sRGB texture is not available on macOS.
+        // R8Unorm_sRGB texture is not available on macOS.
         return sRGB ? .invalid : .r8Unorm
         #endif
     default:
@@ -94,7 +92,7 @@ private func MTIMTLPixelFormat(forCVPixelFormatType type: OSType, sRGB: Bool) ->
     }
 }
 
-public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
+public final class MTICVPixelBufferPromise: MTIImagePromise {
     public let pixelBuffer: CVPixelBuffer
     public let renderingAPI: MTICVPixelBufferRenderingAPI
     private let sRGB: Bool
@@ -122,17 +120,12 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
                 forCVPixelFormatType: CVPixelBufferGetPixelFormatType(pixelBuffer),
                 sRGB: options.sRGB
             ),
-            width: UInt(CVPixelBufferGetWidth(pixelBuffer)),
-            height: UInt(CVPixelBufferGetHeight(pixelBuffer)),
+            width: Int(CVPixelBufferGetWidth(pixelBuffer)),
+            height: Int(CVPixelBufferGetHeight(pixelBuffer)),
             mipmapped: false,
             usage: [.shaderRead, .shaderWrite],
             resourceOptions: .storageModePrivate
         )
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 
     public var dependencies: [MTIImage] {
@@ -159,10 +152,9 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
         -> MTIImagePromiseRenderTarget
     {
         if coreImageRendererDefaultTextureDescriptor.pixelFormat == .invalid {
-            throw _MTIErrorCreate(
-                .unsupportedCVPixelBufferFormat,
-                "MTIErrorUnsupportedCVPixelBufferFormat",
-                nil
+            throw MTIError(
+                code: .unsupportedCVPixelBufferFormat,
+                message: "MTIErrorUnsupportedCVPixelBufferFormat"
             )
         }
         let renderTarget = try renderingContext.context
@@ -187,10 +179,9 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange,
              kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
             guard renderingContext.context.isYCbCrPixelFormatSupported else {
-                throw _MTIErrorCreate(
-                    .unsupportedCVPixelBufferFormat,
-                    "MTIErrorUnsupportedCVPixelBufferFormat",
-                    nil
+                throw MTIError(
+                    code: .unsupportedCVPixelBufferFormat,
+                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
                 )
             }
             let pixelFormat: MTLPixelFormat = sRGB ? .yCbCr10_420_2p_srgb : .yCbCr10_420_2p
@@ -238,11 +229,11 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
                 let isFullYUVRange = pixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
 
                 var preferredConversion: MTIYUVColorConversion = if let colorAttachments =
-                    CVBufferGetAttachment(
+                    CVBufferCopyAttachment(
                         pixelBuffer,
                         kCVImageBufferYCbCrMatrixKey,
                         nil
-                    )?.takeUnretainedValue()
+                    )
                 {
                     if CFStringCompare(
                         (colorAttachments as! CFString),
@@ -288,8 +279,8 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
                 let pixelFormat: MTLPixelFormat = .bgra8Unorm
                 let textureDescriptor = MTITextureDescriptor(
                     pixelFormat: pixelFormat,
-                    width: UInt(CVPixelBufferGetWidth(pixelBuffer)),
-                    height: UInt(CVPixelBufferGetHeight(pixelBuffer)),
+                    width: Int(CVPixelBufferGetWidth(pixelBuffer)),
+                    height: Int(CVPixelBufferGetHeight(pixelBuffer)),
                     mipmapped: false,
                     usage: [.shaderRead, .renderTarget],
                     resourceOptions: .storageModePrivate
@@ -344,10 +335,9 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
                 sRGB: sRGB
             )
             if pixelFormat == .invalid {
-                throw _MTIErrorCreate(
-                    .unsupportedCVPixelBufferFormat,
-                    "MTIErrorUnsupportedCVPixelBufferFormat",
-                    nil
+                throw MTIError(
+                    code: .unsupportedCVPixelBufferFormat,
+                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
                 )
             }
             let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -369,14 +359,13 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
             )
             #if os(iOS) && !targetEnvironment(macCatalyst)
             // Workaround for #64. See https://github.com/MetalPetal/MetalPetal/issues/64
-            if !renderingContext.context.device.supportsFeatureSet(.iOS_GPUFamily2_v1) {
+            if !renderingContext.context.device.supportsFamily(.apple2) {
                 let renderTarget = try renderingContext.context
                     .makeRenderTarget(reusableTextureDescriptor: textureDescriptor.makeMTITextureDescriptor())
                 guard let commandEncoder = renderingContext.commandBuffer.makeBlitCommandEncoder() else {
-                    throw _MTIErrorCreate(
-                        .failedToCreateCommandEncoder,
-                        "MTIErrorFailedToCreateCommandEncoder",
-                        nil
+                    throw MTIError(
+                        code: .failedToCreateCommandEncoder,
+                        message: "MTIErrorFailedToCreateCommandEncoder"
                     )
                 }
                 commandEncoder.copy(
@@ -425,9 +414,8 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
         }
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var debugInfo: MTIImagePromiseDebugInfo {
@@ -435,16 +423,16 @@ public final class MTICVPixelBufferPromise: NSObject, MTIImagePromise {
     }
 }
 
-public final class MTICVPixelBufferDirectBridgePromise: NSObject, MTIImagePromise {
+public final class MTICVPixelBufferDirectBridgePromise: MTIImagePromise {
     private let pixelBuffer: CVPixelBuffer
     private let textureDescriptor: MTLTextureDescriptor
-    private let planeIndex: UInt
+    private let planeIndex: Int
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
     public init(
         cvPixelBuffer pixelBuffer: CVPixelBuffer,
-        planeIndex: UInt,
+        planeIndex: Int,
         textureDescriptor: MTLTextureDescriptor,
         alphaType: MTIAlphaType
     ) {
@@ -457,7 +445,6 @@ public final class MTICVPixelBufferDirectBridgePromise: NSObject, MTIImagePromis
         self.textureDescriptor = textureDescriptor.copy() as! MTLTextureDescriptor
         self.planeIndex = planeIndex
         self.pixelBuffer = pixelBuffer
-        super.init()
     }
 
     public func resolve(with renderingContext: MTIImageRenderingContext) throws
@@ -476,9 +463,8 @@ public final class MTICVPixelBufferDirectBridgePromise: NSObject, MTIImagePromis
         return renderingContext.context.makeRenderTarget(texture: cvMetalTexture.texture)
     }
 
-    public func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == 0)
-        return self
+    public func updatingDependencies(_: [MTIImage]) -> Self {
+        self
     }
 
     public var dependencies: [MTIImage] {
@@ -487,9 +473,5 @@ public final class MTICVPixelBufferDirectBridgePromise: NSObject, MTIImagePromis
 
     public var debugInfo: MTIImagePromiseDebugInfo {
         MTIImagePromiseDebugInfo(promise: self, type: .source, content: CIImage(cvPixelBuffer: pixelBuffer))
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 }

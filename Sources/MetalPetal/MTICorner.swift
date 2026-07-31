@@ -51,6 +51,9 @@ public extension MTICornerCurve {
     }
 }
 
-func _MTICornerRadiusGetShadingParameterValue(_ r: MTICornerRadius, _ curve: MTICornerCurve) -> simd_float4 {
-    simd_make_float4(r.topLeft, r.topRight, r.bottomRight, r.bottomLeft) * curve.expansionFactor
+extension MTICornerRadius {
+    /// The per-corner radii the shaders expect, scaled for the given curve.
+    func shadingParameterValue(for curve: MTICornerCurve) -> simd_float4 {
+        simd_make_float4(topLeft, topRight, bottomRight, bottomLeft) * curve.expansionFactor
+    }
 }

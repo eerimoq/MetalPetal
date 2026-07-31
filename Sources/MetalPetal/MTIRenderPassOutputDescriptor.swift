@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIRenderPassOutputDescriptor: NSObject, NSCopying {
+public final class MTIRenderPassOutputDescriptor: Hashable {
     public let dimensions: MTITextureDimensions
     public let pixelFormat: MTLPixelFormat
     public let loadAction: MTLLoadAction
@@ -27,7 +27,6 @@ public final class MTIRenderPassOutputDescriptor: NSObject, NSCopying {
         self.clearColor = clearColor
         self.loadAction = loadAction
         self.storeAction = storeAction
-        super.init()
     }
 
     public convenience init(dimensions: MTITextureDimensions, pixelFormat: MTLPixelFormat) {
@@ -62,12 +61,7 @@ public final class MTIRenderPassOutputDescriptor: NSObject, NSCopying {
         )
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
-    override public var hash: Int {
-        var hasher = Hasher()
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(dimensions.width)
         hasher.combine(dimensions.height)
         hasher.combine(dimensions.depth)
@@ -78,26 +72,19 @@ public final class MTIRenderPassOutputDescriptor: NSObject, NSCopying {
         hasher.combine(clearColor.green)
         hasher.combine(clearColor.blue)
         hasher.combine(clearColor.alpha)
-        return hasher.finalize()
     }
 
-    override public func isEqual(_ object: Any?) -> Bool {
-        guard let object = object as? MTIRenderPassOutputDescriptor else {
-            return false
-        }
-        return isEqual(to: object)
-    }
-
-    public func isEqual(to object: MTIRenderPassOutputDescriptor) -> Bool {
-        dimensions.width == object.dimensions.width &&
-            dimensions.height == object.dimensions.height &&
-            dimensions.depth == object.dimensions.depth &&
-            pixelFormat == object.pixelFormat &&
-            loadAction == object.loadAction &&
-            storeAction == object.storeAction &&
-            clearColor.red == object.clearColor.red &&
-            clearColor.green == object.clearColor.green &&
-            clearColor.blue == object.clearColor.blue &&
-            clearColor.alpha == object.clearColor.alpha
+    public static func == (
+        lhs: MTIRenderPassOutputDescriptor,
+        rhs: MTIRenderPassOutputDescriptor
+    ) -> Bool {
+        lhs.dimensions == rhs.dimensions &&
+            lhs.pixelFormat == rhs.pixelFormat &&
+            lhs.loadAction == rhs.loadAction &&
+            lhs.storeAction == rhs.storeAction &&
+            lhs.clearColor.red == rhs.clearColor.red &&
+            lhs.clearColor.green == rhs.clearColor.green &&
+            lhs.clearColor.blue == rhs.clearColor.blue &&
+            lhs.clearColor.alpha == rhs.clearColor.alpha
     }
 }

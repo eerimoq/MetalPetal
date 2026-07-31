@@ -6,7 +6,9 @@
 import Foundation
 import Metal
 
-public final class MTIBlendWithMaskFilter: NSObject, MTIFilter {
+public final class MTIBlendWithMaskFilter: MTIFilter {
+    public init() {}
+
     public var inputImage: MTIImage?
     public var inputBackgroundImage: MTIImage?
     public var inputMask: MTIMask?

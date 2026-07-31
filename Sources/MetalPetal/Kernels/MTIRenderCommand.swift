@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class MTIRenderCommand: NSObject, NSCopying {
+public final class MTIRenderCommand {
     public let kernel: MTIRenderPipelineKernel
     public let geometry: MTIGeometry
     public let images: [MTIImage]
@@ -19,15 +19,9 @@ public final class MTIRenderCommand: NSObject, NSCopying {
         images: [MTIImage],
         parameters: [String: Any]
     ) {
-        assert(kernel.alphaTypeHandlingRule._canHandleAlphaTypes(in: images))
         self.kernel = kernel
-        self.geometry = geometry.copy(with: nil) as! MTIGeometry
+        self.geometry = geometry
         self.images = images
         self.parameters = parameters
-        super.init()
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
     }
 }

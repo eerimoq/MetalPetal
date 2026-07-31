@@ -62,14 +62,6 @@ extension View {
         #endif
     }
 
-    func stackNavigationViewStyle() -> some View {
-        #if os(iOS)
-        return navigationViewStyle(StackNavigationViewStyle())
-        #else
-        return self
-        #endif
-    }
-
     func groupedListStyle() -> some View {
         #if os(iOS)
         return listStyle(GroupedListStyle())
@@ -83,14 +75,6 @@ extension View {
         return navigationBarTitle(title, displayMode: .inline)
         #else
         return navigationTitle(title)
-        #endif
-    }
-
-    func largeControlSize() -> some View {
-        #if os(macOS)
-        return controlSize(.large)
-        #else
-        return self
         #endif
     }
 
@@ -137,9 +121,18 @@ extension View {
 #if os(iOS)
 
 extension UIApplication {
+    var activeWindowScene: UIWindowScene? {
+        let windowScenes = connectedScenes.compactMap { $0 as? UIWindowScene }
+        return windowScenes.first(where: { $0.activationState == .foregroundActive }) ?? windowScenes.first
+    }
+
+    var activeWindow: UIWindow? {
+        let windows = activeWindowScene?.windows ?? []
+        return windows.first(where: { $0.isKeyWindow }) ?? windows.first(where: { $0.isHidden == false })
+    }
+
     var topMostViewController: UIViewController? {
-        let rootWindow = windows.first(where: { $0.isHidden == false })
-        var topMostViewController: UIViewController? = rootWindow?.rootViewController
+        var topMostViewController: UIViewController? = activeWindow?.rootViewController
         while topMostViewController?.presentedViewController != nil {
             topMostViewController = topMostViewController?.presentedViewController
         }

@@ -6,6 +6,7 @@
 import Foundation
 import Metal
 import MetalPerformanceShaders
+import os
 
 private struct MTIMPSImageConvolutionSettings: Hashable {
     let kernelWidth: Int
@@ -13,15 +14,13 @@ private struct MTIMPSImageConvolutionSettings: Hashable {
     let weights: [Float]
 
     init(kernelWidth: Int, kernelHeight: Int, weights: UnsafePointer<Float>) {
-        assert(kernelWidth > 0)
-        assert(kernelHeight > 0)
         self.kernelWidth = kernelWidth
         self.kernelHeight = kernelHeight
         self.weights = Array(UnsafeBufferPointer(start: weights, count: kernelWidth * kernelHeight))
     }
 }
 
-public final class MTIMPSConvolutionFilter: NSObject, MTIUnaryFilter {
+public final class MTIMPSConvolutionFilter: MTIUnaryFilter {
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     /// The bias is a value to be added to convolved pixel before it is converted back to the storage
@@ -36,11 +35,13 @@ public final class MTIMPSConvolutionFilter: NSObject, MTIUnaryFilter {
     public var bias: Float = 0
     private let kernel: MTIMPSKernel
     private static var kernels: [MTIMPSImageConvolutionSettings: MTIMPSKernel] = [:]
-    private static let kernelsLock = MTILockCreate()
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     private static func kernel(settings: MTIMPSImageConvolutionSettings) -> MTIMPSKernel {
         kernelsLock.lock()
-        defer { kernelsLock.unlock() }
+        defer {
+            kernelsLock.unlock()
+        }
         if let kernel = kernels[settings] {
             return kernel
         }
@@ -58,14 +59,13 @@ public final class MTIMPSConvolutionFilter: NSObject, MTIUnaryFilter {
         return kernel
     }
 
-    public init(kernelWidth: UInt, kernelHeight: UInt, weights kernelWeights: UnsafePointer<Float>) {
+    public init(kernelWidth: Int, kernelHeight: Int, weights kernelWeights: UnsafePointer<Float>) {
         let settings = MTIMPSImageConvolutionSettings(
             kernelWidth: Int(kernelWidth),
             kernelHeight: Int(kernelHeight),
             weights: kernelWeights
         )
         kernel = MTIMPSConvolutionFilter.kernel(settings: settings)
-        super.init()
     }
 
     public var outputImage: MTIImage? {

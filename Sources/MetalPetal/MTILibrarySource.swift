@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import os
 
 public let MTIURLSchemeForLibraryWithSource = "mti.library-source"
 
@@ -38,7 +39,7 @@ private final class MTILibrarySource {
 /// metal compiler. You should avoid using this class as much as you can.
 public final class MTILibrarySourceRegistration {
     private var sources: [URL: MTILibrarySource] = [:]
-    private let lock = MTILockCreate()
+    private let lock = OSAllocatedUnfairLock()
 
     private init() {}
 
@@ -63,7 +64,6 @@ public final class MTILibrarySourceRegistration {
     }
 
     public func newLibrary(with libraryURL: URL, device: MTLDevice) throws -> MTLLibrary {
-        assert(libraryURL.scheme == MTIURLSchemeForLibraryWithSource)
         lock.lock()
         let librarySource = sources[libraryURL]
         lock.unlock()

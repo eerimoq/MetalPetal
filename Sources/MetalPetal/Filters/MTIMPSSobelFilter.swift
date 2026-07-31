@@ -8,20 +8,20 @@ import Metal
 import MetalPerformanceShaders
 import simd
 
-public enum MTIMPSSobelColorMode: UInt {
+public enum MTIMPSSobelColorMode: Int {
     case auto
     case grayscale
     case grayscaleInverted
 }
 
-public final class MTIMPSSobelFilter: NSObject, MTIUnaryFilter {
+public final class MTIMPSSobelFilter: MTIUnaryFilter {
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public private(set) var grayColorTransform: simd_float3
     public var colorMode: MTIMPSSobelColorMode = .auto
     private let kernel: MTIMPSKernel
 
-    override public convenience init() {
+    public convenience init() {
         self.init(grayColorTransform: MTIGrayColorTransformDefault)
     }
 
@@ -33,7 +33,6 @@ public final class MTIMPSSobelFilter: NSObject, MTIUnaryFilter {
             k.edgeMode = .clamp
             return k
         })
-        super.init()
     }
 
     private static let rToMonochromeKernel = MTIRenderPipelineKernel(
@@ -61,10 +60,10 @@ public final class MTIMPSSobelFilter: NSObject, MTIUnaryFilter {
                                           outputTextureDimensions: dimensions,
                                           outputPixelFormat: .r8Unorm)
             return MTIMPSSobelFilter.rToMonochromeKernel.apply(
-                toInputImages: [sobelImage],
+                to: [sobelImage],
                 parameters: ["invert": colorMode == .grayscaleInverted,
                              "convertSRGBToLinear": false],
-                outputTextureDimensions: dimensions,
+                outputDimensions: dimensions,
                 outputPixelFormat: outputPixelFormat
             )
         }

@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Foundation
+import os
 
 public extension MTIImage {
     func applyingAssetTrackTransform(_ transform: CGAffineTransform) -> MTIImage {
@@ -69,12 +70,18 @@ public class MTIAsyncVideoCompositionRequestHandler {
         }
     }
 
-    private struct Track {
+    struct Track {
         let id: CMPersistentTrackID
         let preferredTransform: CGAffineTransform
-        init(track: AVAssetTrack) {
+
+        init(id: CMPersistentTrackID, preferredTransform: CGAffineTransform) {
+            self.id = id
+            self.preferredTransform = preferredTransform
+        }
+
+        init(track: AVAssetTrack) async throws {
             id = track.trackID
-            preferredTransform = track.preferredTransform
+            preferredTransform = try await track.load(.preferredTransform)
         }
     }
 
@@ -83,32 +90,32 @@ public class MTIAsyncVideoCompositionRequestHandler {
     private let filter: (Request) throws -> MTIImage
     private let queue: DispatchQueue?
 
-    @available(*, deprecated, message: "Use init(context:tracks:on:filter:) instead.")
-    public init(
-        context: MTIContext,
-        tracks: [AVAssetTrack],
-        queue: DispatchQueue = .main,
-        filter: @escaping (Request) throws -> MTIImage
-    ) {
-        assert(tracks.count > 0)
-        self.tracks = tracks.map(Track.init(track:))
-        self.context = context
-        self.filter = filter
-        self.queue = queue
-    }
-
     /// Initialize a new `MTIAsyncVideoCompositionRequestHandler` object that can handle
     /// `MTIMutableVideoCompositionRequest` on the specified `queue` using `filter`.
     /// If the `queue` is nil, the `filter` block runs directly on the queue where `handle(request:)` is
     /// called.
-    public init(
+    public convenience init(
         context: MTIContext,
         tracks: [AVAssetTrack],
         on queue: DispatchQueue?,
         filter: @escaping (Request) throws -> MTIImage
+    ) async throws {
+        var loaded: [Track] = []
+        loaded.reserveCapacity(tracks.count)
+        for track in tracks {
+            try await loaded.append(Track(track: track))
+        }
+        self.init(context: context, tracks: loaded, on: queue, filter: filter)
+    }
+
+    /// For callers that have already loaded the track properties, so they are not fetched twice.
+    init(
+        context: MTIContext,
+        tracks: [Track],
+        on queue: DispatchQueue?,
+        filter: @escaping (Request) throws -> MTIImage
     ) {
-        assert(tracks.count > 0)
-        self.tracks = tracks.map(Track.init(track:))
+        self.tracks = tracks
         self.context = context
         self.filter = filter
         self.queue = queue
@@ -121,7 +128,6 @@ public class MTIAsyncVideoCompositionRequestHandler {
         guard let pixelBuffer = request.sourceFrame(byTrackID: track.id) else {
             return nil
         }
-        assert(request.renderContext.renderTransform.isIdentity == true)
         let image = MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .alphaIsOne)
         if request.isTrackTransformApplied || track.preferredTransform.isIdentity {
             return image
@@ -201,7 +207,7 @@ public class MTIVideoComposition {
             private let internalRequest: AVAsynchronousVideoCompositionRequest
             private var completionHandler: (() -> Void)?
             private var _isCancelled: Bool = false
-            private let stateLock = MTILockCreate()
+            private let stateLock = OSAllocatedUnfairLock()
 
             func hash(into hasher: inout Hasher) {
                 hasher.combine(internalRequest)
@@ -272,7 +278,7 @@ public class MTIVideoComposition {
             let timeRange: CMTimeRange
             let enablePostProcessing: Bool = false
             let containsTweening: Bool = true
-            let requiredSourceTrackIDs: [NSValue]? = nil
+            nonisolated(unsafe) let requiredSourceTrackIDs: [NSValue]? = nil
             let passthroughTrackID: CMPersistentTrackID = kCMPersistentTrackID_Invalid
             let handler: Handler
 
@@ -282,30 +288,33 @@ public class MTIVideoComposition {
             }
         }
 
-        let sourcePixelBufferAttributes: [String: Any]? = [kCVPixelBufferPixelFormatTypeKey as String: [
-            kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
-            kCVPixelFormatType_32BGRA,
-            kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-        ]]
+        let sourcePixelBufferAttributes: [String: any Sendable]? = [
+            kCVPixelBufferPixelFormatTypeKey as String: [
+                kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+                kCVPixelFormatType_32BGRA,
+                kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            ],
+        ]
 
-        let requiredPixelBufferAttributesForRenderContext: [String: Any] =
+        let requiredPixelBufferAttributesForRenderContext: [String: any Sendable] =
             [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
 
         private var pendingRequests: Set<VideoCompositionRequest> = []
-        private let pendingRequestsLock = MTILockCreate()
+        private let pendingRequestsLock = OSAllocatedUnfairLock()
 
         func renderContextChanged(_: AVVideoCompositionRenderContext) {}
 
         func startRequest(_ asyncVideoCompositionRequest: AVAsynchronousVideoCompositionRequest) {
             guard let instruction = asyncVideoCompositionRequest.videoCompositionInstruction as? Instruction
             else {
-                assertionFailure()
                 asyncVideoCompositionRequest.finish(with: Error.unsupportedInstruction)
                 return
             }
             let request = VideoCompositionRequest(request: asyncVideoCompositionRequest)
             request.onCompletion { [unowned request, weak self] in
-                guard let strongSelf = self else { return }
+                guard let strongSelf = self else {
+                    return
+                }
                 strongSelf.pendingRequestsLock.lock()
                 strongSelf.pendingRequests.remove(request)
                 strongSelf.pendingRequestsLock.unlock()
@@ -392,29 +401,52 @@ public class MTIVideoComposition {
         context: MTIContext,
         queue: DispatchQueue?,
         filter: @escaping (MTIAsyncVideoCompositionRequestHandler.Request) throws -> MTIImage
-    ) {
-        asset = inputAsset.copy() as! AVAsset
-        videoComposition = AVMutableVideoComposition(propertiesOf: asset)
-        let videoTracks = asset.tracks(withMediaType: .video)
+    ) async throws {
+        // A local, so the concurrent loads below do not capture `self` mid-initialization.
+        let asset = inputAsset.copy() as! AVAsset
+        self.asset = asset
+
+        // Both reads walk the asset's tracks, so start them together rather than one after the other.
+        async let loadedComposition = AVMutableVideoComposition.videoComposition(withPropertiesOf: asset)
+        async let loadedTracks = asset.loadTracks(withMediaType: .video)
+        let videoTracks = try await loadedTracks
+        videoComposition = try await loadedComposition
+
+        // Each track's properties are loaded once here and handed to the request handler, which would
+        // otherwise load `preferredTransform` for every track a second time.
+        let tracks = try await withThrowingTaskGroup(
+            of: (offset: Int, track: MTIAsyncVideoCompositionRequestHandler.Track, size: CGSize).self
+        ) { group in
+            for (offset, videoTrack) in videoTracks.enumerated() {
+                group.addTask {
+                    let (naturalSize, preferredTransform) = try await videoTrack
+                        .load(.naturalSize, .preferredTransform)
+                    return (
+                        offset,
+                        .init(id: videoTrack.trackID, preferredTransform: preferredTransform),
+                        naturalSize.applying(preferredTransform)
+                    )
+                }
+            }
+            // The handler indexes tracks positionally, so restore the source order.
+            return try await group.reduce(into: []) { $0.append($1) }.sorted { $0.offset < $1.offset }
+        }
 
         /// AVMutableVideoComposition's renderSize property is buggy with some assets. Calculate the
         /// renderSize here based on the documentation of `AVMutableVideoComposition(propertiesOf:)`
         if let composition = asset as? AVComposition {
             videoComposition.renderSize = composition.naturalSize
         } else {
-            var renderSize: CGSize = .zero
-            for videoTrack in videoTracks {
-                let size = videoTrack.naturalSize.applying(videoTrack.preferredTransform)
-                renderSize.width = max(renderSize.width, abs(size.width))
-                renderSize.height = max(renderSize.height, abs(size.height))
+            videoComposition.renderSize = tracks.reduce(into: CGSize.zero) { renderSize, track in
+                renderSize.width = max(renderSize.width, abs(track.size.width))
+                renderSize.height = max(renderSize.height, abs(track.size.height))
             }
-            videoComposition.renderSize = renderSize
         }
 
         videoComposition.customVideoCompositorClass = Compositor.self
         let handler = MTIAsyncVideoCompositionRequestHandler(
             context: context,
-            tracks: videoTracks,
+            tracks: tracks.map(\.track),
             on: queue,
             filter: filter
         )

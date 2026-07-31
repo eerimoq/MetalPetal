@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import os
 
 /// Modes that describe how source colors blend with destination colors.
 /// See also: https://www.w3.org/TR/compositing-1/
@@ -58,7 +59,7 @@ public extension MTIBlendMode {
     static let colorLookup512x512 = MTIBlendMode("ColorLookup512x512")
 }
 
-public final class MTIBlendFunctionDescriptors: NSObject, NSCopying {
+public final class MTIBlendFunctionDescriptors {
     public let forBlendFilter: MTIFunctionDescriptor
     public let forMultilayerCompositingFilterWithProgrammableBlending: MTIFunctionDescriptor?
     public let forMultilayerCompositingFilterWithoutProgrammableBlending: MTIFunctionDescriptor?
@@ -73,7 +74,6 @@ public final class MTIBlendFunctionDescriptors: NSObject, NSCopying {
             forMultilayerCompositingFilterWithProgrammableBlending
         self.forMultilayerCompositingFilterWithoutProgrammableBlending =
             forMultilayerCompositingFilterWithoutProgrammableBlending
-        super.init()
     }
 
     /// Creates a `MTIBlendFunctionDescriptors` using a metal shader function.
@@ -103,14 +103,10 @@ public final class MTIBlendFunctionDescriptors: NSObject, NSCopying {
             )
         )
     }
-
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
 }
 
-public final class MTIBlendModes: NSObject {
-    private static let lock = MTILockCreate()
+public enum MTIBlendModes {
+    private static let lock = OSAllocatedUnfairLock()
     private static var registeredBlendModes: [MTIBlendMode: MTIBlendFunctionDescriptors] = MTIBlendModes
         .makeBuiltinBlendModes()
 
@@ -174,7 +170,9 @@ public final class MTIBlendModes: NSObject {
 
     public static var all: [MTIBlendMode] {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         return Array(registeredBlendModes.keys)
     }
 
@@ -183,21 +181,25 @@ public final class MTIBlendModes: NSObject {
         with functionDescriptors: MTIBlendFunctionDescriptors
     ) {
         lock.lock()
-        defer { lock.unlock() }
-        assert(registeredBlendModes[blendMode] == nil)
+        defer {
+            lock.unlock()
+        }
         registeredBlendModes[blendMode] = functionDescriptors
     }
 
     public static func unregisterBlendMode(_ blendMode: MTIBlendMode) {
         lock.lock()
-        defer { lock.unlock() }
-        assert(registeredBlendModes[blendMode] != nil)
+        defer {
+            lock.unlock()
+        }
         registeredBlendModes[blendMode] = nil
     }
 
     public static func functionDescriptors(for blendMode: MTIBlendMode) -> MTIBlendFunctionDescriptors? {
         lock.lock()
-        defer { lock.unlock() }
+        defer {
+            lock.unlock()
+        }
         return registeredBlendModes[blendMode]
     }
 }

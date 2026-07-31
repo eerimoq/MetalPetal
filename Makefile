@@ -8,6 +8,7 @@ CODESPELL_ARGS = \
 	--ignore-words-list "inout,froms,soop,medias,deactive,upto,datas,ro,lightyears"
 
 CODE_DIRS += "Sources"
+CODE_DIRS += "Tests"
 CODE_DIRS += "MetalPetalExamples"
 
 SHELL = /usr/bin/env bash
@@ -40,7 +41,13 @@ build-mac-catalyst:
 build-tvos:
 	xcodebuild build -scheme MetalPetal -destination generic/platform=tvOS -workspace .
 
-build-all: build build-ios build-mac-catalyst build-tvos
+build-ios-simulator:
+	xcodebuild build -scheme MetalPetal -destination 'generic/platform=iOS Simulator' -workspace .
+
+build-examples:
+	xcodebuild build -project MetalPetalExamples.xcodeproj -scheme "MetalPetalExamples (iOS)" -destination generic/platform=iOS
+
+build-all: build build-ios build-ios-simulator build-mac-catalyst build-tvos build-examples
 
 test:
 	swift test
@@ -57,4 +64,6 @@ test-tvos:
 test-all: test test-ios test-mac-catalyst test-tvos
 
 generate:
-	./utilities.sh
+	cd Utilities && swift run main boilerplate-generator $(CURDIR)
+	cd Utilities && swift run main swift-package-generator $(CURDIR)
+	$(MAKE) style

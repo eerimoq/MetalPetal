@@ -24,7 +24,7 @@ public enum MTICVPixelBufferPoolError {
 private func MTICVPixelBufferPoolIsOutOfBuffer(_ pool: MTICVPixelBufferPool) {
     NSLog(
         "%@: Pool is out of buffers. Create a symbolic breakpoint of MTICVPixelBufferPoolIsOutOfBuffer to debug.",
-        pool
+        String(describing: pool)
     )
 }
 
@@ -40,7 +40,7 @@ private func MTICVPixelBufferPoolFourCharCodeToString(_ code: FourCharCode) -> S
     return string.trimmingCharacters(in: .whitespaces)
 }
 
-public final class MTICVPixelBufferPool: NSObject {
+public final class MTICVPixelBufferPool {
     private let pool: CVPixelBufferPool
     public var internalPool: CVPixelBufferPool {
         pool
@@ -50,7 +50,7 @@ public final class MTICVPixelBufferPool: NSObject {
     public let pixelBufferAttributes: [AnyHashable: Any]
     public let pixelBufferWidth: Int
     public let pixelBufferHeight: Int
-    public let minimumBufferCount: UInt
+    public let minimumBufferCount: Int
     public let pixelFormatType: OSType
     public let pixelFormatDescription: String
 
@@ -66,12 +66,11 @@ public final class MTICVPixelBufferPool: NSObject {
         pixelBufferHeight = (pixelBufferAttributes[kCVPixelBufferHeightKey as String] as? NSNumber)?
             .intValue ?? 0
         minimumBufferCount = (poolAttributes[kCVPixelBufferPoolMinimumBufferCountKey as String] as? NSNumber)?
-            .uintValue ?? 0
+            .intValue ?? 0
         let pixelFormatType =
             (pixelBufferAttributes[kCVPixelBufferPixelFormatTypeKey as String] as? NSNumber)?.uint32Value ?? 0
         self.pixelFormatType = pixelFormatType
         pixelFormatDescription = MTICVPixelBufferPoolFourCharCodeToString(pixelFormatType)
-        super.init()
     }
 
     public convenience init(
@@ -95,7 +94,7 @@ public final class MTICVPixelBufferPool: NSObject {
         pixelBufferWidth width: Int,
         pixelBufferHeight height: Int,
         pixelFormatType: OSType,
-        minimumBufferCount: UInt
+        minimumBufferCount: Int
     ) throws {
         try self.init(poolAttributes: [kCVPixelBufferPoolMinimumBufferCountKey: minimumBufferCount],
                       pixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey: pixelFormatType,
@@ -104,7 +103,7 @@ public final class MTICVPixelBufferPool: NSObject {
                                               kCVPixelBufferIOSurfacePropertiesKey: NSDictionary()])
     }
 
-    public func makePixelBuffer(allocationThreshold: UInt) throws -> CVPixelBuffer {
+    public func makePixelBuffer(allocationThreshold: Int) throws -> CVPixelBuffer {
         var allocationThreshold = allocationThreshold
         if allocationThreshold == 0 {
             allocationThreshold = minimumBufferCount

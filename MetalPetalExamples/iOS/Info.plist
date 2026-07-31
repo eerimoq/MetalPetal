@@ -24,8 +24,6 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>To test filters.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>To test filters.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>To test filters.</string>
 	<key>UIApplicationSceneManifest</key>

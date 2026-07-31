@@ -7,10 +7,11 @@
 
 import Foundation
 import Metal
+import os
 
 public let MTIRenderPipelineMaximumColorAttachmentCount = 8
 
-public final class MTIRenderPipelineKernelConfiguration: NSObject, MTIKernelConfiguration {
+public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration, Hashable {
     private let pixelFormats: [MTLPixelFormat]
     public let colorAttachmentCount: Int
     public let depthAttachmentPixelFormat: MTLPixelFormat
@@ -27,14 +28,12 @@ public final class MTIRenderPipelineKernelConfiguration: NSObject, MTIKernelConf
         stencilAttachmentPixelFormat: MTLPixelFormat,
         rasterSampleCount: Int
     ) {
-        assert(colorAttachmentPixelFormats.count <= MTIRenderPipelineMaximumColorAttachmentCount)
         let count = min(colorAttachmentPixelFormats.count, MTIRenderPipelineMaximumColorAttachmentCount)
         pixelFormats = Array(colorAttachmentPixelFormats.prefix(count))
         colorAttachmentCount = count
         self.depthAttachmentPixelFormat = depthAttachmentPixelFormat
         self.stencilAttachmentPixelFormat = stencilAttachmentPixelFormat
         self.rasterSampleCount = rasterSampleCount
-        super.init()
     }
 
     public convenience init(colorAttachmentPixelFormats: [MTLPixelFormat], count _: Int) {
@@ -66,47 +65,43 @@ public final class MTIRenderPipelineKernelConfiguration: NSObject, MTIKernelConf
         )
     }
 
-    override public var hash: Int {
-        var hasher = Hasher()
+    public func hash(into hasher: inout Hasher) {
         for index in 0 ..< colorAttachmentCount {
             hasher.combine(pixelFormats[index].rawValue)
         }
         hasher.combine(depthAttachmentPixelFormat.rawValue)
         hasher.combine(stencilAttachmentPixelFormat.rawValue)
         hasher.combine(rasterSampleCount)
-        return hasher.finalize()
     }
 
-    override public func isEqual(_ object: Any?) -> Bool {
-        if self === (object as AnyObject) {
+    public static func == (
+        lhs: MTIRenderPipelineKernelConfiguration,
+        rhs: MTIRenderPipelineKernelConfiguration
+    ) -> Bool {
+        if lhs === rhs {
             return true
         }
-        guard let obj = object as? MTIRenderPipelineKernelConfiguration else { return false }
-        if obj.colorAttachmentCount == colorAttachmentCount, obj.rasterSampleCount == rasterSampleCount {
-            for index in 0 ..< colorAttachmentCount where obj.pixelFormats[index] != pixelFormats[index] {
-                return false
-            }
-            if depthAttachmentPixelFormat != obj
-                .depthAttachmentPixelFormat || stencilAttachmentPixelFormat != obj
-                .stencilAttachmentPixelFormat
-            {
-                return false
-            }
-            return true
+        guard lhs.colorAttachmentCount == rhs.colorAttachmentCount,
+              lhs.rasterSampleCount == rhs.rasterSampleCount,
+              lhs.depthAttachmentPixelFormat == rhs.depthAttachmentPixelFormat,
+              lhs.stencilAttachmentPixelFormat == rhs.stencilAttachmentPixelFormat
+        else {
+            return false
         }
-        return false
+        for index in 0 ..< lhs.colorAttachmentCount
+            where lhs.pixelFormats[index] != rhs.pixelFormats[index]
+        {
+            return false
+        }
+        return true
     }
 
-    public var identifier: NSCopying {
-        self
-    }
-
-    public func copy(with _: NSZone? = nil) -> Any {
+    public var identifier: AnyHashable {
         self
     }
 }
 
-public final class MTIRenderPipelineKernel: NSObject, MTIKernel {
+public final class MTIRenderPipelineKernel: MTIKernel {
     public let vertexFunctionDescriptor: MTIFunctionDescriptor
     public let fragmentFunctionDescriptor: MTIFunctionDescriptor
     public let vertexDescriptor: MTLVertexDescriptor?
@@ -120,12 +115,11 @@ public final class MTIRenderPipelineKernel: NSObject, MTIKernel {
         colorAttachmentCount: Int,
         alphaTypeHandlingRule: MTIAlphaTypeHandlingRule
     ) {
-        self.vertexFunctionDescriptor = vertexFunctionDescriptor.copy() as! MTIFunctionDescriptor
-        self.fragmentFunctionDescriptor = fragmentFunctionDescriptor.copy() as! MTIFunctionDescriptor
+        self.vertexFunctionDescriptor = vertexFunctionDescriptor
+        self.fragmentFunctionDescriptor = fragmentFunctionDescriptor
         self.vertexDescriptor = vertexDescriptor?.copy() as? MTLVertexDescriptor
         self.colorAttachmentCount = colorAttachmentCount
         self.alphaTypeHandlingRule = alphaTypeHandlingRule
-        super.init()
     }
 
     public convenience init(
@@ -143,7 +137,6 @@ public final class MTIRenderPipelineKernel: NSObject, MTIKernel {
 
     public func makeKernelState(context: MTIContext, configuration: MTIKernelConfiguration?) throws -> Any {
         let configuration = configuration as! MTIRenderPipelineKernelConfiguration
-        assert(configuration.colorAttachmentCount == colorAttachmentCount)
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.vertexDescriptor = vertexDescriptor
         let vertexFunction = try context.function(with: vertexFunctionDescriptor)
@@ -162,15 +155,15 @@ public final class MTIRenderPipelineKernel: NSObject, MTIKernel {
         return try context.renderPipeline(with: renderPipelineDescriptor)
     }
 
-    override public var description: String {
+    public var description: String {
         """
         <\(type(of: self)): vertexFunctionDescriptor = \(vertexFunctionDescriptor); \
         fragmentFunctionDescriptor = \(fragmentFunctionDescriptor)>
         """
     }
 
-    public func __apply(
-        toInputImages images: [MTIImage],
+    func makeOutputImage(
+        inputImages images: [MTIImage],
         parameters: [String: Any],
         outputTextureDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat
@@ -179,16 +172,19 @@ public final class MTIRenderPipelineKernel: NSObject, MTIKernel {
             dimensions: outputTextureDimensions,
             pixelFormat: outputPixelFormat
         )
-        return __apply(toInputImages: images, parameters: parameters, outputDescriptors: [outputDescriptor])
-            .first!
+        return makeOutputImages(
+            inputImages: images,
+            parameters: parameters,
+            outputDescriptors: [outputDescriptor]
+        )
+        .first!
     }
 
-    public func __apply(
-        toInputImages images: [MTIImage],
+    func makeOutputImages(
+        inputImages images: [MTIImage],
         parameters: [String: Any],
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) -> [MTIImage] {
-        assert(outputDescriptors.count == colorAttachmentCount)
         let command = MTIRenderCommand(
             kernel: self,
             geometry: MTIVertices.fullViewportSquare,
@@ -211,19 +207,16 @@ final class MTIImageRenderingRecipe {
     let renderCommands: [MTIRenderCommand]
     let outputDescriptors: [MTIRenderPassOutputDescriptor]
     let resolutionCache: MTIWeakToStrongObjectsMapTable<MTIImageRenderingContext, NSArray>?
-    let resolutionCacheLock: NSLocking?
+    let resolutionCacheLock: OSAllocatedUnfairLock<Void>?
     let alphaType: MTIAlphaType
     let dependencies: [MTIImage]
-    let rasterSampleCount: UInt
+    let rasterSampleCount: Int
 
     init(
         renderCommands: [MTIRenderCommand],
-        rasterSampleCount: UInt,
+        rasterSampleCount: Int,
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) {
-        assert(renderCommands.count > 0)
-        assert(rasterSampleCount >= 1)
-        assert(outputDescriptors.count > 0)
         self.renderCommands = renderCommands
         self.outputDescriptors = outputDescriptors
         self.rasterSampleCount = rasterSampleCount
@@ -243,7 +236,7 @@ final class MTIImageRenderingRecipe {
             .outputAlphaType(forInputImages: lastCommand.images)
         if outputDescriptors.count > 1 {
             resolutionCache = MTIWeakToStrongObjectsMapTable<MTIImageRenderingContext, NSArray>()
-            resolutionCacheLock = MTILockCreate()
+            resolutionCacheLock = OSAllocatedUnfairLock()
         } else {
             resolutionCache = nil
             resolutionCacheLock = nil
@@ -280,11 +273,11 @@ final class MTIImageRenderingRecipe {
                     if #available(macCatalyst 14.0, macOS 11.0, iOS 10.0, tvOS 10.0, *) {
                         tempTextureDescriptor.storageMode = .memoryless
                     }
-                    tempTextureDescriptor.sampleCount = Int(rasterSampleCount)
+                    tempTextureDescriptor.sampleCount = rasterSampleCount
                     guard let msaaTexture = renderingContext.context.device
                         .makeTexture(descriptor: tempTextureDescriptor)
                     else {
-                        throw _MTIErrorCreate(.failedToCreateTexture, "MTIErrorFailedToCreateTexture", nil)
+                        throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
                     }
                     renderPassDescriptor.colorAttachments[index].texture = msaaTexture
                     renderPassDescriptor.colorAttachments[index].clearColor = outputDescriptor.clearColor
@@ -299,7 +292,7 @@ final class MTIImageRenderingRecipe {
                     let tempTextureDescriptor = textureDescriptor.makeMTLTextureDescriptor()
                     tempTextureDescriptor.textureType = .type2DMultisample
                     tempTextureDescriptor.usage = .renderTarget
-                    tempTextureDescriptor.sampleCount = Int(rasterSampleCount)
+                    tempTextureDescriptor.sampleCount = rasterSampleCount
                     let msaaTarget = try renderingContext.context
                         .makeRenderTarget(reusableTextureDescriptor: tempTextureDescriptor
                             .makeMTITextureDescriptor())
@@ -321,12 +314,15 @@ final class MTIImageRenderingRecipe {
         guard let commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw _MTIErrorCreate(.failedToCreateCommandEncoder, "MTIErrorFailedToCreateCommandEncoder", nil)
+            throw MTIError(
+                code: .failedToCreateCommandEncoder,
+                message: "MTIErrorFailedToCreateCommandEncoder"
+            )
         }
         for command in renderCommands {
             let configuration = MTIRenderPipelineKernelConfiguration.configuration(
                 colorAttachmentPixelFormats: pixelFormats,
-                rasterSampleCount: Int(rasterSampleCount)
+                rasterSampleCount: rasterSampleCount
             )
             let renderPipeline: MTIRenderPipeline
             do {
@@ -339,7 +335,7 @@ final class MTIImageRenderingRecipe {
                 throw error
             }
             commandEncoder.setRenderPipelineState(renderPipeline.state)
-            for argument in renderPipeline.reflection.vertexArguments ?? [] where argument.type == .texture {
+            for argument in renderPipeline.reflection.vertexBindings where argument.type == .texture {
                 let index = argument.index
                 if index < command.images.count {
                     let texture = renderingContext.resolvedTexture(for: command.images[index])
@@ -348,14 +344,13 @@ final class MTIImageRenderingRecipe {
                     commandEncoder.setVertexSamplerState(samplerState, index: index)
                 } else {
                     commandEncoder.endEncoding()
-                    throw _MTIErrorCreate(
-                        .textureBindingFailed,
-                        "MTIErrorTextureBindingFailed",
-                        ["kernel": command.kernel, "stage": "vertex", "argument": argument.name]
+                    throw MTIError(
+                        code: .textureBindingFailed,
+                        message: "MTIErrorTextureBindingFailed"
                     )
                 }
             }
-            for argument in renderPipeline.reflection.fragmentArguments ?? []
+            for argument in renderPipeline.reflection.fragmentBindings
                 where argument.type == .texture
             {
                 let index = argument.index
@@ -366,10 +361,9 @@ final class MTIImageRenderingRecipe {
                     commandEncoder.setFragmentSamplerState(samplerState, index: index)
                 } else {
                     commandEncoder.endEncoding()
-                    throw _MTIErrorCreate(
-                        .textureBindingFailed,
-                        "MTIErrorTextureBindingFailed",
-                        ["kernel": command.kernel, "stage": "fragment", "argument": argument.name]
+                    throw MTIError(
+                        code: .textureBindingFailed,
+                        message: "MTIErrorTextureBindingFailed"
                     )
                 }
             }
@@ -377,13 +371,13 @@ final class MTIImageRenderingRecipe {
             if command.parameters.count > 0 {
                 do {
                     try MTIFunctionArgumentsEncoder.encode(
-                        renderPipeline.reflection.vertexArguments ?? [],
+                        renderPipeline.reflection.vertexBindings,
                         values: command.parameters,
                         functionType: .vertex,
                         encoder: commandEncoder
                     )
                     try MTIFunctionArgumentsEncoder.encode(
-                        renderPipeline.reflection.fragmentArguments ?? [],
+                        renderPipeline.reflection.fragmentBindings,
                         values: command.parameters,
                         functionType: .fragment,
                         encoder: commandEncoder
@@ -400,7 +394,7 @@ final class MTIImageRenderingRecipe {
     }
 }
 
-final class MTIImageRenderingPromise: NSObject, MTIImagePromise {
+final class MTIImageRenderingPromise: MTIImagePromise {
     let recipe: MTIImageRenderingRecipe
     let outputIndex: Int
 
@@ -411,7 +405,6 @@ final class MTIImageRenderingPromise: NSObject, MTIImagePromise {
     init(imageRenderingRecipe recipe: MTIImageRenderingRecipe, outputIndex index: Int) {
         self.recipe = recipe
         outputIndex = index
-        super.init()
     }
 
     var dimensions: MTITextureDimensions {
@@ -423,7 +416,9 @@ final class MTIImageRenderingPromise: NSObject, MTIImagePromise {
             return try recipe.resolve(with: renderingContext, resolver: self)[0]
         } else {
             recipe.resolutionCacheLock!.lock()
-            defer { recipe.resolutionCacheLock!.unlock() }
+            defer {
+                recipe.resolutionCacheLock!.unlock()
+            }
             if let renderTargets = recipe.resolutionCache!
                 .object(forKey: renderingContext) as? [MTIImagePromiseRenderTarget]
             {
@@ -438,16 +433,11 @@ final class MTIImageRenderingPromise: NSObject, MTIImagePromise {
         }
     }
 
-    func copy(with _: NSZone? = nil) -> Any {
-        self
-    }
-
     var alphaType: MTIAlphaType {
         recipe.alphaType
     }
 
     func updatingDependencies(_ dependencies: [MTIImage]) -> Self {
-        assert(dependencies.count == self.dependencies.count)
         var newCommands: [MTIRenderCommand] = []
         var index = 0
         for command in recipe.renderCommands {
@@ -491,7 +481,7 @@ public extension MTIRenderCommand {
 
     static func images(
         byPerforming renderCommands: [MTIRenderCommand],
-        rasterSampleCount: UInt,
+        rasterSampleCount: Int,
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) -> [MTIImage] {
         let recipe = MTIImageRenderingRecipe(

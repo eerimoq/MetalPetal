@@ -41,7 +41,8 @@ struct CLAHEFilterView: View {
                                 )
                                 Button("More Information") { [openURL] in
                                     openURL(URL(string: "https://github.com/YuAo/Accelerated-CLAHE")!)
-                                }.linkButtonStyle()
+                                }
+                                .linkButtonStyle()
                             }
                         })
                         .inlineNavigationBarTitle("CLAHE")

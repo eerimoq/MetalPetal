@@ -9,7 +9,7 @@ import CoreGraphics
 import Foundation
 import QuartzCore
 
-public final class MTIVector: NSObject, NSCopying {
+public final class MTIVector: Hashable {
     public enum ScalarType: Int {
         case float
         case int
@@ -20,84 +20,63 @@ public final class MTIVector: NSObject, NSCopying {
         case uchar
     }
 
-    private let data: NSData
+    private let data: Data
 
     public let scalarType: ScalarType
 
     public let count: Int
 
-    public init(floatValues values: UnsafePointer<Float>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<Float>.stride)
+    public init(floatValues values: UnsafePointer<Float>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<Float>.stride)
         scalarType = .float
-        super.init()
     }
 
-    public init(intValues values: UnsafePointer<Int32>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<Int32>.stride)
+    public init(intValues values: UnsafePointer<Int32>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<Int32>.stride)
         scalarType = .int
-        super.init()
     }
 
-    public init(uintValues values: UnsafePointer<UInt32>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<UInt32>.stride)
+    public init(uintValues values: UnsafePointer<UInt32>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<UInt32>.stride)
         scalarType = .uint
-        super.init()
     }
 
-    public init(shortValues values: UnsafePointer<Int16>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<Int16>.stride)
+    public init(shortValues values: UnsafePointer<Int16>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<Int16>.stride)
         scalarType = .short
-        super.init()
     }
 
-    public init(ushortValues values: UnsafePointer<UInt16>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<UInt16>.stride)
+    public init(ushortValues values: UnsafePointer<UInt16>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<UInt16>.stride)
         scalarType = .ushort
-        super.init()
     }
 
-    public init(charValues values: UnsafePointer<Int8>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<Int8>.stride)
+    public init(charValues values: UnsafePointer<Int8>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<Int8>.stride)
         scalarType = .char
-        super.init()
     }
 
-    public init(ucharValues values: UnsafePointer<UInt8>, count: UInt) {
-        assert(count > 0)
-        self.count = Int(count)
-        data = NSData(bytes: values, length: Int(count) * MemoryLayout<UInt8>.stride)
+    public init(ucharValues values: UnsafePointer<UInt8>, count: Int) {
+        self.count = count
+        data = Data(bytes: values, count: count * MemoryLayout<UInt8>.stride)
         scalarType = .uchar
-        super.init()
     }
 
-    public func copy(with _: NSZone? = nil) -> Any {
-        self
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(data)
     }
 
-    override public var hash: Int {
-        data.hash
-    }
-
-    override public func isEqual(_ object: Any?) -> Bool {
-        guard let other = object as? MTIVector else {
-            return false
-        }
-        if other === self {
+    public static func == (lhs: MTIVector, rhs: MTIVector) -> Bool {
+        if lhs === rhs {
             return true
         }
-        return count == other.count && data.isEqual(other.data)
+        return lhs.count == rhs.count && lhs.data == rhs.data
     }
 
     public convenience init(x: Float, y: Float) {
@@ -127,63 +106,71 @@ public final class MTIVector: NSObject, NSCopying {
 
     public var cgPointValue: CGPoint {
         if count == 2, scalarType == .float {
-            let b = bytes().assumingMemoryBound(to: Float.self)
-            return CGPoint(x: CGFloat(b[0]), y: CGFloat(b[1]))
+            return withUnsafeBytes { raw in
+                let b = raw.bindMemory(to: Float.self)
+                return CGPoint(x: CGFloat(b[0]), y: CGFloat(b[1]))
+            }
         }
         return .zero
     }
 
     public var cgSizeValue: CGSize {
         if count == 2, scalarType == .float {
-            let b = bytes().assumingMemoryBound(to: Float.self)
-            return CGSize(width: CGFloat(b[0]), height: CGFloat(b[1]))
+            return withUnsafeBytes { raw in
+                let b = raw.bindMemory(to: Float.self)
+                return CGSize(width: CGFloat(b[0]), height: CGFloat(b[1]))
+            }
         }
         return .zero
     }
 
     public var cgRectValue: CGRect {
         if count == 4, scalarType == .float {
-            let b = bytes().assumingMemoryBound(to: Float.self)
-            return CGRect(x: CGFloat(b[0]), y: CGFloat(b[1]), width: CGFloat(b[2]), height: CGFloat(b[3]))
+            return withUnsafeBytes { raw in
+                let b = raw.bindMemory(to: Float.self)
+                return CGRect(x: CGFloat(b[0]), y: CGFloat(b[1]), width: CGFloat(b[2]), height: CGFloat(b[3]))
+            }
         }
         return .zero
     }
 
     public var byteLength: Int {
-        data.length
+        data.count
     }
 
-    public func bytes() -> UnsafeRawPointer {
-        data.bytes
+    /// Calls `body` with the vector's raw bytes. The pointer is only valid for the duration of the
+    /// call; this replaces the previous `bytes()`, which handed out an unowned interior pointer.
+    public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+        try data.withUnsafeBytes(body)
     }
 }
 
 public extension MTIVector {
     convenience init(values: [Float]) {
-        self.init(floatValues: values, count: UInt(values.count))
+        self.init(floatValues: values, count: values.count)
     }
 
     convenience init(values: [Int32]) {
-        self.init(intValues: values, count: UInt(values.count))
+        self.init(intValues: values, count: values.count)
     }
 
     convenience init(values: [UInt32]) {
-        self.init(uintValues: values, count: UInt(values.count))
+        self.init(uintValues: values, count: values.count)
     }
 
     convenience init(values: [Int16]) {
-        self.init(shortValues: values, count: UInt(values.count))
+        self.init(shortValues: values, count: values.count)
     }
 
     convenience init(values: [UInt16]) {
-        self.init(ushortValues: values, count: UInt(values.count))
+        self.init(ushortValues: values, count: values.count)
     }
 
     convenience init(values: [Int8]) {
-        self.init(charValues: values, count: UInt(values.count))
+        self.init(charValues: values, count: values.count)
     }
 
     convenience init(values: [UInt8]) {
-        self.init(ucharValues: values, count: UInt(values.count))
+        self.init(ucharValues: values, count: values.count)
     }
 }
