@@ -215,6 +215,28 @@ struct RenderTests {
         ]))
     }
 
+    @Test func pinchDistortionFilter_identity() throws {
+        let inputCGImage = try ImageGenerator.makeSmoothGradientImage(width: 32, height: 32)
+        let inputImage = MTIImage(cgImage: inputCGImage, isOpaque: true)
+
+        let filter = MTIPinchDistortionFilter()
+        filter.inputImage = inputImage
+        filter.center = simd_make_float2(16, 16)
+        filter.radius = 12
+        filter.scale = 0
+        let output = try #require(filter.outputImage)
+
+        let context = try makeContext()
+        let outputCGImage = try context.makeCGImage(from: output)
+        var inputPixels = [PixelEnumerator.Coordinates: PixelEnumerator.Pixel]()
+        PixelEnumerator.enumeratePixels(in: inputCGImage) { pixel, coord in
+            inputPixels[coord] = pixel
+        }
+        PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
+            #expect(pixel == inputPixels[coord])
+        }
+    }
+
     @Test func mPSFilter_lanczosScale() throws {
         let kernel = MTIMPSKernel { device in
             MPSImageLanczosScale(device: device)

@@ -36,6 +36,7 @@ struct PublicInitializerTests {
             MTIMPSHistogramFilter(),
             MTIMultilayerCompositingFilter(),
             MTIOpacityFilter(),
+            MTIPinchDistortionFilter(),
             MTIPixellateFilter(),
             MTIPremultiplyAlphaFilter(),
             MTIRGBColorSpaceConversionFilter(),
@@ -47,7 +48,7 @@ struct PublicInitializerTests {
             MTIUnpremultiplyAlphaFilter(),
             MTIVibranceFilter(),
         ]
-        #expect(filters.count == 34)
+        #expect(filters.count == 35)
         for filter in filters {
             #expect(filter.outputImage == nil)
         }

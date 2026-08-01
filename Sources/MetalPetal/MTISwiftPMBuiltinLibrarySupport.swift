@@ -5614,7 +5614,26 @@ namespace metalpetal {
         
         return sourceTexture.sample(sourceSampler, textureCoordinate);
     }
-    
+
+    fragment float4 pinchDistortion(VertexOut vertexIn [[stage_in]],
+                                    texture2d<float, access::sample> sourceTexture [[texture(0)]],
+                                    sampler sourceSampler [[sampler(0)]],
+                                    constant float & scale [[ buffer(0) ]],
+                                    constant float & radius [[ buffer(1) ]],
+                                    constant float2 & center [[ buffer(2) ]]) {
+        float2 textureSize = float2(sourceTexture.get_width(), sourceTexture.get_height());
+        float2 textureCoordinate = vertexIn.textureCoordinate;
+        float2 offset = textureCoordinate * textureSize - center;
+        float dist = length(offset);
+
+        if (dist > 0) {
+            float distortedDist = dist + (sqrt(dist * radius) - dist) * scale;
+            textureCoordinate = (center + offset * (distortedDist / dist)) / textureSize;
+        }
+
+        return sourceTexture.sample(sourceSampler, textureCoordinate);
+    }
+
     namespace definition {
         
         float4 meaningBlur(float4 im, float4 b) {

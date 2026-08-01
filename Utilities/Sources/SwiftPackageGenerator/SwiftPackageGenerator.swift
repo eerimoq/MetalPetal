@@ -54,7 +54,10 @@ public struct SwiftPackageGenerator: ParsableCommand {
                     let librarySource = targetConditionals + MTIBuiltinLibrarySource
                     let options = MTLCompileOptions()
                     options.fastMathEnabled = true
-                    return MTILibrarySourceRegistration.shared.registerLibrary(source: librarySource, compileOptions: options)
+                    return MTILibrarySourceRegistration.shared.registerLibrary(
+                        source: librarySource,
+                        compileOptions: options
+                    )
                 }()
             }
             return Static.url

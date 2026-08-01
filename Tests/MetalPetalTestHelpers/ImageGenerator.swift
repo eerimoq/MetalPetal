@@ -190,4 +190,32 @@ public enum ImageGenerator {
         }
         return image
     }
+
+    public static func makeSmoothGradientImage(width: Int, height: Int) throws -> CGImage {
+        var buffer = [UInt8](repeating: 0, count: width * height * 4)
+        for y in 0 ..< height {
+            for x in 0 ..< width {
+                let i = (y * width + x) * 4
+                buffer[i + 0] = UInt8(64 + 128 * y / max(height - 1, 1))
+                buffer[i + 1] = UInt8(64 + 128 * (x + y) / max(width + height - 2, 1))
+                buffer[i + 2] = UInt8(64 + 128 * x / max(width - 1, 1))
+                buffer[i + 3] = 255
+            }
+        }
+        guard let context = CGContext(
+            data: &buffer,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
+        ) else {
+            throw Error.cannotCreateCGContext
+        }
+        guard let image = context.makeImage() else {
+            throw Error.cannotCreateImageFromContext
+        }
+        return image
+    }
 }
