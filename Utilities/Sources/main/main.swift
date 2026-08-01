@@ -8,12 +8,11 @@
 import Foundation
 import ArgumentParser
 import BoilerplateGenerator
-import SwiftPackageGenerator
 
 struct Main: ParsableCommand {
     static var configuration = CommandConfiguration(
         abstract: "Code Generator Utilities for MetalPetal.",
-        subcommands: [BoilerplateGenerator.self, SwiftPackageGenerator.self],
+        subcommands: [BoilerplateGenerator.self],
         defaultSubcommand: nil)
 }
 

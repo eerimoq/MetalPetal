@@ -13,9 +13,6 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "SwiftPackageGenerator",
-            dependencies: ["ArgumentParser", "URLExpressibleByArgument", "MetalPetalSourceLocator"]),
-        .target(
             name: "BoilerplateGenerator",
             dependencies: ["ArgumentParser", "SIMDType", "URLExpressibleByArgument", "MetalPetalSourceLocator"]),
         .target(
@@ -24,6 +21,6 @@ let package = Package(
         .target(name: "MetalPetalSourceLocator"),
         .target(
             name: "main",
-            dependencies: ["SwiftPackageGenerator", "BoilerplateGenerator"])
+            dependencies: ["BoilerplateGenerator"])
     ]
 )

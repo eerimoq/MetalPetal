@@ -18,7 +18,7 @@ let package = Package(
         .target(
             name: "MetalPetal",
             dependencies: [],
-            exclude: ["Shaders"]),
+            resources: [.process("Shaders")]),
         .target(
             name: "MetalPetalTestHelpers",
             dependencies: ["MetalPetal"],

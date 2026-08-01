@@ -52,6 +52,26 @@ struct ContextTests {
         -------------------
         """)
     }
+
+    @Test func builtinLibrary() throws {
+        let isPrecompiled = MTIBuiltinLibraryURL().scheme != MTIURLSchemeForLibraryWithSource
+        print("built-in metal library is precompiled - \(isPrecompiled)")
+        let context = try makeContext()
+        let functionNames = Set(context.defaultLibrary.functionNames)
+        for name in [
+            "metalpetal::passthroughVertex",
+            "metalpetal::passthrough",
+            "metalpetal::colorLookup3D",
+            "metalpetal::multilayerCompositeNormalBlend",
+        ] {
+            #expect(functionNames.contains(name))
+        }
+        #if targetEnvironment(simulator)
+        #expect(!context.defaultLibrarySupportsProgrammableBlending)
+        #else
+        #expect(context.defaultLibrarySupportsProgrammableBlending)
+        #endif
+    }
 }
 
 @Suite(.enabled(if: metalDeviceIsAvailable))

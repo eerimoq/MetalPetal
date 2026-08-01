@@ -71,9 +71,7 @@ public final class MTIContextOptions {
     public var makeTexturePool: ((MTLDevice) -> any MTITexturePool)?
 
     public init() {
-        // MetalPetal ships no `default.metallib`; the built-in shaders are compiled at runtime from the
-        // source embedded in `MTISwiftPMBuiltinLibrarySupport.swift`.
-        defaultLibraryURL = MTISwiftPMBuiltinLibrarySourceURL()
+        defaultLibraryURL = MTIBuiltinLibraryURL()
     }
 }
 
