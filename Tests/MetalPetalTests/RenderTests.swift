@@ -237,6 +237,60 @@ struct RenderTests {
         }
     }
 
+    @Test func twirlDistortionFilter_identity() throws {
+        let inputCGImage = try ImageGenerator.makeSmoothGradientImage(width: 32, height: 32)
+        let inputImage = MTIImage(cgImage: inputCGImage, isOpaque: true)
+
+        let filter = MTITwirlDistortionFilter()
+        filter.inputImage = inputImage
+        filter.center = simd_make_float2(16, 16)
+        filter.radius = 12
+        filter.angle = 0
+        let output = try #require(filter.outputImage)
+
+        let context = try makeContext()
+        let outputCGImage = try context.makeCGImage(from: output)
+        var inputPixels = [PixelEnumerator.Coordinates: PixelEnumerator.Pixel]()
+        PixelEnumerator.enumeratePixels(in: inputCGImage) { pixel, coord in
+            inputPixels[coord] = pixel
+        }
+        PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
+            #expect(pixel == inputPixels[coord])
+        }
+    }
+
+    @Test func twirlDistortionFilter_leavesPixelsOutsideRadiusUntouched() throws {
+        let inputCGImage = try ImageGenerator.makeSmoothGradientImage(width: 64, height: 64)
+        let inputImage = MTIImage(cgImage: inputCGImage, isOpaque: true)
+
+        let center = simd_make_float2(32, 32)
+        let radius: Float = 20
+        let filter = MTITwirlDistortionFilter()
+        filter.inputImage = inputImage
+        filter.center = center
+        filter.radius = radius
+        filter.angle = .pi
+        let output = try #require(filter.outputImage)
+
+        let context = try makeContext()
+        let outputCGImage = try context.makeCGImage(from: output)
+        var inputPixels = [PixelEnumerator.Coordinates: PixelEnumerator.Pixel]()
+        PixelEnumerator.enumeratePixels(in: inputCGImage) { pixel, coord in
+            inputPixels[coord] = pixel
+        }
+        var distortedPixelCount = 0
+        PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
+            let dx = Float(coord.x) + 0.5 - center.x
+            let dy = Float(coord.y) + 0.5 - center.y
+            if (dx * dx + dy * dy).squareRoot() > radius {
+                #expect(pixel == inputPixels[coord])
+            } else if pixel != inputPixels[coord] {
+                distortedPixelCount += 1
+            }
+        }
+        #expect(distortedPixelCount > 100)
+    }
+
     @Test func mPSFilter_lanczosScale() throws {
         let kernel = MTIMPSKernel { device in
             MPSImageLanczosScale(device: device)

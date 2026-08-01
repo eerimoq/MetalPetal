@@ -1,0 +1,31 @@
+//
+//  MTITwirlDistortionFilter.swift
+//  MetalPetal
+//
+
+import Foundation
+import simd
+
+public final class MTITwirlDistortionFilter: MTIUnaryImageRenderingFilter {
+    /// Specifies the center of the distortion in pixels.
+    public var center: simd_float2 = simd_make_float2(0, 0)
+    /// Specifies the radius of the distortion in pixels. Pixels at this distance from the center, and
+    /// beyond, are unaffected.
+    public var radius: Float = 0
+    /// Specifies the rotation at the center of the distortion, in radians, counterclockwise.
+    public var angle: Float = 0
+
+    override public static func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
+        MTIFunctionDescriptor(name: "twirlDistortion")
+    }
+
+    override public var parameters: [String: Any] {
+        ["center": MTIVector(value: center),
+         "radius": radius,
+         "angle": angle]
+    }
+
+    override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
+        MTIAlphaTypeHandlingRule.passthrough
+    }
+}

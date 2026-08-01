@@ -386,6 +386,19 @@ extension CapturePipeline.Effect {
                 return filter.outputImage!
             }
         },
+        .init("Twirl Distortion") {
+            let filter = MTITwirlDistortionFilter()
+            filter.angle = .pi
+            return { image in
+                filter.center = simd_make_float2(
+                    Float(image.size.width / 2),
+                    Float(image.size.height / 2)
+                )
+                filter.radius = Float(min(image.size.width, image.size.height) / 2)
+                filter.inputImage = image
+                return filter.outputImage!
+            }
+        },
         .init("Round Corner") {
             let filter = MTIRoundCornerFilter()
             filter.cornerCurve = .continuous

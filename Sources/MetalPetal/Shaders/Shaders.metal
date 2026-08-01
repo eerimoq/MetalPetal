@@ -631,6 +631,28 @@ namespace metalpetal {
         return sourceTexture.sample(sourceSampler, textureCoordinate);
     }
 
+    fragment float4 twirlDistortion(VertexOut vertexIn [[stage_in]],
+                                    texture2d<float, access::sample> sourceTexture [[texture(0)]],
+                                    sampler sourceSampler [[sampler(0)]],
+                                    constant float & angle [[ buffer(0) ]],
+                                    constant float & radius [[ buffer(1) ]],
+                                    constant float2 & center [[ buffer(2) ]]) {
+        float2 textureSize = float2(sourceTexture.get_width(), sourceTexture.get_height());
+        float2 textureCoordinate = vertexIn.textureCoordinate;
+        float2 offset = textureCoordinate * textureSize - center;
+
+        if (radius > 0) {
+            float falloff = 1.0 - smoothstep(0.0, 1.0, length(offset) / radius);
+            float rotation = angle * falloff;
+            float s = sin(rotation);
+            float c = cos(rotation);
+            offset = float2(offset.x * c - offset.y * s, offset.x * s + offset.y * c);
+            textureCoordinate = (center + offset) / textureSize;
+        }
+
+        return sourceTexture.sample(sourceSampler, textureCoordinate);
+    }
+
     namespace definition {
         
         float4 meaningBlur(float4 im, float4 b) {

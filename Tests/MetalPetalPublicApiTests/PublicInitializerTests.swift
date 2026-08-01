@@ -45,10 +45,11 @@ struct PublicInitializerTests {
             MTISRGBToneCurveToLinearFilter(),
             MTISaturationFilter(),
             MTITransformFilter(),
+            MTITwirlDistortionFilter(),
             MTIUnpremultiplyAlphaFilter(),
             MTIVibranceFilter(),
         ]
-        #expect(filters.count == 35)
+        #expect(filters.count == 36)
         for filter in filters {
             #expect(filter.outputImage == nil)
         }
