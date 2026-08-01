@@ -16,7 +16,6 @@ public final class MTIRoundCornerFilter: MTIUnaryFilter {
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var cornerRadius = MTICornerRadius(topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0)
     public var cornerCurve: MTICornerCurve = .circular
-    private var deprecatedRadius = simd_make_float4(0)
 
     private static let circularCornerKernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),

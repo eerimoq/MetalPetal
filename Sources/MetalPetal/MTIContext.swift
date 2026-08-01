@@ -300,9 +300,6 @@ extension MTIContext: MTIMemoryWarningHandling {
     }
 }
 
-private let MTIContextRenderingLockNotLockedErrorDescription =
-    "Context is performing a render-releated operation without acquiring the renderingLock."
-
 public extension MTIContext {
     func makeRenderTarget(texture: MTLTexture) -> MTIImagePromiseRenderTarget {
         MTIImagePromiseRenderTarget(texture: texture)

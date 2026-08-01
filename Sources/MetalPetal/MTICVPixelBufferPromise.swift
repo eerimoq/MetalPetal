@@ -13,7 +13,6 @@ import simd
 
 private let MTIColorConversionVertexFunctionName = "colorConversionVertex"
 private let MTIColorConversionFragmentFunctionName = "colorConversionFragment"
-private let MTIColorConversionKernelFunctionName = "colorConversion"
 
 private let MTIYUVColorConversionVertexData: [Float] = [
     -1.0, -1.0, 0.0, 1.0,

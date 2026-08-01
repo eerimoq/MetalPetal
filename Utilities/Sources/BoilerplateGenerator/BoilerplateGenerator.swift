@@ -19,8 +19,6 @@ public struct BoilerplateGenerator: ParsableCommand {
         case projectRoot
     }
     
-    private let fileManager = FileManager()
-    
     public init() { }
     
     public func run() throws {
