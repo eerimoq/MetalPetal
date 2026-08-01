@@ -13,17 +13,6 @@ import Metal
 import MetalKit
 import ModelIO
 
-private func MTIPreferredAlphaType(forCVPixelBuffer pixelBuffer: CVPixelBuffer) -> MTIAlphaType {
-    switch CVPixelBufferGetPixelFormatType(pixelBuffer) {
-    case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
-         kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-        .alphaIsOne
-    default:
-        // We assume the alpha type to be non-premultiplied.
-        .nonPremultiplied
-    }
-}
-
 private func MTIPreferredAlphaType(forImageWith properties: MTIImageProperties) -> MTIAlphaType {
     let alphaInfo = properties.alphaInfo
     var alphaType = MTIAlphaType.alphaIsOne

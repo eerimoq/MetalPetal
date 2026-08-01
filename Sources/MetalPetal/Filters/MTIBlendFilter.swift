@@ -23,19 +23,16 @@ public final class MTIBlendFilter: MTIFilter {
     }
 
     private struct KernelKey: Hashable {
-        let mode: MTIBlendMode
         let sourceHasPremultipliedAlpha: Bool
         let backdropHasPremultipliedAlpha: Bool
         let outputsPremultipliedAlpha: Bool
         let outputsOpaqueImage: Bool
 
         init(
-            mode: MTIBlendMode,
             backdropAlphaType: MTIAlphaType,
             sourceAlphaType: MTIAlphaType,
             outputAlphaType: MTIAlphaType
         ) {
-            self.mode = mode
             sourceHasPremultipliedAlpha = sourceAlphaType == .premultiplied
             backdropHasPremultipliedAlpha = backdropAlphaType == .premultiplied
             outputsPremultipliedAlpha = outputAlphaType == .premultiplied
@@ -52,7 +49,6 @@ public final class MTIBlendFilter: MTIFilter {
                                outputAlphaType: MTIAlphaType) -> MTIRenderPipelineKernel
     {
         let key = KernelKey(
-            mode: mode,
             backdropAlphaType: backdropAlphaType,
             sourceAlphaType: sourceAlphaType,
             outputAlphaType: outputAlphaType

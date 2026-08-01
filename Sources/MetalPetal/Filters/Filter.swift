@@ -67,7 +67,6 @@ private class PortConnectionContext {
 }
 
 private protocol PortConnection {
-    var fromObject: AnyObject { get }
     var toObject: AnyObject { get }
     func connect(context: PortConnectionContext)
 }
