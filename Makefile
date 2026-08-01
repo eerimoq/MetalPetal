@@ -45,7 +45,7 @@ build-ios-simulator:
 	xcodebuild build -scheme MetalPetal -destination 'generic/platform=iOS Simulator' -workspace .
 
 build-examples:
-	xcodebuild build -project MetalPetalExamples.xcodeproj -scheme "MetalPetalExamples (iOS)" -destination generic/platform=iOS
+	xcodebuild build -project MetalPetalExamples.xcodeproj -scheme "MetalPetalExamples (iOS)" -destination 'platform=macOS,variant=Mac Catalyst'
 
 build-all: build build-ios build-ios-simulator build-mac-catalyst build-tvos build-examples
 
