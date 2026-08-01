@@ -1,6 +1,6 @@
 # MetalPetal
 
-> A Swift only fork, for the simple reason I like Swift a lot more than Objective-C. Claude was used to convert the Objective-C code to Swift.
+> A Swift only fork, for the simple reason I like Swift a lot more than Objective-C. Claude was used to convert the Objective-C code to Swift. My intention is to maintain this fork as it's used by the [Moblin iOS app](https://github.com/eerimoq/moblin). Feel free to submit PR:s.
 
 An image processing framework based on Metal.
 
