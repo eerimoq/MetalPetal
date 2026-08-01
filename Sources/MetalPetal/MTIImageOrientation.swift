@@ -8,22 +8,18 @@
 import Foundation
 import ImageIO
 
-// https://developer.apple.com/documentation/uikit/uiimageorientation?language=objc
+public enum MTIImageOrientation {
+    case unknown
+    case up
+    case upMirrored
+    case down
+    case downMirrored
+    case leftMirrored
+    case right
+    case rightMirrored
+    case left
 
-public enum MTIImageOrientation: Int {
-    case unknown = 0
-    case up = 1
-    case upMirrored = 2
-    case down = 3
-    case downMirrored = 4
-    case leftMirrored = 5
-    case right = 6
-    case rightMirrored = 7
-    case left = 8
-}
-
-public extension MTIImageOrientation {
-    init(cgImagePropertyOrientation orientation: CGImagePropertyOrientation) {
+    init(orientation: CGImagePropertyOrientation) {
         switch orientation {
         case .up:
             self = .up

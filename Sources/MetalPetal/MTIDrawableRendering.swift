@@ -14,7 +14,7 @@ public protocol MTIDrawableProvider: AnyObject {
     func renderPassDescriptor(for request: MTIDrawableRenderingRequest) -> MTLRenderPassDescriptor?
 }
 
-public enum MTIDrawableRenderingResizingMode: Int {
+public enum MTIDrawableRenderingResizingMode {
     case scale
     case aspect
     case aspectFill

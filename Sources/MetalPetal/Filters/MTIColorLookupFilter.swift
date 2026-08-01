@@ -9,7 +9,7 @@ import CoreGraphics
 import Foundation
 import Metal
 
-public enum MTIColorLookupTableType: Int {
+public enum MTIColorLookupTableType {
     case typeUnknown
     /// The look up table contents must a 2D image representing `n` slices of a unit color cube texture,
     /// arranged in an square of `n` images. For instance, a color cube of dimension 64x64x64 should be

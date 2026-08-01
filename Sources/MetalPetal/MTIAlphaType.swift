@@ -9,16 +9,16 @@ import Foundation
 
 /// Describe different ways to represent the opacity of a color value. See also:
 /// https://microsoft.github.io/Win2D/html/PremultipliedAlpha.htm
-public enum MTIAlphaType: Int {
+public enum MTIAlphaType {
     /// The alpha type is unknown.
-    case unknown = 0
+    case unknown
     /// RGB values specify the color of the thing being drawn. The alpha value specifies how solid it is.
-    case nonPremultiplied = 1
+    case nonPremultiplied
     /// RGB specifies how much color the thing being drawn contributes to the output. The alpha value
     /// specifies how much it obscures whatever is behind it.
-    case premultiplied = 2
+    case premultiplied
     /// There is no alpha channel or the alpha value is one.
-    case alphaIsOne = 3
+    case alphaIsOne
 }
 
 public func MTIAlphaTypeGetDescription(_ alphaType: MTIAlphaType) -> String {

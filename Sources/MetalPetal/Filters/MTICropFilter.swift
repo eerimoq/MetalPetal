@@ -17,7 +17,7 @@ import Metal
 // Floor           1.2 | 1.2  | 1.2  | 1.3  | 1.2
 // Ceiling         1.2 | 1.3  | 1.3  | 1.4  | 1.3
 
-public enum MTICropFilterRoundingMode: Int {
+public enum MTICropFilterRoundingMode {
     case plain
     case ceiling
     case floor

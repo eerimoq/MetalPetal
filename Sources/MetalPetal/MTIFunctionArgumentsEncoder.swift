@@ -127,7 +127,6 @@ public enum MTIFunctionArgumentsEncoder {
             guard let value = parameters[binding.name] else {
                 continue
             }
-
             /// Encodes a trivial scalar, checking it against the size the shader declared.
             func encodeScalar(_ scalar: some Any) {
                 var scalar = scalar
@@ -141,7 +140,6 @@ public enum MTIFunctionArgumentsEncoder {
                     )
                 }
             }
-
             if let number = value as? NSNumber {
                 switch binding.bufferDataType {
                 case .bool: encodeScalar(number.boolValue)

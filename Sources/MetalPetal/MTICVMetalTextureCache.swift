@@ -13,7 +13,6 @@ import os
 public let MTICVMetalTextureCacheErrorDomain = "MTICVMetalTextureCacheErrorDomain"
 
 public enum MTICVMetalTextureCacheError: Int {
-    case metalIsNotSupported
     case failedToInitialize
     case failedToCreateTexture
 }

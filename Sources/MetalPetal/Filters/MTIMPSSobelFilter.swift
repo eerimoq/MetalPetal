@@ -8,7 +8,7 @@ import Metal
 import MetalPerformanceShaders
 import simd
 
-public enum MTIMPSSobelColorMode: Int {
+public enum MTIMPSSobelColorMode {
     case auto
     case grayscale
     case grayscaleInverted

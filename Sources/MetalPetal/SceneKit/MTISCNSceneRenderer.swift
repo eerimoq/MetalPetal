@@ -15,8 +15,8 @@ import Metal
 
 public let MTISCNSceneRendererErrorDomain = "MTISCNSceneRendererErrorDomain"
 
-public enum MTISCNSceneRendererError: Int {
-    case sceneKitDoesNotSupportMetal = 1001
+public enum MTISCNSceneRendererError {
+    case sceneKitDoesNotSupportMetal
 }
 
 private func sampleCount(for antialiasingMode: SCNAntialiasingMode) -> Int {
@@ -33,7 +33,7 @@ private func sampleCount(for antialiasingMode: SCNAntialiasingMode) -> Int {
     case .multisampling16X:
         return 16
     #endif
-    @unknown default:
+    default:
         return 1
     }
 }

@@ -12,13 +12,13 @@ import os
 import simd
 
 public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var orientation: MTIImageOrientation = .up
     private static var kernels: [MTIFunctionDescriptor: MTIRenderPipelineKernel] = [:]
     private static let kernelsLock = OSAllocatedUnfairLock()
+
+    public init() {}
 
     public static func kernel() -> MTIRenderPipelineKernel {
         let fragmentFunctionDescriptor = fragmentFunctionDescriptor()

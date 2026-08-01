@@ -10,11 +10,8 @@ import Metal
 
 public final class MTIFunctionDescriptor: Hashable, CustomStringConvertible {
     public let libraryURL: URL?
-
     public let name: String
-
     public let constantValues: MTLFunctionConstantValues?
-
     private let cachedHashValue: Int
 
     public init(name: String, constantValues: MTLFunctionConstantValues?, libraryURL: URL?) {

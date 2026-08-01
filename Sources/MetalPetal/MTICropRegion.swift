@@ -8,7 +8,7 @@
 import CoreGraphics
 import Foundation
 
-public enum MTICropRegionUnit: Int {
+public enum MTICropRegionUnit {
     case pixel
     case percentage
 }

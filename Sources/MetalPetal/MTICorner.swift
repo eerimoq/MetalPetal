@@ -30,12 +30,11 @@ public struct MTICornerRadius: Hashable {
     }
 }
 
-public enum MTICornerCurve: Int {
+public enum MTICornerCurve {
     /// A circular corner curve.
-    case circular = 0
-
+    case circular
     /// A continuous corner curve. This option mimics the behavior of `kCACornerCurveContinuous`.
-    case continuous = 1
+    case continuous
 }
 
 public extension MTICornerCurve {
