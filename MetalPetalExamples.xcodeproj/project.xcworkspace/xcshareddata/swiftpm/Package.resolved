@@ -1,14 +1,15 @@
 {
+  "originHash" : "66ccea8a83bb37e0e8baff493ecc6170e20f3e546e4b232424bf614cd3a05e9c",
   "pins" : [
     {
       "identity" : "videoio",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/MetalPetal/VideoIO",
+      "location" : "https://github.com/eerimoq/VideoIO",
       "state" : {
-        "revision" : "b3fcb5b9209a499811f34c38e41089900393976a",
-        "version" : "2.0.3"
+        "branch" : "master",
+        "revision" : "acb7e0cb793e68bff7bc823568661b7af383330b"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

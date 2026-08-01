@@ -91,9 +91,13 @@ struct BlendModesView: View {
 
 private extension Picker {
     func blendModesPickerStyle() -> some View {
+        #if os(iOS)
         pickerStyle(WheelPickerStyle())
             .background(RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.secondarySystemBackground))
+        #else
+        return pickerStyle(.automatic)
+        #endif
     }
 }
 

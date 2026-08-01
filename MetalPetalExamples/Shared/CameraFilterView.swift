@@ -505,7 +505,11 @@ struct CameraFilterView: View {
                         .tag(effect)
                 }
             }
+            #if os(iOS)
             .pickerStyle(WheelPickerStyle())
+            #else
+            .pickerStyle(.automatic)
+            #endif
             .padding([.horizontal])
             Spacer()
         }
