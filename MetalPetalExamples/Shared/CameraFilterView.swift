@@ -195,8 +195,11 @@ extension CapturePipeline.Effect {
         }
     }
 
-    static let all: [Self] = [
-        noFilter,
+    static let all: [Self] = [noFilter] + filters.sorted {
+        $0.name.localizedStandardCompare($1.name) == .orderedAscending
+    }
+
+    private static let filters: [Self] = [
         .init("Brightness", makeFilter: applying {
             let filter = MTIBrightnessFilter()
             filter.brightness = 0.2
