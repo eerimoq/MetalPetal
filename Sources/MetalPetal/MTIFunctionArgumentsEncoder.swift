@@ -152,7 +152,9 @@ public enum MTIFunctionArgumentsEncoder {
                 case .short: encodeScalar(number.int16Value)
                 case .ushort: encodeScalar(number.uint16Value)
                 case .float: encodeScalar(number.floatValue)
+                #if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))
                 case .half: encodeScalar(Float16(number.floatValue))
+                #endif
                 default:
                     throw MTIError(
                         code: .parameterDataTypeMismatch,
