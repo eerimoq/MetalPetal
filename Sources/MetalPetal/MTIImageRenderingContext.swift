@@ -16,7 +16,7 @@ public protocol MTIImagePromiseResolution: AnyObject {
     func markAsConsumed(by consumer: AnyObject)
 }
 
-private final class MTIImageRenderingDependencyGraph {
+private final class ImageRenderingDependencyGraph {
     // promise identity -> its dependents (the promises that depend on it).
     private var table: [ObjectIdentifier: [MTIImagePromise]] = [:]
 
@@ -54,7 +54,7 @@ private final class MTIImageRenderingDependencyGraph {
     }
 }
 
-private final class MTITransientImagePromiseResolution: MTIImagePromiseResolution {
+private final class TransientImagePromiseResolution: MTIImagePromiseResolution {
     let texture: MTLTexture
     private var invalidationHandler: ((AnyObject) -> Void)?
 
@@ -69,7 +69,7 @@ private final class MTITransientImagePromiseResolution: MTIImagePromiseResolutio
     }
 }
 
-private final class MTIPersistImageResolutionHolder {
+private final class PersistImageResolutionHolder {
     let renderTarget: MTIImagePromiseRenderTarget
 
     init(renderTarget: MTIImagePromiseRenderTarget) {
@@ -90,7 +90,7 @@ public final class MTIImageRenderingContext {
         renderTarget: MTIImagePromiseRenderTarget
     )] = [:]
 
-    private var dependencyGraph: MTIImageRenderingDependencyGraph?
+    private var dependencyGraph: ImageRenderingDependencyGraph?
     private var currentDependencyResolutionMap: [ObjectIdentifier: MTLTexture] = [:]
     private var currentDependencySamplerStateMap: [ObjectIdentifier: MTLSamplerState] = [:]
     private weak var currentResolvingPromise: AnyObject?
@@ -136,7 +136,7 @@ public final class MTIImageRenderingContext {
         if dependencyGraph == nil {
             // If we don't have the dependency graph, we're processing the root image.
             isRootImage = true
-            let graph = MTIImageRenderingDependencyGraph()
+            let graph = ImageRenderingDependencyGraph()
             dependencyGraph = graph
             if context.isRenderGraphOptimizationEnabled {
                 let optimizedPromise = MTIRenderGraphOptimizer.promiseByOptimizingRenderGraph(of: promise)
@@ -218,11 +218,11 @@ public final class MTIImageRenderingContext {
             var persistResolution = context.value(
                 forImage: image,
                 in: MTIContextImagePersistentResolutionHolderTable
-            ) as? MTIPersistImageResolutionHolder
+            ) as? PersistImageResolutionHolder
             if persistResolution == nil {
                 // Create a holder for the render target. Retain the texture. Preventing the texture from
                 // being reused at location [C]
-                persistResolution = MTIPersistImageResolutionHolder(renderTarget: renderTarget)
+                persistResolution = PersistImageResolutionHolder(renderTarget: renderTarget)
                 context.setValue(
                     persistResolution,
                     forImage: image,
@@ -231,7 +231,7 @@ public final class MTIImageRenderingContext {
             }
         }
         if isRootImage {
-            return MTITransientImagePromiseResolution(
+            return TransientImagePromiseResolution(
                 texture: renderTarget.texture!,
                 invalidationHandler: { _ in
                     // Root render result is consumed, releasing the texture.
@@ -240,7 +240,7 @@ public final class MTIImageRenderingContext {
             )
         } else {
             let capturedPromise = promise
-            return MTITransientImagePromiseResolution(
+            return TransientImagePromiseResolution(
                 texture: renderTarget.texture!,
                 invalidationHandler: { [weak self] consumer in
                     guard let self, let graph = dependencyGraph else {
@@ -257,14 +257,14 @@ public final class MTIImageRenderingContext {
     }
 }
 
-private final class MTIImageBufferPromise: MTIImagePromise {
-    fileprivate let resolution: MTIPersistImageResolutionHolder
+private final class ImageBufferPromise: MTIImagePromise {
+    fileprivate let resolution: PersistImageResolutionHolder
     private weak var context: MTIContext?
     let dimensions: MTITextureDimensions
     let alphaType: MTIAlphaType
 
     fileprivate init(
-        persistImageResolutionHolder holder: MTIPersistImageResolutionHolder,
+        persistImageResolutionHolder holder: PersistImageResolutionHolder,
         dimensions: MTITextureDimensions,
         alphaType: MTIAlphaType,
         context: MTIContext
@@ -301,7 +301,7 @@ extension MTIImage {
     /// did not come from that method. Intended for tests, which need to read back the exact texture a
     /// render produced rather than a copy of it.
     var renderedTexture: MTLTexture? {
-        (promise as? MTIImageBufferPromise)?.resolution.renderTarget.texture
+        (promise as? ImageBufferPromise)?.resolution.renderTarget.texture
     }
 }
 
@@ -310,13 +310,13 @@ public extension MTIContext {
         guard let persistResolution = value(
             forImage: targetImage,
             in: MTIContextImagePersistentResolutionHolderTable
-        ) as? MTIPersistImageResolutionHolder else {
+        ) as? PersistImageResolutionHolder else {
             return nil
         }
         return MTIImage(
-            promise: MTIImageBufferPromise(persistImageResolutionHolder: persistResolution,
-                                           dimensions: targetImage.dimensions,
-                                           alphaType: targetImage.alphaType, context: self),
+            promise: ImageBufferPromise(persistImageResolutionHolder: persistResolution,
+                                        dimensions: targetImage.dimensions,
+                                        alphaType: targetImage.alphaType, context: self),
             samplerDescriptor: targetImage.samplerDescriptor,
             cachePolicy: .persistent
         )

@@ -1,5 +1,5 @@
 //
-//  MTILibrarySource.swift
+//  LibrarySource.swift
 //  MetalPetal
 //
 //  Created by Yu Ao on 2019/5/7.
@@ -10,14 +10,13 @@ import Metal
 import os
 
 public let MTIURLSchemeForLibraryWithSource = "mti.library-source"
-
 public let MTILibrarySourceErrorDomain = "MTILibrarySourceErrorDomain"
 
 public enum MTILibrarySourceError: Int {
     case libraryNotFound = 10001
 }
 
-private func MTIURLForLibrarySource(_ identifier: String) -> URL {
+private func urlForLibrarySource(_ identifier: String) -> URL {
     var components = URLComponents()
     components.scheme = MTIURLSchemeForLibraryWithSource
     components.host = "shared"
@@ -25,7 +24,7 @@ private func MTIURLForLibrarySource(_ identifier: String) -> URL {
     return components.url!
 }
 
-private final class MTILibrarySource {
+private final class LibrarySource {
     let source: String
     let compileOptions: MTLCompileOptions?
 
@@ -38,19 +37,18 @@ private final class MTILibrarySource {
 /// `MTILibrarySourceRegistration` can be used under the situation where it is impossible to use an offline
 /// metal compiler. You should avoid using this class as much as you can.
 public final class MTILibrarySourceRegistration {
-    private var sources: [URL: MTILibrarySource] = [:]
+    private var sources: [URL: LibrarySource] = [:]
     private let lock = OSAllocatedUnfairLock()
+    public static let shared = MTILibrarySourceRegistration()
 
     private init() {}
-
-    public static let shared = MTILibrarySourceRegistration()
 
     /// Returns a URL representing the metal library compiled with the `source` code. This URL can be used in
     /// `MTIFunctionDescriptor(name:libraryURL:)`.
     public func registerLibrary(source: String, compileOptions: MTLCompileOptions?) -> URL {
         let identifier = UUID().uuidString
-        let url = MTIURLForLibrarySource(identifier)
-        let librarySource = MTILibrarySource(source: source, compileOptions: compileOptions)
+        let url = urlForLibrarySource(identifier)
+        let librarySource = LibrarySource(source: source, compileOptions: compileOptions)
         lock.lock()
         sources[url] = librarySource
         lock.unlock()
