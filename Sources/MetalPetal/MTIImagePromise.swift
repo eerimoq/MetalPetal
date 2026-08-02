@@ -159,7 +159,6 @@ public final class MTICGImagePromise: MTIImagePromise {
     private let image: CGImage
     private let options: MTICGImageLoadingOptions
     private let properties: MTIImageProperties
-
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
@@ -204,14 +203,12 @@ public final class MTICGImagePromise: MTIImagePromise {
         guard let pixelBuffer = pixelBufferOut else {
             throw MTIError.failedToCreateCVPixelBuffer
         }
-
         let specifiedColorSpace = options.colorSpace ?? image.colorSpace
         let colorSpace = if let specifiedColorSpace, specifiedColorSpace.model == .rgb {
             specifiedColorSpace
         } else {
             CGColorSpaceCreateDeviceRGB()
         }
-
         CVPixelBufferLockBaseAddress(pixelBuffer, [])
         guard let cgContext = CGContext(
             data: CVPixelBufferGetBaseAddress(pixelBuffer),
@@ -225,7 +222,6 @@ public final class MTICGImagePromise: MTIImagePromise {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
             throw MTIError.textureLoaderFailedToCreateCGContext
         }
-
         let placeholder = CIImage(color: CIColor.black).cropped(to: CGRect(
             x: 0,
             y: 0,
@@ -247,11 +243,9 @@ public final class MTICGImagePromise: MTIImagePromise {
                 .orientationTransform(forExifOrientation: Int32(properties.orientation.rawValue)))
         cgContext.draw(image, in: CGRect(x: 0, y: 0, width: pixelWidth, height: pixelHeight))
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
-
         guard let iosurface = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
             throw MTIError.failedToCreateTexture
         }
-
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,
             width: CVPixelBufferGetWidth(pixelBuffer),
@@ -261,7 +255,6 @@ public final class MTICGImagePromise: MTIImagePromise {
         textureDescriptor.usage = .shaderRead
         textureDescriptor.storageMode = options.storageMode
         textureDescriptor.cpuCacheMode = options.cpuCacheMode
-
         guard let texture = renderingContext.context.device.makeTexture(
             descriptor: textureDescriptor,
             iosurface: iosurface,
@@ -269,7 +262,6 @@ public final class MTICGImagePromise: MTIImagePromise {
         ) else {
             throw MTIError.failedToCreateTexture
         }
-
         #if os(iOS) && !targetEnvironment(macCatalyst)
         // Workaround for #64. See https://github.com/MetalPetal/MetalPetal/issues/64
         if !renderingContext.context.device.supportsFamily(.apple2) {
@@ -309,7 +301,6 @@ public final class MTICGImagePromise: MTIImagePromise {
 
 public final class MTITexturePromise: MTIImagePromise {
     public let texture: MTLTexture
-
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
@@ -347,7 +338,6 @@ public final class MTICIImagePromise: MTIImagePromise {
     private let textureDescriptor: MTITextureDescriptor
     private let isOpaque: Bool
     private let options: MTICIImageRenderingOptions
-
     public let dimensions: MTITextureDimensions
 
     public init(ciImage: CIImage, bounds: CGRect, isOpaque: Bool, options: MTICIImageRenderingOptions) {
@@ -424,7 +414,6 @@ public final class MTICIImagePromise: MTIImagePromise {
 public final class MTIColorImagePromise: MTIImagePromise {
     public let color: MTIColor
     private let sRGB: Bool
-
     public let dimensions: MTITextureDimensions
 
     public init(color: MTIColor, sRGB: Bool, size: CGSize) {
@@ -470,7 +459,6 @@ public final class MTIColorImagePromise: MTIImagePromise {
             bytesPerRow: 4 * textureDescriptor.width,
             bytesPerImage: 4 * textureDescriptor.width * textureDescriptor.height
         )
-
         MTIImagePromiseOptimizeContentsForGPUAccess(texture, renderingContext)
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
@@ -499,7 +487,6 @@ public final class MTIBitmapDataImagePromise: MTIImagePromise {
     private let data: Data
     private let pixelFormat: MTLPixelFormat
     private let bytesPerRow: Int
-
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
@@ -536,7 +523,6 @@ public final class MTIBitmapDataImagePromise: MTIImagePromise {
         guard let texture = renderingContext.context.device.makeTexture(descriptor: textureDescriptor) else {
             throw MTIError.failedToCreateTexture
         }
-
         data.withUnsafeBytes { rawBuffer in
             texture.replace(
                 region: MTLRegionMake2D(0, 0, textureDescriptor.width, textureDescriptor.height),
@@ -547,7 +533,6 @@ public final class MTIBitmapDataImagePromise: MTIImagePromise {
                 bytesPerImage: Int(bytesPerRow) * textureDescriptor.height
             )
         }
-
         MTIImagePromiseOptimizeContentsForGPUAccess(texture, renderingContext)
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
@@ -566,7 +551,6 @@ public final class MTINamedImagePromise: MTIImagePromise {
     public let bundle: Bundle?
     public let scaleFactor: CGFloat
     private let options: [MTKTextureLoader.Option: Any]?
-
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
@@ -629,7 +613,6 @@ public final class MTINamedImagePromise: MTIImagePromise {
 public final class MTIMDLTexturePromise: MTIImagePromise {
     private let options: [MTKTextureLoader.Option: Any]?
     private let texture: MDLTexture
-
     public let dimensions: MTITextureDimensions
     public let alphaType: MTIAlphaType
 
