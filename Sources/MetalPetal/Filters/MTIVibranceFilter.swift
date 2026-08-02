@@ -18,7 +18,7 @@ public final class MTIVibranceFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "vibranceAdjust")
     }
 
-    override public var parameters: [String: Any] {
+    override public var parameters: [String: MTIFunctionArgumentValue] {
         let amount = Double(amount)
         let vector = simd_float4(
             Float(3 * amount),
@@ -26,10 +26,10 @@ public final class MTIVibranceFilter: MTIUnaryImageRenderingFilter {
             Float(9.0 / 2.0 * amount * amount * amount - amount / 2.0),
             Float(-9.0 / 2.0 * amount * amount * amount + 9.0 / 2.0 * amount * amount - amount)
         )
-        return ["amount": self.amount,
-                "vibranceVector": MTIVector(value: vector),
-                "avoidsSaturatingSkinTones": avoidsSaturatingSkinTones,
-                "grayColorTransform": MTIVector(value: grayColorTransform)]
+        return ["amount": .float(self.amount),
+                "vibranceVector": .vector(MTIVector(value: vector)),
+                "avoidsSaturatingSkinTones": .bool(avoidsSaturatingSkinTones),
+                "grayColorTransform": .vector(MTIVector(value: grayColorTransform))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

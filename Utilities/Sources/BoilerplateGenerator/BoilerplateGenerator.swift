@@ -34,7 +34,7 @@ public struct BoilerplateGenerator: ParsableCommand {
             let url = shadersFileDirectory.appendingPathComponent(file)
             try! content.write(to: url, atomically: true, encoding: .utf8)
         }
-        for (file, content) in MTISIMDShaderArgumentEncoderGenerator.generate() {
+        for (file, content) in MTISIMDArgumentValueGenerator.generate() {
             let url = sourceDirectory.appendingPathComponent(file)
             try! content.write(to: url, atomically: true, encoding: .utf8)
         }

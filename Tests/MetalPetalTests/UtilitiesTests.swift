@@ -92,7 +92,7 @@ struct UtilitiesTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": SIMD4<Float>(1, 0, 0, 0)],
+            parameters: ["color": .simd(.float4(SIMD4<Float>(1, 0, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -135,7 +135,7 @@ struct UtilitiesTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": SIMD3<Float>(1, 0, 0)],
+            parameters: ["color": .simd(.float3(SIMD3<Float>(1, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -177,7 +177,7 @@ struct UtilitiesTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": float2x2(rows: [SIMD2<Float>(1, 0), SIMD2<Float>(1, 0)])],
+            parameters: ["color": .simd(.float2x2(float2x2(rows: [SIMD2<Float>(1, 0), SIMD2<Float>(1, 0)])))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -228,7 +228,7 @@ struct UtilitiesTests {
         do {
             try MTIFunctionArgumentsEncoder.encode(
                 state.reflection.bindings,
-                values: ["color": SIMD3<Float>(0, 0, 0)],
+                values: ["color": .simd(.float3(SIMD3<Float>(0, 0, 0)))],
                 functionType: .kernel,
                 encoder: #require(commandEncoder)
             )
@@ -238,7 +238,7 @@ struct UtilitiesTests {
         }
         try MTIFunctionArgumentsEncoder.encode(
             state.reflection.bindings,
-            values: ["color": MTLPackedFloat3Make(0, 0, 0)],
+            values: ["color": .simd(.packedFloat3(MTLPackedFloat3Make(0, 0, 0)))],
             functionType: .kernel,
             encoder: #require(commandEncoder)
         )
@@ -280,7 +280,7 @@ struct UtilitiesTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": SIMD4<UInt8>(128, 0, 0, 0)],
+            parameters: ["color": .simd(.uchar4(SIMD4<UInt8>(128, 0, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -288,56 +288,6 @@ struct UtilitiesTests {
         let output = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: output) { pixel, _ in
             #expect(pixel.r == 128 && pixel.g == 255 && pixel.b == 0 && pixel.a == 255)
-        }
-    }
-
-    @Test func directSIMDVectorSupport_int64_4() throws {
-        let kernelSource = """
-        #include <metal_stdlib>
-        using namespace metal;
-
-        kernel void testCompute(
-        texture2d<float, access::read> inTexture [[texture(0)]],
-        texture2d<float, access::write> outTexture [[texture(1)]],
-        constant int4 &color [[buffer(0)]],
-        uint2 gid [[thread_position_in_grid]]
-        ) {
-            if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) {
-                return;
-            }
-            outTexture.write(inTexture.read(uint2(0,0)), gid);
-        }
-        """
-        let libraryURL = MTILibrarySourceRegistration.shared.registerLibrary(
-            source: kernelSource,
-            compileOptions: nil
-        )
-        let computeKernel = MTIComputePipelineKernel(computeFunctionDescriptor: MTIFunctionDescriptor(
-            name: "testCompute",
-            libraryURL: libraryURL
-        ))
-
-        let context = try makeContext()
-        context.lockForRendering()
-        let state = try #require(context.kernelState(
-            for: computeKernel,
-            configuration: nil
-        ) as? MTIComputePipeline)
-        context.unlockForRendering()
-        let commandEncoder = context.commandQueue.makeCommandBuffer()?.makeComputeCommandEncoder()
-        defer {
-            commandEncoder?.endEncoding()
-        }
-        do {
-            try MTIFunctionArgumentsEncoder.encode(
-                state.reflection.bindings,
-                values: ["color": SIMD4<Int>(128, 0, 0, 0)],
-                functionType: .kernel,
-                encoder: #require(commandEncoder)
-            )
-        } catch {
-            let error = try #require(error as? MTIError)
-            #expect(error.code == MTIError.Code.unsupportedParameterType)
         }
     }
 
@@ -381,13 +331,13 @@ struct UtilitiesTests {
         do {
             try MTIFunctionArgumentsEncoder.encode(
                 state.reflection.bindings,
-                values: ["color": SIMD4<Float>(128, 0, 0, 0)],
+                values: ["color": .simd(.float4(SIMD4<Float>(128, 0, 0, 0)))],
                 functionType: .kernel,
                 encoder: #require(commandEncoder)
             )
         } catch {
-            let encoderError = try #require(error as? MTISIMDArgumentEncoder.Error)
-            #expect(encoderError == .argumentTypeMismatch)
+            let encoderError = try #require(error as? MTIError)
+            #expect(encoderError.code == .parameterDataTypeMismatch)
         }
     }
 
@@ -426,7 +376,7 @@ struct UtilitiesTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": SIMD4<Int32>(128, 0, 0, 0)],
+            parameters: ["color": .simd(.int4(SIMD4<Int32>(128, 0, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -532,21 +482,20 @@ struct UtilitiesTests {
             constantValues: nil,
             libraryURL: libraryURL
         ))
-        let parameters: [String: Any] = [
-            "intValue": -1,
-            "uintValue": 1,
-            "charValue": 64,
-            "ucharValue": 128,
-            "shortValue": -1,
-            "ushortValue": 1,
-            "floatValue": 1.0,
-            "halfValue": 1.0,
-            "boolValue": true,
-
-            "float2Value": SIMD2<Float>(x: 1, y: 1),
-            "float4x4Value": simd_float4x4(1),
-            "int2Value": SIMD2<Int32>(x: 1, y: 1),
-            "uchar2Value": SIMD2<UInt8>(x: 1, y: 1),
+        let parameters: [String: MTIFunctionArgumentValue] = [
+            "intValue": .int(-1),
+            "uintValue": .uint(1),
+            "charValue": .int(64),
+            "ucharValue": .uint(128),
+            "shortValue": .int(-1),
+            "ushortValue": .uint(1),
+            "floatValue": .float(1.0),
+            "halfValue": .float(1.0),
+            "boolValue": .bool(true),
+            "float2Value": .simd(.float2(SIMD2<Float>(x: 1, y: 1))),
+            "float4x4Value": .simd(.float4x4(simd_float4x4(1))),
+            "int2Value": .simd(.int2(SIMD2<Int32>(x: 1, y: 1))),
+            "uchar2Value": .simd(.uchar2(SIMD2<UInt8>(x: 1, y: 1))),
         ]
         let outputImage = computeKernel.apply(
             toInputImages: [],
@@ -577,8 +526,8 @@ struct UtilitiesTests {
             constantValues: nil,
             libraryURL: libraryURL
         ))
-        let parameters: [String: Any] = [
-            "intValue": SIMD2<Float>(x: 0, y: 0),
+        let parameters: [String: MTIFunctionArgumentValue] = [
+            "intValue": .simd(.float2(SIMD2<Float>(x: 0, y: 0))),
         ]
         let outputImage = computeKernel.apply(
             toInputImages: [],
@@ -592,11 +541,11 @@ struct UtilitiesTests {
             _ = try context.makeCGImage(from: outputImage)
             Issue.record()
         } catch {
-            #expect((error as? MTISIMDArgumentEncoder.Error) == .argumentTypeMismatch)
+            #expect((error as? MTIError)?.code == .parameterDataTypeMismatch)
         }
     }
 
-    @Test func argumentsEncoding_unsupportedType() throws {
+    @Test func argumentsEncoding_scalarTypeMismatch() throws {
         let kernelSource = """
         #include <metal_stdlib>
         using namespace metal;
@@ -614,8 +563,8 @@ struct UtilitiesTests {
             constantValues: nil,
             libraryURL: libraryURL
         ))
-        let parameters: [String: Any] = [
-            "float2Value": 2,
+        let parameters: [String: MTIFunctionArgumentValue] = [
+            "float2Value": .int(2),
         ]
         let outputImage = computeKernel.apply(
             toInputImages: [],

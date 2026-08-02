@@ -996,7 +996,6 @@ struct RenderTests {
         )
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
         #expect(outputImage.alphaType == .nonPremultiplied)
-
         let context = try makeContext()
         let task = try context.startTask(toRender: outputImage, completion: nil)
         task.waitUntilCompleted()
@@ -1288,7 +1287,7 @@ struct RenderTests {
             )
             let outputImage = computeKernel.apply(
                 toInputImages: [image],
-                parameters: ["color": MTIVector(value: SIMD4<Float>(1, 0, 0, 0))],
+                parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
                 dispatchOptions: nil,
                 outputTextureDimensions: image.dimensions,
                 outputPixelFormat: .unspecified
@@ -1308,7 +1307,7 @@ struct RenderTests {
             )
             let outputImage = computeKernel.apply(
                 toInputImages: [image],
-                parameters: ["color": MTIVector(value: SIMD4<Float>(1, 0, 0, 0))],
+                parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
                 dispatchOptions: nil,
                 outputTextureDimensions: image.dimensions,
                 outputPixelFormat: .unspecified
@@ -1428,7 +1427,7 @@ struct RenderTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": MTIVector(value: SIMD4<Float>(1, 0, 0, 0))],
+            parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )
@@ -1605,10 +1604,7 @@ struct RenderTests {
             MTIBlendModes.unregisterBlendMode(blendMode)
         }
         let context = try makeContext()
-
-        let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
-            [64],
-        ]), isOpaque: true)
+        let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([[64]]), isOpaque: true)
         let overlay = MTIImage(
             color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
             sRGB: false,
@@ -1617,7 +1613,6 @@ struct RenderTests {
         let blendFilter = MTIBlendFilter(blendMode: blendMode)
         blendFilter.inputBackgroundImage = image
         blendFilter.inputImage = overlay
-
         do {
             let outputImage = try #require(blendFilter.outputImage)
             let outputCGImage = try context.makeCGImage(from: outputImage)
@@ -1627,7 +1622,6 @@ struct RenderTests {
                 }
             }
         }
-
         do {
             blendFilter.intensity = 0.5
             let outputImage = try #require(blendFilter.outputImage)
@@ -1701,10 +1695,7 @@ struct RenderTests {
                 MTIBlendModes.unregisterBlendMode(blendMode)
             }
             let context = try makeContext()
-
-            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
-                [64],
-            ]), isOpaque: true)
+            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([[64]]), isOpaque: true)
             let overlay = MTIImage(
                 color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
                 sRGB: false,
@@ -1713,7 +1704,6 @@ struct RenderTests {
             let blendFilter = MTIBlendFilter(blendMode: blendMode)
             blendFilter.inputBackgroundImage = image
             blendFilter.inputImage = overlay
-
             do {
                 let outputImage = try #require(blendFilter.outputImage)
                 #expect(throws: (any Error).self) { try context.makeCGImage(from: outputImage) }
@@ -1732,10 +1722,7 @@ struct RenderTests {
                 MTIBlendModes.unregisterBlendMode(blendMode)
             }
             let context = try makeContext()
-
-            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
-                [64],
-            ]), isOpaque: true)
+            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([[64]]), isOpaque: true)
             let overlay = MTIImage(
                 color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
                 sRGB: false,
@@ -1744,7 +1731,6 @@ struct RenderTests {
             let blendFilter = MTIBlendFilter(blendMode: blendMode)
             blendFilter.inputBackgroundImage = image
             blendFilter.inputImage = overlay
-
             do {
                 let outputImage = try #require(blendFilter.outputImage)
                 #expect(throws: (any Error).self) { try context.makeCGImage(from: outputImage) }
@@ -1764,10 +1750,7 @@ struct RenderTests {
                 MTIBlendModes.unregisterBlendMode(blendMode)
             }
             let context = try makeContext()
-
-            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
-                [64],
-            ]), isOpaque: true)
+            let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([[64]]), isOpaque: true)
             let overlay = MTIImage(
                 color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
                 sRGB: false,
@@ -1776,7 +1759,6 @@ struct RenderTests {
             let blendFilter = MTIBlendFilter(blendMode: blendMode)
             blendFilter.inputBackgroundImage = image
             blendFilter.inputImage = overlay
-
             do {
                 let outputImage = try #require(blendFilter.outputImage)
                 #expect(throws: (any Error).self) { try context.makeCGImage(from: outputImage) }
@@ -1853,7 +1835,8 @@ struct RenderTests {
             ))
             let outputImage = computeKernel.apply(
                 toInputImages: [],
-                parameters: ["outBuffer": dataBuffer, "count": MTIVector(values: [UInt32(dataCount)])],
+                parameters: ["outBuffer": .dataBuffer(dataBuffer),
+                             "count": .vector(MTIVector(values: [UInt32(dataCount)]))],
                 dispatchOptions: nil,
                 outputTextureDimensions: MTITextureDimensions(width: dataCount, height: 1),
                 outputPixelFormat: .unspecified

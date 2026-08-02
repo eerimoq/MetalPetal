@@ -10,7 +10,7 @@ import Metal
 
 public extension MTIRenderPipelineKernel {
     func makeImage(
-        parameters: [String: Any] = [:],
+        parameters: [String: MTIFunctionArgumentValue] = [:],
         dimensions: MTITextureDimensions,
         pixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
@@ -19,7 +19,7 @@ public extension MTIRenderPipelineKernel {
 
     func apply(
         to image: MTIImage,
-        parameters: [String: Any] = [:],
+        parameters: [String: MTIFunctionArgumentValue] = [:],
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
         makeOutputImage(
@@ -32,7 +32,7 @@ public extension MTIRenderPipelineKernel {
 
     func apply(
         to image: MTIImage,
-        parameters: [String: Any] = [:],
+        parameters: [String: MTIFunctionArgumentValue] = [:],
         outputDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
@@ -46,7 +46,7 @@ public extension MTIRenderPipelineKernel {
 
     func apply(
         to images: [MTIImage],
-        parameters: [String: Any] = [:],
+        parameters: [String: MTIFunctionArgumentValue] = [:],
         outputDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat = .unspecified
     ) -> MTIImage {
@@ -60,7 +60,7 @@ public extension MTIRenderPipelineKernel {
 
     func apply(
         to images: [MTIImage],
-        parameters: [String: Any] = [:],
+        parameters: [String: MTIFunctionArgumentValue] = [:],
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) -> [MTIImage] {
         makeOutputImages(inputImages: images, parameters: parameters, outputDescriptors: outputDescriptors)

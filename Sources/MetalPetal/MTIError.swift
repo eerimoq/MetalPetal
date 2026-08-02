@@ -23,7 +23,6 @@ public struct MTIError: Error {
         case textureLoaderFailedToCreateCGImage
         // Kernel errors
         case parameterDataSizeMismatch
-        case unsupportedParameterType
         case mpsKernelInputCountMismatch
         case mpsKernelNotSupported
         case textureBindingFailed

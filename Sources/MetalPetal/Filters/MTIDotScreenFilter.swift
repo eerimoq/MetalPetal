@@ -19,10 +19,10 @@ public final class MTIDotScreenFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "dotScreen")
     }
 
-    override public var parameters: [String: Any] {
-        ["angle": angle,
-         "scale": max(scale, 1.0),
-         "grayColorTransform": MTIVector(value: grayColorTransform)]
+    override public var parameters: [String: MTIFunctionArgumentValue] {
+        ["angle": .float(angle),
+         "scale": .float(max(scale, 1.0)),
+         "grayColorTransform": .vector(MTIVector(value: grayColorTransform))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

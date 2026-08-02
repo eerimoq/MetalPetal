@@ -38,14 +38,14 @@ private final class MTIImageComputeRecipe: MTIImagePromise {
     private let inputImages: [MTIImage]
     private let kernel: MTIComputePipelineKernel
     private let dispatchOptions: MTIComputeFunctionDispatchOptions?
-    private let functionParameters: [String: Any]
+    private let functionParameters: [String: MTIFunctionArgumentValue]
     private let outputPixelFormat: MTLPixelFormat
     let dimensions: MTITextureDimensions
     let alphaType: MTIAlphaType
 
     init(kernel: MTIComputePipelineKernel,
          inputImages: [MTIImage],
-         functionParameters: [String: Any],
+         functionParameters: [String: MTIFunctionArgumentValue],
          dispatchOptions: MTIComputeFunctionDispatchOptions?,
          outputTextureDimensions: MTITextureDimensions,
          outputPixelFormat: MTLPixelFormat)
@@ -207,7 +207,7 @@ public final class MTIComputePipelineKernel: MTIKernel {
     }
 
     public func apply(toInputImages images: [MTIImage],
-                      parameters: [String: Any],
+                      parameters: [String: MTIFunctionArgumentValue],
                       outputTextureDimensions: MTITextureDimensions,
                       outputPixelFormat: MTLPixelFormat) -> MTIImage
     {
@@ -219,7 +219,7 @@ public final class MTIComputePipelineKernel: MTIKernel {
     }
 
     public func apply(toInputImages images: [MTIImage],
-                      parameters: [String: Any],
+                      parameters: [String: MTIFunctionArgumentValue],
                       dispatchOptions: MTIComputeFunctionDispatchOptions?,
                       outputTextureDimensions: MTITextureDimensions,
                       outputPixelFormat: MTLPixelFormat) -> MTIImage

@@ -37,7 +37,7 @@ public final class MTIMPSDefinitionFilter: MTIUnaryFilter {
             return nil
         }
         return MTIMPSDefinitionFilter.kernel.apply(to: [inputImage, blurredImage],
-                                                   parameters: ["intensity": intensity],
+                                                   parameters: ["intensity": .float(intensity)],
                                                    outputDimensions: inputImage.dimensions,
                                                    outputPixelFormat: outputPixelFormat)
     }

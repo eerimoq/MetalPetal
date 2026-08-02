@@ -7,12 +7,12 @@ import Foundation
 import Metal
 
 public final class MTIBlendWithMaskFilter: MTIFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var inputBackgroundImage: MTIImage?
     public var inputMask: MTIMask?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
+
+    public init() {}
 
     private static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
@@ -29,8 +29,8 @@ public final class MTIBlendWithMaskFilter: MTIFilter {
         let usesOneMinusMaskValue = inputMask.mode == .oneMinusMaskValue
         return MTIBlendWithMaskFilter.kernel.apply(
             to: [inputImage, inputMask.content, inputBackgroundImage],
-            parameters: ["maskComponent": Int32(inputMask.component.rawValue),
-                         "usesOneMinusMaskValue": usesOneMinusMaskValue],
+            parameters: ["maskComponent": .int(Int32(inputMask.component.rawValue)),
+                         "usesOneMinusMaskValue": .bool(usesOneMinusMaskValue)],
             outputDimensions: MTITextureDimensions(cgSize: inputBackgroundImage.size),
             outputPixelFormat: outputPixelFormat
         )

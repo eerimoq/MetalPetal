@@ -9,8 +9,6 @@ import Foundation
 import Metal
 
 public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
 
@@ -26,6 +24,8 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
             outputAlphaType: .nonPremultiplied
         )
     )
+
+    public init() {}
 
     public static func image(byProcessingImage image: MTIImage,
                              outputPixelFormat pixelFormat: MTLPixelFormat) -> MTIImage
@@ -57,10 +57,10 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
 }
 
 public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
+
+    public init() {}
 
     public static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),

@@ -28,7 +28,7 @@ public final class MTIMPSSobelFilter: MTIUnaryFilter {
     public init(grayColorTransform: simd_float3) {
         self.grayColorTransform = grayColorTransform
         kernel = MTIMPSKernel(builder: { device in
-            let values: [Float] = [grayColorTransform.x, grayColorTransform.y, grayColorTransform.z]
+            let values = [grayColorTransform.x, grayColorTransform.y, grayColorTransform.z]
             let k = MPSImageSobel(device: device, linearGrayColorTransform: values)
             k.edgeMode = .clamp
             return k
@@ -61,8 +61,8 @@ public final class MTIMPSSobelFilter: MTIUnaryFilter {
                                           outputPixelFormat: .r8Unorm)
             return MTIMPSSobelFilter.rToMonochromeKernel.apply(
                 to: [sobelImage],
-                parameters: ["invert": colorMode == .grayscaleInverted,
-                             "convertSRGBToLinear": false],
+                parameters: ["invert": .bool(colorMode == .grayscaleInverted),
+                             "convertSRGBToLinear": .bool(false)],
                 outputDimensions: dimensions,
                 outputPixelFormat: outputPixelFormat
             )

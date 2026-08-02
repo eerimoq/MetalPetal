@@ -16,10 +16,9 @@ public class MTIColorMatrixFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: MTIFilterColorMatrixFragmentFunctionName)
     }
 
-    override public var parameters: [String: Any] {
-        var matrix = colorMatrix
-        let data = withUnsafeBytes(of: &matrix) { Data($0) }
-        return [MTIColorMatrixFilterColorMatrixParameterKey: data]
+    override public var parameters: [String: MTIFunctionArgumentValue] {
+        let data = withUnsafeBytes(of: &colorMatrix) { Data($0) }
+        return [MTIColorMatrixFilterColorMatrixParameterKey: .data(data)]
     }
 
     override public class func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

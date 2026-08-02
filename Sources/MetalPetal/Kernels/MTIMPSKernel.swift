@@ -117,6 +117,8 @@ public final class MTIMPSKernel: MTIKernel {
         return builder(context.device)
     }
 
+    /// Unlike the other kernels, the parameters here are not shader arguments: they are set on the
+    /// `MPSKernel` object itself with `setValuesForKeys`, so the values must be KVC compatible.
     public func apply(toInputImages images: [MTIImage],
                       parameters: [String: Any],
                       outputTextureDimensions: MTITextureDimensions,

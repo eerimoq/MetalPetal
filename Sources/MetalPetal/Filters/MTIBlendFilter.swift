@@ -17,22 +17,27 @@ public final class MTIBlendFilter: MTIFilter {
     /// Specifies the alpha type of output image. If `.alphaIsOne` is assigned, the alpha channel of
     /// the output image will be set to 1. The default value for this property is `.nonPremultiplied`.
     public var outputAlphaType: MTIAlphaType = .nonPremultiplied
+    private static var kernels: [KernelKey: MTIRenderPipelineKernel] = [:]
+    private static let kernelsLock = OSAllocatedUnfairLock()
 
     public init(blendMode mode: MTIBlendMode) {
         blendMode = mode
     }
 
     private struct KernelKey: Hashable {
+        let mode: MTIBlendMode
         let sourceHasPremultipliedAlpha: Bool
         let backdropHasPremultipliedAlpha: Bool
         let outputsPremultipliedAlpha: Bool
         let outputsOpaqueImage: Bool
 
         init(
+            mode: MTIBlendMode,
             backdropAlphaType: MTIAlphaType,
             sourceAlphaType: MTIAlphaType,
             outputAlphaType: MTIAlphaType
         ) {
+            self.mode = mode
             sourceHasPremultipliedAlpha = sourceAlphaType == .premultiplied
             backdropHasPremultipliedAlpha = backdropAlphaType == .premultiplied
             outputsPremultipliedAlpha = outputAlphaType == .premultiplied
@@ -40,15 +45,13 @@ public final class MTIBlendFilter: MTIFilter {
         }
     }
 
-    private static var kernels: [KernelKey: MTIRenderPipelineKernel] = [:]
-    private static let kernelsLock = OSAllocatedUnfairLock()
-
     private static func kernel(blendMode mode: MTIBlendMode,
                                backdropAlphaType: MTIAlphaType,
                                sourceAlphaType: MTIAlphaType,
                                outputAlphaType: MTIAlphaType) -> MTIRenderPipelineKernel
     {
         let key = KernelKey(
+            mode: mode,
             backdropAlphaType: backdropAlphaType,
             sourceAlphaType: sourceAlphaType,
             outputAlphaType: outputAlphaType
@@ -112,7 +115,7 @@ public final class MTIBlendFilter: MTIFilter {
                                            sourceAlphaType: inputImage.alphaType,
                                            outputAlphaType: outputAlphaType)
         return kernel.apply(to: [inputBackgroundImage, inputImage],
-                            parameters: ["intensity": intensity],
+                            parameters: ["intensity": .float(intensity)],
                             outputDimensions: MTITextureDimensions(cgSize: inputBackgroundImage.size),
                             outputPixelFormat: outputPixelFormat)
     }

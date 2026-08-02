@@ -62,7 +62,7 @@ public struct MTIVectorSIMDTypeSupportCodeGenerator {
                     public convenience init(value: \(swiftType)) {
                         var v = value
                         let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
-                        let scalars: [\(scalarType)] = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(scalarType).self)) }
+                        let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(scalarType).self)) }
                         self.init(\(type.scalarValuesInitializerLabel): scalars, count: count)
                     }
 

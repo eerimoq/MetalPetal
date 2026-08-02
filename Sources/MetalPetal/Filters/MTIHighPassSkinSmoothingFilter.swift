@@ -84,7 +84,7 @@ public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
                 blurredBGChannelOverlayImage,
                 toneCurveFilter.toneCurveColorLookupImage,
             ],
-            parameters: ["amount": amount],
+            parameters: ["amount": .float(amount)],
             outputDimensions: MTITextureDimensions(cgSize: inputImage.size),
             outputPixelFormat: outputPixelFormat
         )

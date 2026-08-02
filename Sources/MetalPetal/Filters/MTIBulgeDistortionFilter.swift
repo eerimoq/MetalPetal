@@ -20,10 +20,10 @@ public final class MTIBulgeDistortionFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "bulgeDistortion")
     }
 
-    override public var parameters: [String: Any] {
-        ["center": MTIVector(value: center),
-         "radius": radius,
-         "scale": scale]
+    override public var parameters: [String: MTIFunctionArgumentValue] {
+        ["center": .vector(MTIVector(value: center)),
+         "radius": .float(radius),
+         "scale": .float(scale)]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

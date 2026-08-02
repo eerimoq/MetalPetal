@@ -21,9 +21,7 @@ public final class MTIVector: Hashable {
     }
 
     private let data: Data
-
     public let scalarType: ScalarType
-
     public let count: Int
 
     public init(floatValues values: UnsafePointer<Float>, count: Int) {
@@ -80,22 +78,22 @@ public final class MTIVector: Hashable {
     }
 
     public convenience init(x: Float, y: Float) {
-        let values: [Float] = [x, y]
+        let values = [x, y]
         self.init(floatValues: values, count: 2)
     }
 
     public convenience init(value point: CGPoint) {
-        let values: [Float] = [Float(point.x), Float(point.y)]
+        let values = [Float(point.x), Float(point.y)]
         self.init(floatValues: values, count: 2)
     }
 
     public convenience init(value size: CGSize) {
-        let values: [Float] = [Float(size.width), Float(size.height)]
+        let values = [Float(size.width), Float(size.height)]
         self.init(floatValues: values, count: 2)
     }
 
     public convenience init(value rect: CGRect) {
-        let values: [Float] = [
+        let values = [
             Float(rect.origin.x),
             Float(rect.origin.y),
             Float(rect.size.width),

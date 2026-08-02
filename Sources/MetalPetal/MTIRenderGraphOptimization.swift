@@ -136,8 +136,9 @@ extension MTIImageRenderingRecipe {
     var colorMatrix: MTIColorMatrix {
         var matrix = MTIColorMatrix.identity
         if renderCommands.count == 1 {
-            if let data = renderCommands[0].parameters[MTIColorMatrixFilterColorMatrixParameterKey] as? Data,
-               data.count == MemoryLayout<MTIColorMatrix>.size
+            if case let .data(data) = renderCommands[0]
+                .parameters[MTIColorMatrixFilterColorMatrixParameterKey],
+                data.count == MemoryLayout<MTIColorMatrix>.size
             {
                 _ = withUnsafeMutableBytes(of: &matrix) { dst in
                     data.copyBytes(to: dst.bindMemory(to: UInt8.self))
@@ -184,7 +185,7 @@ func MTIColorMatrixRenderGraphNodeOptimize(_ node: MTIRenderGraphNode) {
             kernel: command.kernel,
             geometry: command.geometry,
             images: lastPromise.dependencies,
-            parameters: [MTIColorMatrixFilterColorMatrixParameterKey: data]
+            parameters: [MTIColorMatrixFilterColorMatrixParameterKey: .data(data)]
         )],
         rasterSampleCount: max(recipe.rasterSampleCount, lastPromise.recipe.rasterSampleCount),
         outputDescriptors: recipe.outputDescriptors

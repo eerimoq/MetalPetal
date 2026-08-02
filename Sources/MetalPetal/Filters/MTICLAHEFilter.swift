@@ -19,6 +19,74 @@ public struct MTICLAHESize {
     }
 }
 
+/// Performs Contrast Limited Adaptive Histogram Equalization. https://github.com/YuAo/Accelerated-CLAHE
+public final class MTICLAHEFilter: MTIUnaryFilter {
+    public var inputImage: MTIImage?
+    public var outputPixelFormat: MTLPixelFormat = .unspecified
+    public var clipLimit: Float = 2.0
+    public var tileGridSize = MTICLAHESize(width: 8, height: 8)
+    private static let lutGeneratorKernel = MTICLAHELUTKernel()
+    private static let rgb2LightnessKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHERGB2Lightness"),
+        vertexDescriptor: nil,
+        colorAttachmentCount: 1,
+        alphaTypeHandlingRule: MTIAlphaTypeHandlingRule(
+            acceptableAlphaTypes: [.nonPremultiplied, .alphaIsOne],
+            outputAlphaType: .alphaIsOne
+        )
+    )
+    private static let claheLookupKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHEColorLookup")
+    )
+
+    public init() {}
+
+    public var outputImage: MTIImage? {
+        guard let inputImage else {
+            return nil
+        }
+        let samplerDescriptor = inputImage.samplerDescriptor.makeMTLSamplerDescriptor()
+        samplerDescriptor.sAddressMode = .mirrorRepeat
+        samplerDescriptor.tAddressMode = .mirrorRepeat
+        samplerDescriptor.rAddressMode = .mirrorRepeat
+        let inputImageForLUT = inputImage.withSamplerDescriptor(samplerDescriptor.makeMTISamplerDescriptor())
+        let dY = (tileGridSize.height - (Int(inputImage.size.height) % tileGridSize.height)) % tileGridSize
+            .height
+        let dX = (tileGridSize.width - (Int(inputImage.size.width) % tileGridSize.width)) % tileGridSize.width
+        let lightnessTextureDimensions = MTITextureDimensions(cgSize: CGSize(
+            width: inputImage.size.width + CGFloat(dX),
+            height: inputImage.size.height + CGFloat(dY)
+        ))
+        let lightnessImageScale = MTIVector(value: simd_make_float2(
+            Float((inputImage.size.width + CGFloat(dX)) / inputImage.size.width),
+            Float((inputImage.size.height + CGFloat(dY)) / inputImage.size.height)
+        ))
+        let lightnessImage = MTICLAHEFilter.rgb2LightnessKernel.apply(
+            to: [inputImageForLUT],
+            parameters: ["scale": .vector(lightnessImageScale)],
+            outputDimensions: lightnessTextureDimensions,
+            outputPixelFormat: .r8Unorm
+        )
+        let lutImage = MTIImage(promise: MTICLAHELUTRecipe(kernel: MTICLAHEFilter.lutGeneratorKernel,
+                                                           inputLightnessImage: lightnessImage,
+                                                           clipLimit: clipLimit,
+                                                           tileGridSize: tileGridSize))
+        let tileGridSizeVector = MTIVector(value: simd_make_float2(
+            Float(tileGridSize.width),
+            Float(tileGridSize.height)
+        ))
+        return MTICLAHEFilter.claheLookupKernel.apply(
+            to: [inputImage, lutImage],
+            parameters: ["tileGridSize": .vector(tileGridSizeVector)],
+            outputDimensions: MTITextureDimensions(cgSize: inputImage
+                .size),
+            outputPixelFormat: outputPixelFormat
+        )
+    }
+}
+
 private let MTICLAHEHistogramBinCount = 256
 
 private final class MTICLAHELUTKernelState {
@@ -174,71 +242,5 @@ private final class MTICLAHELUTRecipe: MTIImagePromise {
                                                                                 tileSize.width,
                                                                                 tileSize.height,
                                                                             ]])
-    }
-}
-
-/// Performs Contrast Limited Adaptive Histogram Equalization. https://github.com/YuAo/Accelerated-CLAHE
-public final class MTICLAHEFilter: MTIUnaryFilter {
-    public init() {}
-
-    public var inputImage: MTIImage?
-    public var outputPixelFormat: MTLPixelFormat = .unspecified
-    public var clipLimit: Float = 2.0
-    public var tileGridSize = MTICLAHESize(width: 8, height: 8)
-    private static let lutGeneratorKernel = MTICLAHELUTKernel()
-    private static let rgb2LightnessKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHERGB2Lightness"),
-        vertexDescriptor: nil,
-        colorAttachmentCount: 1,
-        alphaTypeHandlingRule: MTIAlphaTypeHandlingRule(
-            acceptableAlphaTypes: [.nonPremultiplied, .alphaIsOne],
-            outputAlphaType: .alphaIsOne
-        )
-    )
-    private static let claheLookupKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHEColorLookup")
-    )
-
-    public var outputImage: MTIImage? {
-        guard let inputImage else {
-            return nil
-        }
-        let samplerDescriptor = inputImage.samplerDescriptor.makeMTLSamplerDescriptor()
-        samplerDescriptor.sAddressMode = .mirrorRepeat
-        samplerDescriptor.tAddressMode = .mirrorRepeat
-        samplerDescriptor.rAddressMode = .mirrorRepeat
-        let inputImageForLUT = inputImage.withSamplerDescriptor(samplerDescriptor.makeMTISamplerDescriptor())
-        let dY = (tileGridSize.height - (Int(inputImage.size.height) % tileGridSize.height)) % tileGridSize
-            .height
-        let dX = (tileGridSize.width - (Int(inputImage.size.width) % tileGridSize.width)) % tileGridSize.width
-        let lightnessTextureDimensions = MTITextureDimensions(cgSize: CGSize(
-            width: inputImage.size.width + CGFloat(dX),
-            height: inputImage.size.height + CGFloat(dY)
-        ))
-        let lightnessImageScale = MTIVector(value: simd_make_float2(
-            Float((inputImage.size.width + CGFloat(dX)) / inputImage.size.width),
-            Float((inputImage.size.height + CGFloat(dY)) / inputImage.size.height)
-        ))
-        let lightnessImage = MTICLAHEFilter.rgb2LightnessKernel.apply(to: [inputImageForLUT],
-                                                                      parameters: [
-                                                                          "scale": lightnessImageScale,
-                                                                      ],
-                                                                      outputDimensions: lightnessTextureDimensions,
-                                                                      outputPixelFormat: .r8Unorm)
-        let lutImage = MTIImage(promise: MTICLAHELUTRecipe(kernel: MTICLAHEFilter.lutGeneratorKernel,
-                                                           inputLightnessImage: lightnessImage,
-                                                           clipLimit: clipLimit,
-                                                           tileGridSize: tileGridSize))
-        let tileGridSizeVector = MTIVector(value: simd_make_float2(
-            Float(tileGridSize.width),
-            Float(tileGridSize.height)
-        ))
-        return MTICLAHEFilter.claheLookupKernel.apply(to: [inputImage, lutImage],
-                                                      parameters: ["tileGridSize": tileGridSizeVector],
-                                                      outputDimensions: MTITextureDimensions(cgSize: inputImage
-                                                          .size),
-                                                      outputPixelFormat: outputPixelFormat)
     }
 }

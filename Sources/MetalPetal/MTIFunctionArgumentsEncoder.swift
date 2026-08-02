@@ -8,20 +8,6 @@
 import Foundation
 import Metal
 
-public protocol MTIFunctionArgumentEncodingProxy: AnyObject {
-    func encodeBytes(_ bytes: UnsafeRawPointer, length: Int)
-}
-
-public protocol MTIFunctionArgumentEncoding {
-    /// The binding is always a buffer binding: the encoder only ever encodes values into buffer
-    /// arguments, and `MTLBufferBinding` is what carries `bufferDataType` and `bufferDataSize`.
-    static func encodeValue(
-        _ value: Any,
-        binding: any MTLBufferBinding,
-        proxy: MTIFunctionArgumentEncodingProxy
-    ) throws
-}
-
 private func MTIArgumentsEncoderEncodeBytes(
     _ functionType: MTLFunctionType,
     _ encoder: MTLCommandEncoder,
@@ -75,147 +61,107 @@ private func MTIArgumentsEncoderEncodeBuffer(
     }
 }
 
-private final class MTIFunctionArgumentEncodingProxyImplementation: MTIFunctionArgumentEncodingProxy {
-    private var encoder: MTLCommandEncoder?
-    private var binding: (any MTLBufferBinding)?
-    private let functionType: MTLFunctionType
-    private(set) var used = false
-    private(set) var error: Error?
+private let dataTypeMismatchError = MTIError(
+    code: .parameterDataTypeMismatch,
+    message: "MTIErrorParameterDataTypeMismatch"
+)
 
-    init(encoder: MTLCommandEncoder, functionType: MTLFunctionType, binding: any MTLBufferBinding) {
-        self.encoder = encoder
-        self.functionType = functionType
-        self.binding = binding
-    }
-
-    func encodeBytes(_ bytes: UnsafeRawPointer, length: Int) {
-        guard let encoder, let binding else {
-            return
-        }
-        if length != binding.bufferDataSize {
-            error = MTIError(
-                code: .parameterDataSizeMismatch,
-                message: "MTIErrorParameterDataSizeMismatch"
-            )
-            used = true
-        } else {
-            MTIArgumentsEncoderEncodeBytes(functionType, encoder, bytes, length, binding.index)
-            used = true
-        }
-        self.encoder = nil
-        self.binding = nil
-    }
-
-    func invalidate() {
-        encoder = nil
-        binding = nil
-    }
-}
+private let dataSizeMismatchError = MTIError(
+    code: .parameterDataSizeMismatch,
+    message: "MTIErrorParameterDataSizeMismatch"
+)
 
 public enum MTIFunctionArgumentsEncoder {
     public static func encode(
         _ bindings: [any MTLBinding],
-        values parameters: [String: Any],
+        values parameters: [String: MTIFunctionArgumentValue],
         functionType: MTLFunctionType,
         encoder: MTLCommandEncoder
     ) throws {
         for binding in bindings {
-            // Only buffer bindings carry a data type/size to encode into.
             guard binding.type == .buffer, let binding = binding as? any MTLBufferBinding else {
                 continue
             }
             guard let value = parameters[binding.name] else {
                 continue
             }
-            /// Encodes a trivial scalar, checking it against the size the shader declared.
             func encodeScalar(_ scalar: some Any) {
                 var scalar = scalar
                 withUnsafeBytes(of: &scalar) {
-                    MTIArgumentsEncoderEncodeBytes(
-                        functionType,
-                        encoder,
-                        $0.baseAddress!,
-                        $0.count,
-                        binding.index
-                    )
+                    encodeBytes($0)
                 }
             }
-            if let number = value as? NSNumber {
+            func encodeBytes(_ bytes: UnsafeRawBufferPointer) {
+                MTIArgumentsEncoderEncodeBytes(
+                    functionType,
+                    encoder,
+                    bytes.baseAddress!,
+                    bytes.count,
+                    binding.index
+                )
+            }
+            switch value {
+            case let .bool(value):
+                guard binding.bufferDataType == .bool else {
+                    throw dataTypeMismatchError
+                }
+                encodeScalar(value)
+            case let .int(value):
                 switch binding.bufferDataType {
-                case .bool: encodeScalar(number.boolValue)
-                case .int: encodeScalar(number.int32Value)
-                case .uint: encodeScalar(number.uint32Value)
-                case .char: encodeScalar(number.int8Value)
-                case .uchar: encodeScalar(number.uint8Value)
-                case .short: encodeScalar(number.int16Value)
-                case .ushort: encodeScalar(number.uint16Value)
-                case .float: encodeScalar(number.floatValue)
+                case .int:
+                    encodeScalar(value)
+                case .short:
+                    encodeScalar(Int16(truncatingIfNeeded: value))
+                case .char:
+                    encodeScalar(Int8(truncatingIfNeeded: value))
+                default:
+                    throw dataTypeMismatchError
+                }
+            case let .uint(value):
+                switch binding.bufferDataType {
+                case .uint:
+                    encodeScalar(value)
+                case .ushort:
+                    encodeScalar(UInt16(truncatingIfNeeded: value))
+                case .uchar:
+                    encodeScalar(UInt8(truncatingIfNeeded: value))
+                default:
+                    throw dataTypeMismatchError
+                }
+            case let .float(value):
+                switch binding.bufferDataType {
+                case .float:
+                    encodeScalar(value)
                 #if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))
-                case .half: encodeScalar(Float16(number.floatValue))
+                case .half:
+                    encodeScalar(Float16(value))
                 #endif
                 default:
-                    throw MTIError(
-                        code: .parameterDataTypeMismatch,
-                        message: "MTIErrorParameterDataTypeMismatch"
-                    )
+                    throw dataTypeMismatchError
                 }
-            } else if let nsValue = value as? NSValue {
-                var size = 0
-                NSGetSizeAndAlignment(nsValue.objCType, &size, nil)
-                let valuePtr = malloc(size)!
-                defer {
-                    free(valuePtr)
+            case let .simd(value):
+                guard binding.bufferDataType == value.dataType else {
+                    throw dataTypeMismatchError
                 }
-                nsValue.getValue(valuePtr, size: size)
-                guard binding.bufferDataSize == size else {
-                    throw MTIError(
-                        code: .parameterDataSizeMismatch,
-                        message: "MTIErrorParameterDataSizeMismatch"
-                    )
+                try value.withUnsafeBytes { bytes in
+                    guard bytes.count == binding.bufferDataSize else {
+                        throw dataSizeMismatchError
+                    }
+                    encodeBytes(bytes)
                 }
-                MTIArgumentsEncoderEncodeBytes(functionType, encoder, valuePtr, size, binding.index)
-            } else if let data = value as? Data {
-                data.withUnsafeBytes { rawBuffer in
-                    if let baseAddress = rawBuffer.baseAddress {
-                        MTIArgumentsEncoderEncodeBytes(
-                            functionType,
-                            encoder,
-                            baseAddress,
-                            rawBuffer.count,
-                            binding.index
-                        )
+            case let .vector(value):
+                value.withUnsafeBytes { bytes in
+                    encodeBytes(bytes)
+                }
+            case let .data(value):
+                value.withUnsafeBytes { bytes in
+                    if bytes.baseAddress != nil {
+                        encodeBytes(bytes)
                     }
                 }
-            } else if let vector = value as? MTIVector {
-                vector.withUnsafeBytes { raw in
-                    MTIArgumentsEncoderEncodeBytes(
-                        functionType,
-                        encoder,
-                        raw.baseAddress!,
-                        raw.count,
-                        binding.index
-                    )
-                }
-            } else if let dataBuffer = value as? MTIDataBuffer {
-                if let buffer = dataBuffer.buffer(for: encoder.device) {
+            case let .dataBuffer(value):
+                if let buffer = value.buffer(for: encoder.device) {
                     MTIArgumentsEncoderEncodeBuffer(functionType, encoder, buffer, binding.index)
-                }
-            } else {
-                let proxy = MTIFunctionArgumentEncodingProxyImplementation(
-                    encoder: encoder,
-                    functionType: functionType,
-                    binding: binding
-                )
-                try MTISIMDArgumentEncoder.encodeValue(value, binding: binding, proxy: proxy)
-                if let error = proxy.error {
-                    throw error
-                }
-                if !proxy.used {
-                    proxy.invalidate()
-                    throw MTIError(
-                        code: .unsupportedParameterType,
-                        message: "MTIErrorUnsupportedParameterType"
-                    )
                 }
             }
         }

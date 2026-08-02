@@ -19,10 +19,10 @@ public final class MTITwirlDistortionFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "twirlDistortion")
     }
 
-    override public var parameters: [String: Any] {
-        ["center": MTIVector(value: center),
-         "radius": radius,
-         "angle": angle]
+    override public var parameters: [String: MTIFunctionArgumentValue] {
+        ["center": .vector(MTIVector(value: center)),
+         "radius": .float(radius),
+         "angle": .float(angle)]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

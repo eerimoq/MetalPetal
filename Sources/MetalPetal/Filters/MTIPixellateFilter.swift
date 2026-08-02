@@ -16,8 +16,9 @@ public final class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "pixellate")
     }
 
-    override public var parameters: [String: Any] {
-        ["scale": MTIVector(value: CGSize(width: max(scale.width, 1), height: max(scale.height, 1)))]
+    override public var parameters: [String: MTIFunctionArgumentValue] {
+        let value = CGSize(width: max(scale.width, 1), height: max(scale.height, 1))
+        return ["scale": .vector(MTIVector(value: value))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

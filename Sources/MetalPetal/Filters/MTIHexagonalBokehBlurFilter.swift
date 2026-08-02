@@ -56,16 +56,16 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
         let dimensions = MTITextureDimensions(cgSize: inputImage.size)
         let prepassOutputImage = MTIHexagonalBokehBlurFilter.prepassKernel.apply(
             to: [inputImage, mask.content],
-            parameters: ["power": power,
-                         "maskComponent": Int32(mask.component.rawValue),
-                         "usesOneMinusMaskValue": usesOneMinusMaskValue],
+            parameters: ["power": .float(power),
+                         "maskComponent": .int(Int32(mask.component.rawValue)),
+                         "usesOneMinusMaskValue": .bool(usesOneMinusMaskValue)],
             outputDimensions: dimensions,
             outputPixelFormat: .rgba16Float
         )
         let alphaOutputs = MTIHexagonalBokehBlurFilter.alphaPassKernel.apply(
             to: [prepassOutputImage.withSamplerDescriptor(inputImage.samplerDescriptor)],
-            parameters: ["delta0": deltas[0],
-                         "delta1": deltas[1]],
+            parameters: ["delta0": .vector(deltas[0]),
+                         "delta1": .vector(deltas[1])],
             outputDescriptors: [
                 MTIRenderPassOutputDescriptor(dimensions: dimensions, pixelFormat: .rgba16Float),
                 MTIRenderPassOutputDescriptor(dimensions: dimensions, pixelFormat: .rgba16Float),
@@ -74,9 +74,9 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
         return MTIHexagonalBokehBlurFilter.bravoCharliePassKernel.apply(
             to: [alphaOutputs[0].withSamplerDescriptor(inputImage.samplerDescriptor),
                  alphaOutputs[1].withSamplerDescriptor(inputImage.samplerDescriptor)],
-            parameters: ["delta0": deltas[1],
-                         "delta1": deltas[2],
-                         "power": Float(1.0) / power],
+            parameters: ["delta0": .vector(deltas[1]),
+                         "delta1": .vector(deltas[2]),
+                         "power": .float(Float(1.0) / power)],
             outputDimensions: dimensions,
             outputPixelFormat: outputPixelFormat
         )

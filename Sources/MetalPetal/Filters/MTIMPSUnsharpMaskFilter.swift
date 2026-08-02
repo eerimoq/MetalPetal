@@ -41,10 +41,13 @@ public final class MTIMPSUnsharpMaskFilter: MTIUnaryFilter {
         guard let inputImage, let blurImage = gaussianBlurFilter.outputImage else {
             return nil
         }
-        return MTIMPSUnsharpMaskFilter.kernel.apply(to: [inputImage, blurImage],
-                                                    parameters: ["scale": scale, "threshold": threshold],
-                                                    outputDimensions: MTITextureDimensions(cgSize: inputImage
-                                                        .size),
-                                                    outputPixelFormat: outputPixelFormat)
+        return MTIMPSUnsharpMaskFilter.kernel.apply(
+            to: [inputImage, blurImage],
+            parameters: ["scale": .float(scale),
+                         "threshold": .float(threshold)],
+            outputDimensions: MTITextureDimensions(cgSize: inputImage
+                .size),
+            outputPixelFormat: outputPixelFormat
+        )
     }
 }

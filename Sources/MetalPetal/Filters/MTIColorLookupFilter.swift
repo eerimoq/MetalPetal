@@ -130,8 +130,8 @@ public final class MTIColorLookupFilter: MTIFilter {
             return nil
         }
         return kernel.apply(to: [inputImage, inputColorLookupTable],
-                            parameters: ["intensity": intensity,
-                                         "dimension": Int32(info.dimension)],
+                            parameters: ["intensity": .float(intensity),
+                                         "dimension": .int(Int32(info.dimension))],
                             outputDimensions: MTITextureDimensions(cgSize: inputImage.size),
                             outputPixelFormat: outputPixelFormat)
     }
@@ -172,7 +172,7 @@ public final class MTIColorLookupFilter: MTIFilter {
             return nil
         }
         return kernel.apply(toInputImages: [image],
-                            parameters: ["dimension": Int32(info.dimension)],
+                            parameters: ["dimension": .int(Int32(info.dimension))],
                             outputTextureDimensions: MTITextureDimensions(
                                 width: info.dimension,
                                 height: info.dimension,

@@ -205,10 +205,12 @@ public final class MTIRGBToneCurveFilter: MTIFilter {
         guard let inputImage else {
             return nil
         }
-        return MTIRGBToneCurveFilter.kernel.apply(to: [inputImage, toneCurveColorLookupImage],
-                                                  parameters: ["intensity": intensity],
-                                                  outputDimensions: MTITextureDimensions(cgSize: inputImage
-                                                      .size),
-                                                  outputPixelFormat: outputPixelFormat)
+        return MTIRGBToneCurveFilter.kernel.apply(
+            to: [inputImage, toneCurveColorLookupImage],
+            parameters: ["intensity": .float(intensity)],
+            outputDimensions: MTITextureDimensions(cgSize: inputImage
+                .size),
+            outputPixelFormat: outputPixelFormat
+        )
     }
 }

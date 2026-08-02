@@ -73,7 +73,6 @@ private protocol PortConnection {
 
 private struct PortConnectionsBuildingContext {
     static var contexts: [PortConnectionsBuildingContext] = []
-
     private var connections: [PortConnection] = []
 
     static func add(connection: PortConnection) {
@@ -158,18 +157,15 @@ public class FilterGraph {
     /// only one port is allowed to connect to the `output` port.
     public static func makeImage<T>(input: T, builder: (T, ImageReceiverInputPort) -> Void) -> MTIImage? {
         let outputReceiver = ImageReceiver()
-
         builderLock.lock()
         PortConnectionsBuildingContext.push()
         builder(input, Port(outputReceiver, \.image))
         let connections = PortConnectionsBuildingContext.pop()
         builderLock.unlock()
-
         let rootConnections = connections.filter { $0.toObject === outputReceiver }
         if rootConnections.count != 1 {
             return nil
         }
-
         let context = PortConnectionContext()
         for connection in connections {
             connection.connect(context: context)
@@ -223,9 +219,7 @@ public extension MTIFilter {
 
 public struct UnaryFilterIOPort<Filter: MTIUnaryFilter>: InputPort, OutputPort {
     public let object: Filter
-
     public let keyPath: KeyPath<Filter, MTIImage?> = \.outputImage
-
     public let writableKeyPath: ReferenceWritableKeyPath<Filter, MTIImage?> = \.inputImage
 }
 
@@ -256,9 +250,7 @@ public class PassthroughPort<Value>: InputPort, OutputPort {
     }
 
     private var value: Value
-
     public var writableKeyPath: ReferenceWritableKeyPath<PassthroughPort, Value> = \.value
-
     public var keyPath: KeyPath<PassthroughPort, Value> = \.value
 
     public init(_ value: Value) {
@@ -311,7 +303,6 @@ public struct AnyIOPort<Value>: InputPort, OutputPort, ProxyPort {
     public let object: ObjectProxy
     public let keyPath: KeyPath<ObjectProxy, Value> = \ObjectProxy.readableValue
     public let writableKeyPath: ReferenceWritableKeyPath<ObjectProxy, Value> = \ObjectProxy.writableValue
-
     public let target: ProxyPortTarget
 
     public init<T>(_ port: T) where T: InputPort, T: OutputPort, T.Value == Value {
@@ -360,7 +351,6 @@ public struct AnyInputPort<Value>: InputPort, ProxyPort {
 
     public let object: ObjectProxy
     public let writableKeyPath: ReferenceWritableKeyPath<ObjectProxy, Value> = \ObjectProxy.writableValue
-
     public let target: ProxyPortTarget
 
     public init<T>(_ port: T) where T: InputPort, T.Value == Value {
@@ -391,7 +381,6 @@ public struct AnyOutputPort<Value>: OutputPort, ProxyPort {
 
     public let object: ObjectProxy
     public let keyPath: KeyPath<ObjectProxy, Value> = \ObjectProxy.readableValue
-
     public let target: ProxyPortTarget
 
     public init<T>(_ port: T) where T: OutputPort, T.Value == Value {

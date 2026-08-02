@@ -212,7 +212,7 @@ enum CustomShapeBokehWithMask {
     private static func pow(_ image: MTIImage, _ value: Float) -> MTIImage {
         powKernel.apply(
             to: [image],
-            parameters: ["value": value],
+            parameters: ["value": .float(value)],
             outputDimensions: image.dimensions,
             outputPixelFormat: .rgba32Float
         )
@@ -231,7 +231,8 @@ enum CustomShapeBokehWithMask {
     ) -> MTIImage {
         convolutionKernel.apply(
             to: [image, mask, kernelImage],
-            parameters: ["radius": kernelSize / 2, "brightness": brightness],
+            parameters: ["radius": .float(Float(kernelSize / 2)),
+                         "brightness": .float(brightness)],
             outputDimensions: image.dimensions,
             outputPixelFormat: .rgba32Float
         )

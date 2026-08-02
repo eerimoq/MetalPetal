@@ -164,7 +164,7 @@ public final class MTIRenderPipelineKernel: MTIKernel {
 
     func makeOutputImage(
         inputImages images: [MTIImage],
-        parameters: [String: Any],
+        parameters: [String: MTIFunctionArgumentValue],
         outputTextureDimensions: MTITextureDimensions,
         outputPixelFormat: MTLPixelFormat
     ) -> MTIImage {
@@ -182,7 +182,7 @@ public final class MTIRenderPipelineKernel: MTIKernel {
 
     func makeOutputImages(
         inputImages images: [MTIImage],
-        parameters: [String: Any],
+        parameters: [String: MTIFunctionArgumentValue],
         outputDescriptors: [MTIRenderPassOutputDescriptor]
     ) -> [MTIImage] {
         let command = MTIRenderCommand(

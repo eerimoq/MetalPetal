@@ -50,7 +50,7 @@ The `xcodebuild` targets use `-workspace .` — that is the SwiftPM-generated
 `make generate` runs the separate SwiftPM package in `Utilities/` and overwrites:
 
 - `Sources/MetalPetal/MTIVector+SIMD.swift`
-- `Sources/MetalPetal/MTISIMDArgumentEncoder.swift`
+- `Sources/MetalPetal/MTISIMDArgumentValue.swift`
 - `Sources/MetalPetal/MTIBlendFormulaSupport.swift`
 - `Sources/MetalPetal/Shaders/BlendingShaders.metal`
 - `Sources/MetalPetal/Shaders/MultilayerCompositeShaders.metal`

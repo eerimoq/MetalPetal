@@ -67,7 +67,7 @@ struct BouncingBallsView: View {
         MetalKitView(device: renderContext.device) { view in
             let computeOutput = computeKernel.apply(
                 toInputImages: [],
-                parameters: ["data": frameDataBuffer.buffer],
+                parameters: ["data": .dataBuffer(frameDataBuffer.buffer)],
                 dispatchOptions: .init(
                     threads: MTLSize(width: 1024, height: 1, depth: 1),
                     threadgroups: MTLSize(width: 32, height: 1, depth: 1),
@@ -82,7 +82,7 @@ struct BouncingBallsView: View {
                 kernel: renderKernel,
                 geometry: PointVertices(),
                 images: [computeOutput],
-                parameters: ["data": frameDataBuffer.buffer]
+                parameters: ["data": .dataBuffer(frameDataBuffer.buffer)]
             )
             let output = MTIRenderCommand.images(
                 byPerforming: [renderCommand],

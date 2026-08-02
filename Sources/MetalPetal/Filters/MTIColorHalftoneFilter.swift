@@ -18,11 +18,11 @@ public final class MTIColorHalftoneFilter: MTIUnaryImageRenderingFilter {
         MTIFunctionDescriptor(name: "colorHalftone")
     }
 
-    override public var parameters: [String: Any] {
+    override public var parameters: [String: MTIFunctionArgumentValue] {
         let allAnglesAreEqual = angles.x == angles.y && angles.y == angles.z
-        return ["scale": max(scale, 1.0),
-                "angles": MTIVector(value: angles),
-                "singleAngleMode": allAnglesAreEqual]
+        return ["scale": .float(max(scale, 1.0)),
+                "angles": .vector(MTIVector(value: angles)),
+                "singleAngleMode": .bool(allAnglesAreEqual)]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

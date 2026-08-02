@@ -443,10 +443,10 @@ For example, the parameter dictionary for the metal function `vibranceAdjust` ca
 // Swift
 let amount: Float = 1.0
 let vibranceVector = float4(1, 1, 1, 1)
-let parameters = ["amount": amount,
-                  "vibranceVector": MTIVector(value: vibranceVector),
-                  "avoidsSaturatingSkinTones": true,
-                  "grayColorTransform": MTIVector(value: float3(0,0,0))]
+let parameters = ["amount": .float(amount),
+                  "vibranceVector": .vector(MTIVector(value: vibranceVector)),
+                  "avoidsSaturatingSkinTones": .bool(true),
+                  "grayColorTransform": .vector(MTIVector(value: float3(0,0,0)))]
 ```
 
 ```Metal
@@ -462,18 +462,18 @@ fragment float4 vibranceAdjust(...,
 
 ```
 
-The shader function argument types and the corresponding types to use in a parameter dictionary is listed below.
+A parameter value is a `MTIFunctionArgumentValue`.
 
-| Shader Function Argument Type | Swift |
+| Shader Function Argument Type | MTIFunctionArgumentValue |
 | :--- | :--- |
-| float | Float |
-| int | Int32 |
-| uint | UInt32 |
-| bool | Bool |
-| simd (float2,float4,float4x4,int4, etc.) | simd (with `MetalPetal/Swift`) / MTIVector |
-| struct | Data / MTIDataBuffer |
-| other (float *, struct *, etc.) immutable | Data / MTIDataBuffer |
-| other (float *, struct *, etc.) mutable | MTIDataBuffer |
+| float, half | `.float(Float)` |
+| int, short, char | `.int(Int32)` |
+| uint, ushort, uchar | `.uint(UInt32)` |
+| bool | `.bool(Bool)` |
+| simd (float2,float4,float4x4,int4, etc.) | `.simd(MTISIMDArgumentValue)` |
+| struct | `.data(Data)` / `.dataBuffer(MTIDataBuffer)` |
+| other (float *, struct *, etc.) immutable | `.data(Data)` / `.dataBuffer(MTIDataBuffer)` |
+| other (float *, struct *, etc.) mutable | `.dataBuffer(MTIDataBuffer)` |
 
 ### Simple Single Input / Output Filters
 
@@ -483,8 +483,8 @@ To build a custom unary filter, you can subclass `MTIUnaryImageRenderingFilter` 
 class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     var fractionalWidthOfAPixel: Float = 0.05
 
-    override var parameters: [String : Any] {
-        return ["fractionalWidthOfAPixel": fractionalWidthOfAPixel]
+    override var parameters: [String : MTIFunctionArgumentValue] {
+        return ["fractionalWidthOfAPixel": .float(fractionalWidthOfAPixel)]
     }
 
     override class func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {

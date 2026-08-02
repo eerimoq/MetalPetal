@@ -55,7 +55,7 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
 
     public static func image(
         byProcessingImage image: MTIImage,
-        withInputParameters parameters: [String: Any],
+        withInputParameters parameters: [String: MTIFunctionArgumentValue],
         outputPixelFormat: MTLPixelFormat
     ) -> MTIImage {
         self.image(
@@ -69,7 +69,7 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
     public static func image(
         byProcessingImage image: MTIImage,
         orientation: MTIImageOrientation,
-        parameters: [String: Any],
+        parameters: [String: MTIFunctionArgumentValue],
         outputPixelFormat: MTLPixelFormat
     ) -> MTIImage {
         self.image(
@@ -84,7 +84,7 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
     public static func image(
         byProcessingImage image: MTIImage,
         orientation: MTIImageOrientation,
-        parameters: [String: Any],
+        parameters: [String: MTIFunctionArgumentValue],
         outputPixelFormat: MTLPixelFormat,
         outputImageSize: CGSize
     ) -> MTIImage {
@@ -159,7 +159,7 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
         return size
     }
 
-    public var parameters: [String: Any] {
+    public var parameters: [String: MTIFunctionArgumentValue] {
         [:]
     }
 
