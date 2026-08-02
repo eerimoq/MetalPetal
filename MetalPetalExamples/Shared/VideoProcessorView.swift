@@ -68,8 +68,7 @@ struct VideoProcessorView: View {
                         SIMD2<Float>(1, 1),
                         t: min(Float(request.compositionTime.seconds), 1)
                     )
-                    pixellateFilter.scale.width = CGFloat(pixellateScale.x)
-                    pixellateFilter.scale.height = CGFloat(pixellateScale.y)
+                    pixellateFilter.scale = pixellateScale
                     watermarkFilter.layers = [MultilayerCompositingFilter.Layer(content: watermarkImage)
                         .blendMode(.normal)
                         .frame(CGRect(x: sourceImage.size.width - watermarkImage.size.width - 16,

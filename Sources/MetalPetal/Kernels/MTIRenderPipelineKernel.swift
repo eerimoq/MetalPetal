@@ -362,14 +362,14 @@ final class MTIImageRenderingRecipe {
             if command.parameters.count > 0 {
                 do {
                     try MTIEncodeArguments(
-                        renderPipeline.reflection.vertexBindings,
-                        values: command.parameters,
+                        bindings: renderPipeline.reflection.vertexBindings,
+                        parameters: command.parameters,
                         functionType: .vertex,
                         encoder: commandEncoder
                     )
                     try MTIEncodeArguments(
-                        renderPipeline.reflection.fragmentBindings,
-                        values: command.parameters,
+                        bindings: renderPipeline.reflection.fragmentBindings,
+                        parameters: command.parameters,
                         functionType: .fragment,
                         encoder: commandEncoder
                     )

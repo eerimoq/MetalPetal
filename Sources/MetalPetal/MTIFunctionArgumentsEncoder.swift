@@ -65,8 +65,8 @@ private let dataTypeMismatchError = MTIError.parameterDataTypeMismatch
 private let dataSizeMismatchError = MTIError.parameterDataSizeMismatch
 
 public func MTIEncodeArguments(
-    _ bindings: [any MTLBinding],
-    values parameters: [String: MTIFunctionArgumentValue],
+    bindings: [any MTLBinding],
+    parameters: [String: MTIFunctionArgumentValue],
     functionType: MTLFunctionType,
     encoder: MTLCommandEncoder
 ) throws {

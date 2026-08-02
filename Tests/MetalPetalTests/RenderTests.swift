@@ -119,7 +119,7 @@ struct RenderTests {
         let blendFilter = MTIBlendFilter(blendMode: .multiply)
         let invertFilter = MTIColorInvertFilter()
         let pixellateFilter = MTIPixellateFilter()
-        pixellateFilter.scale = CGSize(width: 2, height: 2)
+        pixellateFilter.scale = simd_make_float2(2, 2)
         let outputImage = FilterGraph.makeImage { output in
             image => saturationFilter => pixellateFilter => blendFilter.inputPorts.inputBackgroundImage
             image => invertFilter => blendFilter.inputPorts.inputImage
@@ -129,9 +129,7 @@ struct RenderTests {
         #expect(context.idleResourceCount == 0)
         _ = try context.makeCGImage(from: #require(outputImage))
         #expect(context.idleResourceCount == 3)
-
         context.reclaimResources()
-
         #expect(context.idleResourceCount == 0)
         let outputImage2 = FilterGraph.makeImage { output in
             image => saturationFilter => pixellateFilter => invertFilter => saturationFilter => output

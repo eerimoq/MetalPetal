@@ -10,15 +10,14 @@ import Foundation
 
 public final class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     /// Specifies the scale of the operation, i.e. the size for the pixels in the resulting image.
-    public var scale: CGSize = .init(width: 16, height: 16)
+    public var scale: simd_float2 = simd_make_float2(16, 16)
 
     override public static func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
         MTIFunctionDescriptor(name: "pixellate")
     }
 
     override public var parameters: [String: MTIFunctionArgumentValue] {
-        let value = CGSize(width: max(scale.width, 1), height: max(scale.height, 1))
-        return ["scale": .vector(MTIVector(value: value))]
+        ["scale": .simd(.float2(scale))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

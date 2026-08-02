@@ -227,8 +227,8 @@ struct UtilitiesTests {
         }
         do {
             try MTIEncodeArguments(
-                state.reflection.bindings,
-                values: ["color": .simd(.float3(SIMD3<Float>(0, 0, 0)))],
+                bindings: state.reflection.bindings,
+                parameters: ["color": .simd(.float3(SIMD3<Float>(0, 0, 0)))],
                 functionType: .kernel,
                 encoder: #require(commandEncoder)
             )
@@ -237,8 +237,8 @@ struct UtilitiesTests {
             #expect(encoderError == .parameterDataSizeMismatch)
         }
         try MTIEncodeArguments(
-            state.reflection.bindings,
-            values: ["color": .simd(.packedFloat3(MTLPackedFloat3Make(0, 0, 0)))],
+            bindings: state.reflection.bindings,
+            parameters: ["color": .simd(.packedFloat3(MTLPackedFloat3Make(0, 0, 0)))],
             functionType: .kernel,
             encoder: #require(commandEncoder)
         )
@@ -316,7 +316,6 @@ struct UtilitiesTests {
             name: "testCompute",
             libraryURL: libraryURL
         ))
-
         let context = try makeContext()
         context.lockForRendering()
         let state = try #require(context.kernelState(
@@ -330,8 +329,8 @@ struct UtilitiesTests {
         }
         do {
             try MTIEncodeArguments(
-                state.reflection.bindings,
-                values: ["color": .simd(.float4(SIMD4<Float>(128, 0, 0, 0)))],
+                bindings: state.reflection.bindings,
+                parameters: ["color": .simd(.float4(simd_make_float4(128, 0, 0, 0)))],
                 functionType: .kernel,
                 encoder: #require(commandEncoder)
             )

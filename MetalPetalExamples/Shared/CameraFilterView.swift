@@ -357,7 +357,7 @@ extension CapturePipeline.Effect {
         }),
         .init("Pixellate", makeFilter: applying {
             let filter = MTIPixellateFilter()
-            filter.scale = CGSize(width: 16, height: 16)
+            filter.scale = simd_make_float2(16, 16)
             return filter
         }),
         .init("Bulge Distortion") {
