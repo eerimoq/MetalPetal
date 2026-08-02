@@ -8,12 +8,12 @@
 import Foundation
 
 enum BlendFormulaSupport {
-    static func generateBlendFormulaSupportFiles(sourceDirectory: URL) -> [String: String] {
-        let sourceHeaderFile = sourceDirectory.appendingPathComponent("Shaders/MTIShaderLib.h")
-        let shaderHeaderContent = try! String(contentsOf: sourceHeaderFile, encoding: .utf8)
+    static func generateBlendFormulaSupportFiles(sourceDirectory: URL) throws -> [String: String] {
+        let sourceHeaderFile = sourceDirectory.appending(path: "Shaders/MTIShaderLib.h")
+        let shaderHeaderContent = try String(contentsOf: sourceHeaderFile, encoding: .utf8)
         let functionConstantsHeaderFile = sourceDirectory
-            .appendingPathComponent("Shaders/MTIShaderFunctionConstants.h")
-        let functionConstantsContent = try! String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
+            .appending(path: "Shaders/MTIShaderFunctionConstants.h")
+        let functionConstantsContent = try String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
         // The shader template is embedded verbatim in a raw string literal (`#"""..."""#`) so it needs no
         // escaping. In the outer `##"""..."""##` raw string, `\##(...)` is interpolation, while `\(...)` and
         // `\n` are emitted literally into the generated file's own (regular) string literals.

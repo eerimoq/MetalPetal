@@ -50,24 +50,24 @@ public struct BoilerplateGenerator: ParsableCommand {
             "Luminosity",
         ]
         let sourceDirectory = MetalPetalSourcesRootURL(in: projectRoot)
-        let shadersFileDirectory = sourceDirectory.appendingPathComponent("Shaders")
+        let shadersFileDirectory = sourceDirectory.appending(component: "Shaders")
         for (file, content) in MTIVectorSIMDTypeSupportCodeGenerator.generate() {
-            let url = sourceDirectory.appendingPathComponent(file)
-            try! content.write(to: url, atomically: true, encoding: .utf8)
+            let url = sourceDirectory.appending(component: file)
+            try content.write(to: url, atomically: true, encoding: .utf8)
         }
         for (file, content) in MetalPetalBlendingShadersCodeGenerator.generate(blendModes: blendModes) {
-            let url = shadersFileDirectory.appendingPathComponent(file)
-            try! content.write(to: url, atomically: true, encoding: .utf8)
+            let url = shadersFileDirectory.appending(component: file)
+            try content.write(to: url, atomically: true, encoding: .utf8)
         }
         for (file, content) in MTISIMDArgumentValueGenerator.generate() {
-            let url = sourceDirectory.appendingPathComponent(file)
-            try! content.write(to: url, atomically: true, encoding: .utf8)
+            let url = sourceDirectory.appending(component: file)
+            try content.write(to: url, atomically: true, encoding: .utf8)
         }
-        for (file, content) in BlendFormulaSupport
+        for (file, content) in try BlendFormulaSupport
             .generateBlendFormulaSupportFiles(sourceDirectory: sourceDirectory)
         {
-            let url = sourceDirectory.appendingPathComponent(file)
-            try! content.write(to: url, atomically: true, encoding: .utf8)
+            let url = sourceDirectory.appending(component: file)
+            try content.write(to: url, atomically: true, encoding: .utf8)
         }
     }
 }
