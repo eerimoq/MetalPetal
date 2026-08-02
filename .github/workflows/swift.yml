@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v7
       - name: Source code styling
         run: |
-          brew install swiftformat
+          brew install swiftformat clang-format
           make style-check
       - name: Linting
         run: |
@@ -28,7 +28,7 @@ jobs:
     - uses: actions/checkout@v7
     - name: Check generated sources are up to date
       run: |
-        brew install swiftformat
+        brew install swiftformat clang-format
         make generate
         git diff --exit-code -- Sources || {
           echo "::error::Generated sources are out of date. Run 'make generate' and commit the result."
