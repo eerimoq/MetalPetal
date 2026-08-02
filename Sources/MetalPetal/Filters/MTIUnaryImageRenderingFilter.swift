@@ -177,10 +177,10 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
     public class func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
         if self == MTIUnaryImageRenderingFilter.self {
             // for MTIUnaryImageRenderingFilter
-            MTIAlphaTypeHandlingRule.passthrough
+            .passthrough
         } else {
             // Subclass default
-            MTIAlphaTypeHandlingRule.general
+            .general
         }
     }
 }

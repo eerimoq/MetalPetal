@@ -22,6 +22,6 @@ public final class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
-        MTIAlphaTypeHandlingRule.passthrough
+        .passthrough
     }
 }

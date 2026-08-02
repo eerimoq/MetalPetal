@@ -26,6 +26,6 @@ public final class MTIColorHalftoneFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
-        MTIAlphaTypeHandlingRule.general
+        .general
     }
 }

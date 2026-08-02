@@ -22,7 +22,7 @@ public class MTIColorMatrixFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public class func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
-        MTIAlphaTypeHandlingRule.general
+        .general
     }
 }
 

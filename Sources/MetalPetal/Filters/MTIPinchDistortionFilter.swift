@@ -26,6 +26,6 @@ public final class MTIPinchDistortionFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {
-        MTIAlphaTypeHandlingRule.passthrough
+        .passthrough
     }
 }
