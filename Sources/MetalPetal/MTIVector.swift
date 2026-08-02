@@ -9,8 +9,8 @@ import CoreGraphics
 import Foundation
 import QuartzCore
 
-public final class MTIVector: Hashable {
-    public enum ScalarType: Int {
+public struct MTIVector: Hashable {
+    public enum ScalarType {
         case float
         case int
         case uint
@@ -71,28 +71,25 @@ public final class MTIVector: Hashable {
     }
 
     public static func == (lhs: MTIVector, rhs: MTIVector) -> Bool {
-        if lhs === rhs {
-            return true
-        }
-        return lhs.count == rhs.count && lhs.data == rhs.data
+        lhs.count == rhs.count && lhs.data == rhs.data
     }
 
-    public convenience init(x: Float, y: Float) {
+    public init(x: Float, y: Float) {
         let values = [x, y]
         self.init(floatValues: values, count: 2)
     }
 
-    public convenience init(value point: CGPoint) {
+    public init(value point: CGPoint) {
         let values = [Float(point.x), Float(point.y)]
         self.init(floatValues: values, count: 2)
     }
 
-    public convenience init(value size: CGSize) {
+    public init(value size: CGSize) {
         let values = [Float(size.width), Float(size.height)]
         self.init(floatValues: values, count: 2)
     }
 
-    public convenience init(value rect: CGRect) {
+    public init(value rect: CGRect) {
         let values = [
             Float(rect.origin.x),
             Float(rect.origin.y),
@@ -144,31 +141,31 @@ public final class MTIVector: Hashable {
 }
 
 public extension MTIVector {
-    convenience init(values: [Float]) {
+    init(values: [Float]) {
         self.init(floatValues: values, count: values.count)
     }
 
-    convenience init(values: [Int32]) {
+    init(values: [Int32]) {
         self.init(intValues: values, count: values.count)
     }
 
-    convenience init(values: [UInt32]) {
+    init(values: [UInt32]) {
         self.init(uintValues: values, count: values.count)
     }
 
-    convenience init(values: [Int16]) {
+    init(values: [Int16]) {
         self.init(shortValues: values, count: values.count)
     }
 
-    convenience init(values: [UInt16]) {
+    init(values: [UInt16]) {
         self.init(ushortValues: values, count: values.count)
     }
 
-    convenience init(values: [Int8]) {
+    init(values: [Int8]) {
         self.init(charValues: values, count: values.count)
     }
 
-    convenience init(values: [UInt8]) {
+    init(values: [UInt8]) {
         self.init(ucharValues: values, count: values.count)
     }
 }

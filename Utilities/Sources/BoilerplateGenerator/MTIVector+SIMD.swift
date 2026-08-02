@@ -57,7 +57,7 @@ public enum MTIVectorSIMDTypeSupportCodeGenerator {
             let scalarType = type.scalarType.swiftTypeName
             lines.append(
                 """
-                    public convenience init(value: \(swiftType)) {
+                    public init(value: \(swiftType)) {
                         var v = value
                         let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
                         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(

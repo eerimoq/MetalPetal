@@ -12,7 +12,7 @@ import simd
 // WARNING: MTIVector equality may not work for a MTIVector holding a simd_type3 or simd_typeNx3 value.
 
 public extension MTIVector {
-    convenience init(value: simd_float2) {
+    init(value: simd_float2) {
         var v = value
         let count = MemoryLayout<simd_float2>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -31,7 +31,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float3) {
+    init(value: simd_float3) {
         var v = value
         let count = MemoryLayout<simd_float3>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -50,7 +50,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float4) {
+    init(value: simd_float4) {
         var v = value
         let count = MemoryLayout<simd_float4>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -69,7 +69,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float2x2) {
+    init(value: simd_float2x2) {
         var v = value
         let count = MemoryLayout<simd_float2x2>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -88,7 +88,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float2x3) {
+    init(value: simd_float2x3) {
         var v = value
         let count = MemoryLayout<simd_float2x3>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -107,7 +107,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float2x4) {
+    init(value: simd_float2x4) {
         var v = value
         let count = MemoryLayout<simd_float2x4>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -126,7 +126,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float3x2) {
+    init(value: simd_float3x2) {
         var v = value
         let count = MemoryLayout<simd_float3x2>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -145,7 +145,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float3x3) {
+    init(value: simd_float3x3) {
         var v = value
         let count = MemoryLayout<simd_float3x3>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -164,7 +164,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float3x4) {
+    init(value: simd_float3x4) {
         var v = value
         let count = MemoryLayout<simd_float3x4>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -183,7 +183,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float4x2) {
+    init(value: simd_float4x2) {
         var v = value
         let count = MemoryLayout<simd_float4x2>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -202,7 +202,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float4x3) {
+    init(value: simd_float4x3) {
         var v = value
         let count = MemoryLayout<simd_float4x3>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -221,7 +221,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_float4x4) {
+    init(value: simd_float4x4) {
         var v = value
         let count = MemoryLayout<simd_float4x4>.size / MemoryLayout<Float>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Float.self)) }
@@ -240,7 +240,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_int2) {
+    init(value: simd_int2) {
         var v = value
         let count = MemoryLayout<simd_int2>.size / MemoryLayout<Int32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int32.self)) }
@@ -259,7 +259,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_int3) {
+    init(value: simd_int3) {
         var v = value
         let count = MemoryLayout<simd_int3>.size / MemoryLayout<Int32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int32.self)) }
@@ -278,7 +278,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_int4) {
+    init(value: simd_int4) {
         var v = value
         let count = MemoryLayout<simd_int4>.size / MemoryLayout<Int32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int32.self)) }
@@ -297,7 +297,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uint2) {
+    init(value: simd_uint2) {
         var v = value
         let count = MemoryLayout<simd_uint2>.size / MemoryLayout<UInt32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt32.self)) }
@@ -316,7 +316,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uint3) {
+    init(value: simd_uint3) {
         var v = value
         let count = MemoryLayout<simd_uint3>.size / MemoryLayout<UInt32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt32.self)) }
@@ -335,7 +335,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uint4) {
+    init(value: simd_uint4) {
         var v = value
         let count = MemoryLayout<simd_uint4>.size / MemoryLayout<UInt32>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt32.self)) }
@@ -354,7 +354,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_short2) {
+    init(value: simd_short2) {
         var v = value
         let count = MemoryLayout<simd_short2>.size / MemoryLayout<Int16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int16.self)) }
@@ -373,7 +373,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_short3) {
+    init(value: simd_short3) {
         var v = value
         let count = MemoryLayout<simd_short3>.size / MemoryLayout<Int16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int16.self)) }
@@ -392,7 +392,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_short4) {
+    init(value: simd_short4) {
         var v = value
         let count = MemoryLayout<simd_short4>.size / MemoryLayout<Int16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int16.self)) }
@@ -411,7 +411,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_ushort2) {
+    init(value: simd_ushort2) {
         var v = value
         let count = MemoryLayout<simd_ushort2>.size / MemoryLayout<UInt16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt16.self)) }
@@ -430,7 +430,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_ushort3) {
+    init(value: simd_ushort3) {
         var v = value
         let count = MemoryLayout<simd_ushort3>.size / MemoryLayout<UInt16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt16.self)) }
@@ -449,7 +449,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_ushort4) {
+    init(value: simd_ushort4) {
         var v = value
         let count = MemoryLayout<simd_ushort4>.size / MemoryLayout<UInt16>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt16.self)) }
@@ -468,7 +468,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_char2) {
+    init(value: simd_char2) {
         var v = value
         let count = MemoryLayout<simd_char2>.size / MemoryLayout<Int8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int8.self)) }
@@ -487,7 +487,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_char3) {
+    init(value: simd_char3) {
         var v = value
         let count = MemoryLayout<simd_char3>.size / MemoryLayout<Int8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int8.self)) }
@@ -506,7 +506,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_char4) {
+    init(value: simd_char4) {
         var v = value
         let count = MemoryLayout<simd_char4>.size / MemoryLayout<Int8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: Int8.self)) }
@@ -525,7 +525,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uchar2) {
+    init(value: simd_uchar2) {
         var v = value
         let count = MemoryLayout<simd_uchar2>.size / MemoryLayout<UInt8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt8.self)) }
@@ -544,7 +544,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uchar3) {
+    init(value: simd_uchar3) {
         var v = value
         let count = MemoryLayout<simd_uchar3>.size / MemoryLayout<UInt8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt8.self)) }
@@ -563,7 +563,7 @@ public extension MTIVector {
         return value
     }
 
-    convenience init(value: simd_uchar4) {
+    init(value: simd_uchar4) {
         var v = value
         let count = MemoryLayout<simd_uchar4>.size / MemoryLayout<UInt8>.size
         let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: UInt8.self)) }
