@@ -89,7 +89,7 @@ private final class MTILayerRenderPipelineKey: Hashable {
     }
 
     func createFragmentFunctionDescriptor(usesProgrammableBlending: Bool) -> MTIFunctionDescriptor? {
-        let fragmentFunctionDescriptorForBlending: MTIFunctionDescriptor? = if usesProgrammableBlending {
+        let fragmentFunctionDescriptorForBlending = if usesProgrammableBlending {
             MTIBlendModes.functionDescriptors(for: blendMode)?
                 .forMultilayerCompositingFilterWithProgrammableBlending
         } else {

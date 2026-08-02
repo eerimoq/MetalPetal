@@ -206,7 +206,7 @@ public final class MTICGImagePromise: MTIImagePromise {
         }
 
         let specifiedColorSpace = options.colorSpace ?? image.colorSpace
-        let colorSpace: CGColorSpace = if let specifiedColorSpace, specifiedColorSpace.model == .rgb {
+        let colorSpace = if let specifiedColorSpace, specifiedColorSpace.model == .rgb {
             specifiedColorSpace
         } else {
             CGColorSpaceCreateDeviceRGB()

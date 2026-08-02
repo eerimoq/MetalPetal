@@ -219,7 +219,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
             } else {
                 let isFullYUVRange = pixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
 
-                var preferredConversion: MTIYUVColorConversion = if let colorAttachments =
+                var preferredConversion = if let colorAttachments =
                     CVBufferCopyAttachment(
                         pixelBuffer,
                         kCVImageBufferYCbCrMatrixKey,

@@ -135,9 +135,7 @@ public final class MTIContext {
             throw MTIError.featureNotAvailableOnSimulator
         }
         #endif
-        let defaultLibrary: MTLLibrary = if options.defaultLibraryURL
-            .scheme == MTIURLSchemeForLibraryWithSource
-        {
+        let defaultLibrary = if options.defaultLibraryURL.scheme == MTIURLSchemeForLibraryWithSource {
             try MTILibrarySourceRegistration.shared.newLibrary(
                 with: options.defaultLibraryURL,
                 device: device
@@ -321,7 +319,7 @@ public extension MTIContext {
         if let library = libraryCache[url] {
             return library
         }
-        let library: MTLLibrary = if url.scheme == MTIURLSchemeForLibraryWithSource {
+        let library = if url.scheme == MTIURLSchemeForLibraryWithSource {
             try MTILibrarySourceRegistration.shared.newLibrary(with: url, device: device)
         } else {
             try device.makeLibrary(URL: url)
@@ -342,7 +340,7 @@ public extension MTIContext {
         if library === defaultLibrary {
             functionName = defaultLibraryFunctionShort2FullNames[descriptor.name] ?? functionName
         }
-        let function: MTLFunction? = if let constantValues = descriptor.constantValues {
+        let function = if let constantValues = descriptor.constantValues {
             try library.makeFunction(name: functionName, constantValues: constantValues)
         } else {
             library.makeFunction(name: functionName)

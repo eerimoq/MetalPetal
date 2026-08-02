@@ -236,9 +236,7 @@ public extension MTIContext {
             renderPassDescriptor.colorAttachments[0].storeAction = .store
             let vertices = MTIVertices.squareVertices(for: CGRect(x: -1, y: -1, width: 2, height: 2))
             // Prefers premultiplied alpha here.
-            let kernel: MTIRenderPipelineKernel = if image.alphaType == .nonPremultiplied,
-                                                     destinationAlphaType == .premultiplied
-            {
+            let kernel = if image.alphaType == .nonPremultiplied, destinationAlphaType == .premultiplied {
                 MTIContext.premultiplyAlphaKernel
             } else if image.alphaType == .premultiplied, destinationAlphaType == .nonPremultiplied {
                 MTIContext.unpremultiplyAlphaKernel
@@ -388,7 +386,7 @@ public extension MTIContext {
             MTIVertex(position: (widthScaling, heightScaling, 0, 1), textureCoordinate: (1, 0)),
         ], primitiveType: .triangleStrip)
         // iOS drawables always require premultiplied alpha.
-        let kernel: MTIRenderPipelineKernel = if image.alphaType == .nonPremultiplied {
+        let kernel = if image.alphaType == .nonPremultiplied {
             MTIContext.premultiplyAlphaKernel
         } else {
             MTIContext.passthroughKernel
@@ -477,9 +475,7 @@ public extension MTIContext {
             renderPassDescriptor.colorAttachments[0].storeAction = .store
             let vertices = MTIVertices.squareVertices(for: CGRect(x: -1, y: -1, width: 2, height: 2))
             // Prefers premultiplied alpha here.
-            let kernel: MTIRenderPipelineKernel = if image.alphaType == .nonPremultiplied,
-                                                     destinationAlphaType == .premultiplied
-            {
+            let kernel = if image.alphaType == .nonPremultiplied, destinationAlphaType == .premultiplied {
                 MTIContext.premultiplyAlphaKernel
             } else if image.alphaType == .premultiplied, destinationAlphaType == .nonPremultiplied {
                 MTIContext.unpremultiplyAlphaKernel
