@@ -75,7 +75,7 @@ fragment float4 colorHalftone(VertexOut vertexIn [[stage_in]],
                               texture2d<float, access::sample> sourceTexture [[texture(0)]],
                               sampler sourceSampler [[sampler(0)]],
                               constant float &scale [[buffer(1)]],
-                              constant float4 &angles [[buffer(2)]],
+                              constant float3 &angles [[buffer(2)]],
                               constant bool &singleAngleMode [[buffer(3)]])
 {
     using namespace metalpetal::halftone;
