@@ -303,7 +303,7 @@ extension CapturePipeline.Effect {
         }),
         .init("MPS Box Blur", makeFilter: applying {
             let filter = MTIMPSBoxBlurFilter()
-            filter.size = simd_make_int2(15, 15)
+            filter.size = .init(15, 15)
             return filter
         }),
         .init("MPS Unsharp Mask", makeFilter: applying {
@@ -364,10 +364,7 @@ extension CapturePipeline.Effect {
             let filter = MTIBulgeDistortionFilter()
             filter.scale = 0.5
             return { image in
-                filter.center = simd_make_float2(
-                    Float(image.size.width / 2),
-                    Float(image.size.height / 2)
-                )
+                filter.center = .init(Float(image.size.width / 2), Float(image.size.height / 2))
                 filter.radius = Float(min(image.size.width, image.size.height) / 2)
                 filter.inputImage = image
                 return filter.outputImage!
@@ -377,10 +374,7 @@ extension CapturePipeline.Effect {
             let filter = MTIPinchDistortionFilter()
             filter.scale = 0.5
             return { image in
-                filter.center = simd_make_float2(
-                    Float(image.size.width / 2),
-                    Float(image.size.height / 2)
-                )
+                filter.center = .init(Float(image.size.width / 2), Float(image.size.height / 2))
                 filter.radius = Float(min(image.size.width, image.size.height) / 2)
                 filter.inputImage = image
                 return filter.outputImage!
@@ -390,10 +384,7 @@ extension CapturePipeline.Effect {
             let filter = MTITwirlDistortionFilter()
             filter.angle = .pi
             return { image in
-                filter.center = simd_make_float2(
-                    Float(image.size.width / 2),
-                    Float(image.size.height / 2)
-                )
+                filter.center = .init(Float(image.size.width / 2), Float(image.size.height / 2))
                 filter.radius = Float(min(image.size.width, image.size.height) / 2)
                 filter.inputImage = image
                 return filter.outputImage!
