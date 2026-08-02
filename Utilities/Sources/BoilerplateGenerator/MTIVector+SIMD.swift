@@ -71,9 +71,10 @@ public enum MTIVectorSIMDTypeSupportCodeGenerator {
                         if scalarType == .\(type
                     .scalarTypeCaseName) && byteLength == MemoryLayout<\(swiftType)>.size {
                             withUnsafeBytes { source in
-                                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<\(
-                                    swiftType
-                                )>.size) }
+                                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<\(
+                                        swiftType
+                                    )>.size) }
                             }
                         }
                         return value

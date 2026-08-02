@@ -18,3 +18,5 @@ disabled_rules:
   - force_try
   - nesting
   - unused_setter_value
+excluded:
+  - Utilities/.build

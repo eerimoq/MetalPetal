@@ -4,9 +4,6 @@
 
 import Foundation
 
-// swiftlint:disable line_length
-// swiftlint:disable trailing_whitespace
-
 private let MTIBlendFormulaSupportShaderTemplate = #"""
 //
 //  MTIShader.h
@@ -939,10 +936,13 @@ fragment float4 customBlend(VertexOut vertexIn [[ stage_in ]],
     float4 uCb = colorTexture.sample(colorSampler, vertexIn.textureCoordinate);
     float2 textureCoordinate = vertexIn.textureCoordinate;
     #if MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER
-    textureCoordinate = modify_source_texture_coordinates(uCb, vertexIn.textureCoordinate, uint2(overlayTexture.get_width(), overlayTexture.get_height()));
+    textureCoordinate = modify_source_texture_coordinates(uCb,
+                                                          vertexIn.textureCoordinate,
+                                                          uint2(overlayTexture.get_width(),
+                                                          overlayTexture.get_height()));
     #endif
     float4 uCf = overlayTexture.sample(overlaySampler, textureCoordinate);
-    
+
     if (blend_filter_backdrop_has_premultiplied_alpha) {
         uCb = unpremultiply(uCb);
     }
@@ -964,21 +964,24 @@ fragment float4 customBlend(VertexOut vertexIn [[ stage_in ]],
 
 
 #if __HAVE_COLOR_ARGUMENTS__ && !TARGET_OS_SIMULATOR
-    
+
 fragment float4 multilayerCompositeCustomBlend_programmableBlending(
-                                                    MTIMultilayerCompositingLayerVertexOut vertexIn [[ stage_in ]],
-                                                    float4 currentColor [[color(0)]],
-                                                    constant MTIMultilayerCompositingLayerShadingParameters & parameters [[buffer(0)]],
-                                                    texture2d<float, access::sample> colorTexture [[ texture(0) ]],
-                                                    sampler colorSampler [[ sampler(0) ]],
-                                                    texture2d<float, access::sample> compositingMaskTexture [[ texture(1) ]],
-                                                    sampler compositingMaskSampler [[ sampler(1) ]],
-                                                    texture2d<float, access::sample> maskTexture [[ texture(2) ]],
-                                                    sampler maskSampler [[ sampler(2) ]]
-                                                ) {
+            MTIMultilayerCompositingLayerVertexOut vertexIn [[ stage_in ]],
+            float4 currentColor [[color(0)]],
+            constant MTIMultilayerCompositingLayerShadingParameters & parameters [[buffer(0)]],
+            texture2d<float, access::sample> colorTexture [[ texture(0) ]],
+            sampler colorSampler [[ sampler(0) ]],
+            texture2d<float, access::sample> compositingMaskTexture [[ texture(1) ]],
+            sampler compositingMaskSampler [[ sampler(1) ]],
+            texture2d<float, access::sample> maskTexture [[ texture(2) ]],
+            sampler maskSampler [[ sampler(2) ]]
+        ) {
     float2 textureCoordinate = vertexIn.textureCoordinate;
     #if MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER
-    textureCoordinate = modify_source_texture_coordinates(currentColor, vertexIn.textureCoordinate, uint2(colorTexture.get_width(), colorTexture.get_height()));
+    textureCoordinate = modify_source_texture_coordinates(currentColor,
+                                                          vertexIn.textureCoordinate,
+                                                          uint2(colorTexture.get_width(),
+                                                          colorTexture.get_height()));
     #endif
     float4 textureColor = colorTexture.sample(colorSampler, textureCoordinate);
 
@@ -1004,10 +1007,14 @@ fragment float4 multilayerCompositeCustomBlend_programmableBlending(
     }
     switch (multilayer_composite_corner_curve_type) {
         case 1:
-            textureColor.a *= circularCornerMask(parameters.layerSize, vertexIn.positionInLayer, parameters.cornerRadius);
+            textureColor.a *= circularCornerMask(parameters.layerSize,
+                                                 vertexIn.positionInLayer,
+                                                 parameters.cornerRadius);
             break;
         case 2:
-            textureColor.a *= continuousCornerMask(parameters.layerSize, vertexIn.positionInLayer, parameters.cornerRadius);
+            textureColor.a *= continuousCornerMask(parameters.layerSize,
+                                                   vertexIn.positionInLayer,
+                                                   parameters.cornerRadius);
             break;
         default:
             break;
@@ -1019,22 +1026,25 @@ fragment float4 multilayerCompositeCustomBlend_programmableBlending(
 #endif
 
 fragment float4 multilayerCompositeCustomBlend(
-                                    MTIMultilayerCompositingLayerVertexOut vertexIn [[ stage_in ]],
-                                    texture2d<float, access::sample> backgroundTexture [[ texture(1) ]],
-                                    texture2d<float, access::sample> compositingMaskTexture [[ texture(2) ]],
-                                    sampler compositingMaskSampler [[ sampler(2) ]],
-                                    texture2d<float, access::sample> maskTexture [[ texture(3) ]],
-                                    sampler maskSampler [[ sampler(3) ]],
-                                    constant MTIMultilayerCompositingLayerShadingParameters & parameters [[buffer(0)]],
-                                    texture2d<float, access::sample> colorTexture [[ texture(0) ]],
-                                    sampler colorSampler [[ sampler(0) ]]
-                                ) {
+            MTIMultilayerCompositingLayerVertexOut vertexIn [[ stage_in ]],
+            texture2d<float, access::sample> backgroundTexture [[ texture(1) ]],
+            texture2d<float, access::sample> compositingMaskTexture [[ texture(2) ]],
+            sampler compositingMaskSampler [[ sampler(2) ]],
+            texture2d<float, access::sample> maskTexture [[ texture(3) ]],
+            sampler maskSampler [[ sampler(3) ]],
+            constant MTIMultilayerCompositingLayerShadingParameters & parameters [[buffer(0)]],
+            texture2d<float, access::sample> colorTexture [[ texture(0) ]],
+            sampler colorSampler [[ sampler(0) ]]
+        ) {
     constexpr sampler s(coord::normalized, address::clamp_to_zero, filter::linear);
     float2 location = vertexIn.position.xy / parameters.canvasSize;
     float4 backgroundColor = backgroundTexture.sample(s, location);
     float2 textureCoordinate = vertexIn.textureCoordinate;
     #if MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER
-    textureCoordinate = modify_source_texture_coordinates(backgroundColor, vertexIn.textureCoordinate, uint2(colorTexture.get_width(), colorTexture.get_height()));
+    textureCoordinate = modify_source_texture_coordinates(backgroundColor,
+                                                          vertexIn.textureCoordinate,
+                                                          uint2(colorTexture.get_width(),
+                                                          colorTexture.get_height()));
     #endif
     float4 textureColor = colorTexture.sample(colorSampler, textureCoordinate);
     if (multilayer_composite_content_premultiplied) {
@@ -1058,10 +1068,14 @@ fragment float4 multilayerCompositeCustomBlend(
     }
     switch (multilayer_composite_corner_curve_type) {
         case 1:
-            textureColor.a *= circularCornerMask(parameters.layerSize, vertexIn.positionInLayer, parameters.cornerRadius);
+            textureColor.a *= circularCornerMask(parameters.layerSize,
+                                                 vertexIn.positionInLayer,
+                                                 parameters.cornerRadius);
             break;
         case 2:
-            textureColor.a *= continuousCornerMask(parameters.layerSize, vertexIn.positionInLayer, parameters.cornerRadius);
+            textureColor.a *= continuousCornerMask(parameters.layerSize,
+                                                   vertexIn.positionInLayer,
+                                                   parameters.cornerRadius);
             break;
         default:
             break;
@@ -1081,12 +1095,12 @@ func MTIBuildBlendFormulaShaderSource(_ formula: String) -> String {
     let targetOSSimulator = 0
     #endif
     let hasTextureCoordinatesModifier = formula.contains("modify_source_texture_coordinates") ? 1 : 0
-    let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR \(targetOSSimulator)\n#endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)\n\n"
-    return MTIBlendFormulaSupportShaderTemplate.replacingOccurrences(
-        of: "{MTIBlendFormula}",
-        with: targetConditionals + formula
-    )
-}
+    let targetConditionals = """
+    #ifndef TARGET_OS_SIMULATOR
+    #define TARGET_OS_SIMULATOR \(targetOSSimulator)
+    #endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)
 
-// swiftlint:enable line_length
-// swiftlint:enable trailing_whitespace
+    """
+    return MTIBlendFormulaSupportShaderTemplate
+        .replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
+}

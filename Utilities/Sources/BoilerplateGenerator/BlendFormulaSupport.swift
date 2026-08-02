@@ -24,9 +24,6 @@ enum BlendFormulaSupport {
 
         import Foundation
 
-        // swiftlint:disable line_length
-        // swiftlint:disable trailing_whitespace
-
         private let MTIBlendFormulaSupportShaderTemplate = #"""
         \##(shaderHeaderContent)
         \##(functionConstantsContent)
@@ -54,12 +51,15 @@ enum BlendFormulaSupport {
             let targetOSSimulator = 0
             #endif
             let hasTextureCoordinatesModifier = formula.contains("modify_source_texture_coordinates") ? 1 : 0
-            let targetConditionals = "#ifndef TARGET_OS_SIMULATOR\n#define TARGET_OS_SIMULATOR \(targetOSSimulator)\n#endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)\n\n"
-            return MTIBlendFormulaSupportShaderTemplate.replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
-        }
+            let targetConditionals = """
+                #ifndef TARGET_OS_SIMULATOR
+                #define TARGET_OS_SIMULATOR \(targetOSSimulator)
+                #endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)
 
-        // swiftlint:enable line_length
-        // swiftlint:enable trailing_whitespace
+                """
+            return MTIBlendFormulaSupportShaderTemplate
+                .replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
+        }
 
         """##
 

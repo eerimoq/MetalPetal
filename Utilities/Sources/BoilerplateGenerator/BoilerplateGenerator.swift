@@ -52,7 +52,7 @@ public struct BoilerplateGenerator: ParsableCommand {
         let sourceDirectory = MetalPetalSourcesRootURL(in: projectRoot)
         let shadersFileDirectory = sourceDirectory.appending(component: "Shaders")
         for (file, content) in MTIVectorSIMDTypeSupportCodeGenerator.generate() {
-            let url = sourceDirectory.appending(component: file)
+            let url = sourceDirectory.appending(component: "Generated").appending(component: file)
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
         for (file, content) in MetalPetalBlendingShadersCodeGenerator.generate(blendModes: blendModes) {
@@ -60,13 +60,13 @@ public struct BoilerplateGenerator: ParsableCommand {
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
         for (file, content) in MTISIMDArgumentValueGenerator.generate() {
-            let url = sourceDirectory.appending(component: file)
+            let url = sourceDirectory.appending(component: "Generated").appending(component: file)
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
         for (file, content) in try BlendFormulaSupport
             .generateBlendFormulaSupportFiles(sourceDirectory: sourceDirectory)
         {
-            let url = sourceDirectory.appending(component: file)
+            let url = sourceDirectory.appending(component: "Generated").appending(component: file)
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
     }

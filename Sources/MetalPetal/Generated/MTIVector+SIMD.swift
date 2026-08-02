@@ -23,11 +23,9 @@ public extension MTIVector {
         var value = simd_float2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float2>.size)
+                }
             }
         }
         return value
@@ -44,11 +42,9 @@ public extension MTIVector {
         var value = simd_float3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float3>.size)
+                }
             }
         }
         return value
@@ -65,11 +61,9 @@ public extension MTIVector {
         var value = simd_float4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float4>.size)
+                }
             }
         }
         return value
@@ -86,11 +80,9 @@ public extension MTIVector {
         var value = simd_float2x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float2x2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float2x2>.size)
+                }
             }
         }
         return value
@@ -107,11 +99,9 @@ public extension MTIVector {
         var value = simd_float2x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float2x3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float2x3>.size)
+                }
             }
         }
         return value
@@ -128,11 +118,9 @@ public extension MTIVector {
         var value = simd_float2x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float2x4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float2x4>.size)
+                }
             }
         }
         return value
@@ -149,11 +137,9 @@ public extension MTIVector {
         var value = simd_float3x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float3x2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float3x2>.size)
+                }
             }
         }
         return value
@@ -170,11 +156,9 @@ public extension MTIVector {
         var value = simd_float3x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float3x3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float3x3>.size)
+                }
             }
         }
         return value
@@ -191,11 +175,9 @@ public extension MTIVector {
         var value = simd_float3x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float3x4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float3x4>.size)
+                }
             }
         }
         return value
@@ -212,11 +194,9 @@ public extension MTIVector {
         var value = simd_float4x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float4x2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float4x2>.size)
+                }
             }
         }
         return value
@@ -233,11 +213,9 @@ public extension MTIVector {
         var value = simd_float4x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float4x3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float4x3>.size)
+                }
             }
         }
         return value
@@ -254,11 +232,9 @@ public extension MTIVector {
         var value = simd_float4x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_float4x4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_float4x4>.size)
+                }
             }
         }
         return value
@@ -275,11 +251,9 @@ public extension MTIVector {
         var value = simd_int2()
         if scalarType == .int, byteLength == MemoryLayout<simd_int2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_int2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_int2>.size)
+                }
             }
         }
         return value
@@ -296,11 +270,9 @@ public extension MTIVector {
         var value = simd_int3()
         if scalarType == .int, byteLength == MemoryLayout<simd_int3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_int3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_int3>.size)
+                }
             }
         }
         return value
@@ -317,11 +289,9 @@ public extension MTIVector {
         var value = simd_int4()
         if scalarType == .int, byteLength == MemoryLayout<simd_int4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_int4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_int4>.size)
+                }
             }
         }
         return value
@@ -338,11 +308,9 @@ public extension MTIVector {
         var value = simd_uint2()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uint2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uint2>.size)
+                }
             }
         }
         return value
@@ -359,11 +327,9 @@ public extension MTIVector {
         var value = simd_uint3()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uint3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uint3>.size)
+                }
             }
         }
         return value
@@ -380,11 +346,9 @@ public extension MTIVector {
         var value = simd_uint4()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uint4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uint4>.size)
+                }
             }
         }
         return value
@@ -401,11 +365,9 @@ public extension MTIVector {
         var value = simd_short2()
         if scalarType == .short, byteLength == MemoryLayout<simd_short2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_short2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_short2>.size)
+                }
             }
         }
         return value
@@ -422,11 +384,9 @@ public extension MTIVector {
         var value = simd_short3()
         if scalarType == .short, byteLength == MemoryLayout<simd_short3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_short3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_short3>.size)
+                }
             }
         }
         return value
@@ -443,11 +403,9 @@ public extension MTIVector {
         var value = simd_short4()
         if scalarType == .short, byteLength == MemoryLayout<simd_short4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_short4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_short4>.size)
+                }
             }
         }
         return value
@@ -464,11 +422,9 @@ public extension MTIVector {
         var value = simd_ushort2()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_ushort2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_ushort2>.size)
+                }
             }
         }
         return value
@@ -485,11 +441,9 @@ public extension MTIVector {
         var value = simd_ushort3()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_ushort3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_ushort3>.size)
+                }
             }
         }
         return value
@@ -506,11 +460,9 @@ public extension MTIVector {
         var value = simd_ushort4()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_ushort4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_ushort4>.size)
+                }
             }
         }
         return value
@@ -527,11 +479,9 @@ public extension MTIVector {
         var value = simd_char2()
         if scalarType == .char, byteLength == MemoryLayout<simd_char2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_char2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_char2>.size)
+                }
             }
         }
         return value
@@ -548,11 +498,9 @@ public extension MTIVector {
         var value = simd_char3()
         if scalarType == .char, byteLength == MemoryLayout<simd_char3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_char3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_char3>.size)
+                }
             }
         }
         return value
@@ -569,11 +517,9 @@ public extension MTIVector {
         var value = simd_char4()
         if scalarType == .char, byteLength == MemoryLayout<simd_char4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_char4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_char4>.size)
+                }
             }
         }
         return value
@@ -590,11 +536,9 @@ public extension MTIVector {
         var value = simd_uchar2()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar2>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uchar2>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uchar2>.size)
+                }
             }
         }
         return value
@@ -611,11 +555,9 @@ public extension MTIVector {
         var value = simd_uchar3()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar3>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uchar3>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uchar3>.size)
+                }
             }
         }
         return value
@@ -632,11 +574,9 @@ public extension MTIVector {
         var value = simd_uchar4()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar4>.size {
             withUnsafeBytes { source in
-                _ = Swift.withUnsafeMutableBytes(of: &value) { memcpy(
-                    $0.baseAddress!,
-                    source.baseAddress!,
-                    MemoryLayout<simd_uchar4>.size
-                ) }
+                _ = Swift.withUnsafeMutableBytes(of: &value) {
+                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<simd_uchar4>.size)
+                }
             }
         }
         return value
