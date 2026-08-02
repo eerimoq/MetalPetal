@@ -132,10 +132,7 @@ public final class MTIContext {
     public init(device: MTLDevice, options: MTIContextOptions) throws {
         #if targetEnvironment(simulator)
         if !MTIContext.enablesSimulatorSupport {
-            throw MTIError(
-                code: .featureNotAvailableOnSimulator,
-                message: "MTIContext is not available on the simulator."
-            )
+            throw MTIError.featureNotAvailableOnSimulator
         }
         #endif
         let defaultLibrary: MTLLibrary = if options.defaultLibraryURL

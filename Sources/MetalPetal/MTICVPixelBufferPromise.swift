@@ -351,10 +351,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
                 let renderTarget = try renderingContext.context
                     .makeRenderTarget(reusableTextureDescriptor: textureDescriptor.makeMTITextureDescriptor())
                 guard let commandEncoder = renderingContext.commandBuffer.makeBlitCommandEncoder() else {
-                    throw MTIError(
-                        code: .failedToCreateCommandEncoder,
-                        message: "MTIErrorFailedToCreateCommandEncoder"
-                    )
+                    throw MTIError.failedToCreateCommandEncoder
                 }
                 commandEncoder.copy(
                     from: cvMetalTexture.texture,
