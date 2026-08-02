@@ -30,12 +30,14 @@ struct MTIVertex {
     vector_float4 position;
     vector_float2 textureCoordinate;
 };
+
 typedef struct MTIVertex MTIVertex;
 
 struct MTIColorMatrix {
     matrix_float4x4 matrix;
     vector_float4 bias;
 };
+
 typedef struct MTIColorMatrix MTIColorMatrix;
 
 struct MTICLAHELUTGeneratorInputParameters {
@@ -44,26 +46,23 @@ struct MTICLAHELUTGeneratorInputParameters {
     uint totalPixelCountPerTile;
     uint numberOfLUTs;
 };
+
 typedef struct MTICLAHELUTGeneratorInputParameters MTICLAHELUTGeneratorInputParameters;
 
 struct MTIMultilayerCompositingLayerShadingParameters {
     vector_float2 canvasSize;
-
     float opacity;
-
     int maskComponent;
     bool maskHasPremultipliedAlpha;
     bool maskUsesOneMinusValue;
-
     int compositingMaskComponent;
     bool compositingMaskHasPremultipliedAlpha;
     bool compositingMaskUsesOneMinusValue;
-
     vector_float4 tintColor;
     vector_float4 cornerRadius;
-
     vector_float2 layerSize;
 };
+
 typedef struct MTIMultilayerCompositingLayerShadingParameters MTIMultilayerCompositingLayerShadingParameters;
 
 struct MTIMultilayerCompositingLayerVertex {
@@ -71,6 +70,7 @@ struct MTIMultilayerCompositingLayerVertex {
     vector_float2 textureCoordinate;
     vector_float2 positionInLayer;
 };
+
 typedef struct MTIMultilayerCompositingLayerVertex MTIMultilayerCompositingLayerVertex;
 
 #ifdef __METAL_VERSION__
@@ -178,65 +178,51 @@ METAL_FUNC T hue2rgb(T p, T q, T t)
 METAL_FUNC float3 rgb2hsl(float3 inputColor)
 {
     float3 color = saturate(inputColor);
-
     // Compute min and max component values
     float MAX = max(color.r, max(color.g, color.b));
     float MIN = min(color.r, min(color.g, color.b));
-
     // Make sure MAX > MIN to avoid division by zero later
     MAX = max(MIN + 1e-6, MAX);
-
     // Compute luminosity
     float l = (MIN + MAX) / 2.0;
-
     // Compute saturation
     float s = (l < 0.5 ? (MAX - MIN) / (MIN + MAX) : (MAX - MIN) / (2.0 - MAX - MIN));
-
     // Compute hue
     float h = (MAX == color.r ? (color.g - color.b) / (MAX - MIN)
                               : (MAX == color.g ? 2.0 + (color.b - color.r) / (MAX - MIN)
                                                 : 4.0 + (color.r - color.g) / (MAX - MIN)));
     h /= 6.0;
     h = (h < 0.0 ? 1.0 + h : h);
-
     return float3(h, s, l);
 }
 
 METAL_FUNC half3 rgb2hsl(half3 inputColor)
 {
     half3 color = saturate(inputColor);
-
     // Compute min and max component values
     half MAX = max(color.r, max(color.g, color.b));
     half MIN = min(color.r, min(color.g, color.b));
-
     // Make sure MAX > MIN to avoid division by zero later
     MAX = max(MIN + 1e-6h, MAX);
-
     // Compute luminosity
     half l = (MIN + MAX) / 2.0h;
-
     // Compute saturation
     half s = (l < 0.5h ? (MAX - MIN) / (MIN + MAX) : (MAX - MIN) / (2.0h - MAX - MIN));
-
     // Compute hue
     half h = (MAX == color.r ? (color.g - color.b) / (MAX - MIN)
                              : (MAX == color.g ? 2.0h + (color.b - color.r) / (MAX - MIN)
                                                : 4.0h + (color.r - color.g) / (MAX - MIN)));
     h /= 6.0h;
     h = (h < 0.0h ? 1.0h + h : h);
-
     return half3(h, s, l);
 }
 
 METAL_FUNC float3 hsl2rgb(float3 inputColor)
 {
     float3 color = saturate(inputColor);
-
     float h = color.r;
     float s = color.g;
     float l = color.b;
-
     float r, g, b;
     if (s <= 0.0) {
         r = g = b = l;
@@ -254,11 +240,9 @@ METAL_FUNC float3 hsl2rgb(float3 inputColor)
 METAL_FUNC half3 hsl2rgb(half3 inputColor)
 {
     half3 color = saturate(inputColor);
-
     half h = color.r;
     half s = color.g;
     half l = color.b;
-
     half r, g, b;
     if (s <= 0.0h) {
         r = g = b = l;
@@ -712,35 +696,26 @@ METAL_FUNC float4 colorLookup2DSquareLUT(float4 color,
 {
     float row = round(sqrt((float)dimension));
     float blueColor = color.b * (dimension - 1);
-
     float2 quad1;
     quad1.y = floor(floor(blueColor) / row);
     quad1.x = floor(blueColor) - (quad1.y * row);
-
     float2 quad2;
     quad2.y = floor(ceil(blueColor) / row);
     quad2.x = ceil(blueColor) - (quad2.y * row);
-    ;
-
     float2 texPos1;
     texPos1.x = (quad1.x * (1.0 / row)) + 0.5 / lutTexture.get_width() +
                 ((1.0 / row - 1.0 / lutTexture.get_width()) * color.r);
     texPos1.y = (quad1.y * (1.0 / row)) + 0.5 / lutTexture.get_height() +
                 ((1.0 / row - 1.0 / lutTexture.get_height()) * color.g);
-
     float2 texPos2;
     texPos2.x = (quad2.x * (1.0 / row)) + 0.5 / lutTexture.get_width() +
                 ((1.0 / row - 1.0 / lutTexture.get_width()) * color.r);
     texPos2.y = (quad2.y * (1.0 / row)) + 0.5 / lutTexture.get_height() +
                 ((1.0 / row - 1.0 / lutTexture.get_height()) * color.g);
-
     float4 newColor1 = lutTexture.sample(lutSamper, texPos1);
     float4 newColor2 = lutTexture.sample(lutSamper, texPos2);
-
     float4 newColor = mix(newColor1, newColor2, float(fract(blueColor)));
-
     float4 finalColor = mix(color, float4(newColor.rgb, color.a), intensity);
-
     return finalColor;
 }
 
@@ -753,39 +728,30 @@ METAL_FUNC float4 colorLookup2DStripLUT(float4 color,
 {
     float4 textureColor = color;
     float blueColor = textureColor.b * (dimension - 1);
-
     float2 quad1;
     quad1.x = isHorizontal ? floor(blueColor) : 0.0;
     quad1.y = isHorizontal ? 0.0 : floor(blueColor);
-
     float2 quad2;
     quad2.x = isHorizontal ? ceil(blueColor) : 0.0;
     quad2.y = isHorizontal ? 0.0 : ceil(blueColor);
-
     float widthForQuard = isHorizontal ? 1.0 / dimension : 1.0;
     float heightForQuard = isHorizontal ? 1.0 : 1.0 / dimension;
     float pixelWidthOnX = 1.0 / lutTexture.get_width();
     float pixelWidthOnY = 1.0 / lutTexture.get_height();
-
     float2 texPos1;
     texPos1.x = (quad1.x * widthForQuard) + (0.5 * pixelWidthOnX) +
                 ((widthForQuard - pixelWidthOnX) * textureColor.r);
     texPos1.y = (quad1.y * heightForQuard) + (0.5 * pixelWidthOnY) +
                 ((heightForQuard - pixelWidthOnY) * textureColor.g);
-
     float2 texPos2;
     texPos2.x = (quad2.x * widthForQuard) + (0.5 * pixelWidthOnX) +
                 ((widthForQuard - pixelWidthOnX) * textureColor.r);
     texPos2.y = (quad2.y * heightForQuard) + (0.5 * pixelWidthOnY) +
                 ((heightForQuard - pixelWidthOnY) * textureColor.g);
-
     float4 newColor1 = lutTexture.sample(lutSamper, texPos1);
     float4 newColor2 = lutTexture.sample(lutSamper, texPos2);
-
     float4 newColor = mix(newColor1, newColor2, float(fract(blueColor)));
-
     float4 finalColor = mix(textureColor, float4(newColor.rgb, textureColor.a), intensity);
-
     return finalColor;
 }
 
@@ -898,22 +864,22 @@ METAL_FUNC float continuousCornerMask(float2 canvasSize, float2 normalizedTextur
 #include <metal_stdlib>
 
 namespace metalpetal {
+
 constant bool blend_filter_backdrop_has_premultiplied_alpha [[function_constant(1024)]];
 constant bool blend_filter_source_has_premultiplied_alpha [[function_constant(1025)]];
 constant bool blend_filter_outputs_premultiplied_alpha [[function_constant(1026)]];
 constant bool blend_filter_outputs_opaque_image [[function_constant(1027)]];
-
 constant bool multilayer_composite_content_premultiplied [[function_constant(1028)]];
 constant bool multilayer_composite_has_mask [[function_constant(1029)]];
 constant bool multilayer_composite_has_compositing_mask [[function_constant(1030)]];
 constant bool multilayer_composite_has_tint_color [[function_constant(1031)]];
 constant short multilayer_composite_corner_curve_type [[function_constant(1037)]];
-
 constant bool rgb_color_space_conversion_input_has_premultiplied_alpha [[function_constant(1032)]];
 constant short rgb_color_space_conversion_input_color_space [[function_constant(1033)]];
 constant short rgb_color_space_conversion_output_color_space [[function_constant(1034)]];
 constant bool rgb_color_space_conversion_outputs_premultiplied_alpha [[function_constant(1035)]];
 constant bool rgb_color_space_conversion_outputs_opaque_image [[function_constant(1036)]];
+
 } // namespace metalpetal
 
 #endif
@@ -942,7 +908,6 @@ fragment float4 customBlend(VertexOut vertexIn [[ stage_in ]],
                                                           overlayTexture.get_height()));
     #endif
     float4 uCf = overlayTexture.sample(overlaySampler, textureCoordinate);
-
     if (blend_filter_backdrop_has_premultiplied_alpha) {
         uCb = unpremultiply(uCb);
     }
@@ -984,7 +949,6 @@ fragment float4 multilayerCompositeCustomBlend_programmableBlending(
                                                           colorTexture.get_height()));
     #endif
     float4 textureColor = colorTexture.sample(colorSampler, textureCoordinate);
-
     if (multilayer_composite_content_premultiplied) {
         textureColor = unpremultiply(textureColor);
     }

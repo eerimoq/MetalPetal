@@ -80,12 +80,9 @@ fragment float4 colorHalftone(VertexOut vertexIn [[stage_in]],
 {
     using namespace metalpetal::halftone;
     constexpr sampler customSampler(coord::normalized, address::clamp_to_edge, filter::linear);
-
     float4 textureColor = sourceTexture.sample(sourceSampler, vertexIn.textureCoordinate);
-
     float2 textureSize = float2(sourceTexture.get_width(), sourceTexture.get_height());
     float2 textureCoordinate = vertexIn.textureCoordinate * textureSize;
-
     float3 intensityRGB;
     float3 intensityNeighborRGB;
     if (singleAngleMode) {
@@ -101,16 +98,13 @@ fragment float4 colorHalftone(VertexOut vertexIn [[stage_in]],
         float2x2 mr = rotm(angles.x);
         float2x2 mg = rotm(angles.y);
         float2x2 mb = rotm(angles.z);
-
         float2 samplePositionR = samplePosition(textureCoordinate, mr, scale);
         float2 samplePositionG = samplePosition(textureCoordinate, mg, scale);
         float2 samplePositionB = samplePosition(textureCoordinate, mb, scale);
-
         intensityRGB = float3(
             halftoneIntensityRGB(textureCoordinate, samplePositionR, scale, sourceTexture, customSampler).r,
             halftoneIntensityRGB(textureCoordinate, samplePositionG, scale, sourceTexture, customSampler).g,
             halftoneIntensityRGB(textureCoordinate, samplePositionB, scale, sourceTexture, customSampler).b);
-
         intensityNeighborRGB =
             float3(halftoneIntensityRGB(textureCoordinate,
                                         neighborSamplePosition(textureCoordinate, samplePositionR, scale, mr),
@@ -138,9 +132,7 @@ fragment float4 dotScreen(VertexOut vertexIn [[stage_in]],
 {
     using namespace metalpetal::halftone;
     constexpr sampler customSampler(coord::normalized, address::clamp_to_edge, filter::linear);
-
     float4 textureColor = sourceTexture.sample(sourceSampler, vertexIn.textureCoordinate);
-
     float2x2 m = rotm(angle);
     float2 textureSize = float2(sourceTexture.get_width(), sourceTexture.get_height());
     float2 textureCoordinate = vertexIn.textureCoordinate * textureSize;

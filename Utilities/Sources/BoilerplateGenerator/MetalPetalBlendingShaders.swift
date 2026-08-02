@@ -37,7 +37,6 @@ public enum MetalPetalBlendingShadersCodeGenerator {
                                                                   colorTexture.get_height()));
             #endif
             float4 textureColor = colorTexture.sample(colorSampler, textureCoordinate);
-
             if (multilayer_composite_content_premultiplied) {
                 textureColor = unpremultiply(textureColor);
             }
@@ -162,7 +161,6 @@ public enum MetalPetalBlendingShadersCodeGenerator {
                                                                   overlayTexture.get_height()));
             #endif
             float4 uCf = overlayTexture.sample(overlaySampler, textureCoordinate);
-
             if (blend_filter_backdrop_has_premultiplied_alpha) {
                 uCb = unpremultiply(uCb);
             }

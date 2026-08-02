@@ -397,18 +397,14 @@ fragment float4 chromaKeyBlend(VertexOut vertexIn [[stage_in]],
 {
     float4 textureColor = sourceTexture.sample(sourceSampler, vertexIn.textureCoordinate);
     float4 textureColor2 = backgroundTexture.sample(backgroundSampler, vertexIn.textureCoordinate);
-
     float maskY = 0.2989 * color.r + 0.5866 * color.g + 0.1145 * color.b;
     float maskCr = 0.7132 * (color.r - maskY);
     float maskCb = 0.5647 * (color.b - maskY);
-
     float Y = 0.2989 * textureColor.r + 0.5866 * textureColor.g + 0.1145 * textureColor.b;
     float Cr = 0.7132 * (textureColor.r - Y);
     float Cb = 0.5647 * (textureColor.b - Y);
-
     float blendValue = 1.0 - smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing,
                                         distance(float2(Cr, Cb), float2(maskCr, maskCb)));
-
     return mix(textureColor, textureColor2, blendValue);
 }
 
@@ -507,19 +503,15 @@ fragment float4 histogramDisplay(VertexOut vertexIn [[stage_in]],
     ushort indexP = floor(x);
     ushort indexN = ceil(x);
     float factor = fract(x);
-
     uint rP = sourceTexture.read(uint2(indexP, 0)).r;
     uint rN = sourceTexture.read(uint2(indexN, 0)).r;
     float rValue = mix(float(rP), float(rN), factor);
-
     uint gP = sourceTexture.read(uint2(indexP, 1)).r;
     uint gN = sourceTexture.read(uint2(indexN, 1)).r;
     float gValue = mix(float(gP), float(gN), factor);
-
     uint bP = sourceTexture.read(uint2(indexP, 2)).r;
     uint bN = sourceTexture.read(uint2(indexN, 2)).r;
     float bValue = mix(float(bP), float(bN), factor);
-
     uint4 maxValue = maxValueTexture.read(uint2(0, 0));
     float3 height = float3(rValue, gValue, bValue) / float3(max(max(maxValue.r, maxValue.g), maxValue.b));
     bool3 fill = vertexIn.textureCoordinate.y > 1.0 - height;
@@ -609,7 +601,6 @@ fragment float4 bulgeDistortion(VertexOut vertexIn [[stage_in]],
 
     float2 texturePixelCoordinate = textureCoordinate * textureSize;
     float dist = distance(texturePixelCoordinate, center);
-
     if (dist < radius) {
         texturePixelCoordinate -= center;
         float percent = 1.0 - ((radius - dist) / radius) * scale;
@@ -620,7 +611,6 @@ fragment float4 bulgeDistortion(VertexOut vertexIn [[stage_in]],
 
         textureCoordinate = texturePixelCoordinate / textureSize;
     }
-
     return sourceTexture.sample(sourceSampler, textureCoordinate);
 }
 
@@ -635,12 +625,10 @@ fragment float4 pinchDistortion(VertexOut vertexIn [[stage_in]],
     float2 textureCoordinate = vertexIn.textureCoordinate;
     float2 offset = textureCoordinate * textureSize - center;
     float dist = length(offset);
-
     if (dist > 0) {
         float distortedDist = dist + (sqrt(dist * radius) - dist) * scale;
         textureCoordinate = (center + offset * (distortedDist / dist)) / textureSize;
     }
-
     return sourceTexture.sample(sourceSampler, textureCoordinate);
 }
 
@@ -654,7 +642,6 @@ fragment float4 twirlDistortion(VertexOut vertexIn [[stage_in]],
     float2 textureSize = float2(sourceTexture.get_width(), sourceTexture.get_height());
     float2 textureCoordinate = vertexIn.textureCoordinate;
     float2 offset = textureCoordinate * textureSize - center;
-
     if (radius > 0) {
         float falloff = 1.0 - smoothstep(0.0, 1.0, length(offset) / radius);
         float rotation = angle * falloff;
@@ -663,7 +650,6 @@ fragment float4 twirlDistortion(VertexOut vertexIn [[stage_in]],
         offset = float2(offset.x * c - offset.y * s, offset.x * s + offset.y * c);
         textureCoordinate = (center + offset) / textureSize;
     }
-
     return sourceTexture.sample(sourceSampler, textureCoordinate);
 }
 
@@ -689,10 +675,8 @@ fragment float4 clarity(VertexOut vertexIn [[stage_in]],
                         constant float &intensity [[buffer(0)]])
 {
     float4 s = sourceTexture.sample(sourceSampler, vertexIn.textureCoordinate);
-
     float4 b = blurTexture.sample(blurSampler, vertexIn.textureCoordinate);
     b = meaningBlur(s, b);
-
     float sl = (s.r + s.g + s.b);
     float bl = (b.r + b.g + b.b);
     float dl = sl + (sl - bl) * intensity;

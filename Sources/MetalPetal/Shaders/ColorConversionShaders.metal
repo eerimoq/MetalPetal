@@ -64,10 +64,8 @@ kernel void colorConversion(uint2 gid [[thread_position_in_grid]],
                                   gid.y / 2); // half the size because we are using a 4:2:0 chroma subsampling
     float y = yTexture.read(gid).r;
     float2 cbcr = cbcrTexture.read(cbcrCoordinates).rg;
-
     float3 ycbcr = float3(y, cbcr);
     float3 rgb = colorConversion.matrix * (ycbcr + colorConversion.offset);
-
     outTexture.write(float4(float3(rgb), 1.0), gid);
 }
 

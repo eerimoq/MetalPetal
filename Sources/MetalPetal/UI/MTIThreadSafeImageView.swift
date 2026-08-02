@@ -76,21 +76,13 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     }
 
     public var automaticallyCreatesContext: Bool = true
-
     private let lock = OSAllocatedUnfairLock()
-
     private var screenScale: CGFloat = 1.0
-
     private var currentDrawable: CAMetalDrawable?
-
     private var backgroundAccessingBounds: CGRect = .zero
-
     private var currentDrawableValid: Bool = false
-
     private var currentDrawableSize: CGSize = .zero
-
     private var contextCreationError: Error?
-
     private var _context: MTIContext?
     private var _image: MTIImage?
     private var _clearColor: MTLClearColor = MTLClearColorMake(0, 0, 0, 0)
@@ -289,7 +281,6 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
 
     private func renderImage(_ image: MTIImage?, completion: ((Error?) -> Void)?) {
         setupContextIfNeeded()
-
         guard let context = _context else {
             completion?(contextCreationError ?? NSError(
                 domain: MTIImageViewErrorDomain,
@@ -298,32 +289,17 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
             ))
             return
         }
-
         updateContentScaleFactor()
-
         let resizingMode = _resizingMode
         // and acquire _clearColor
-
         invalidateCurrentDrawable()
-
         let request = MTIDrawableRenderingRequest(drawableProvider: self, resizingMode: resizingMode)
-
         if let imageToRender = image {
             do {
                 _ = try context.startTask(toRender: imageToRender, toDrawableWithRequest: request) { task in
                     completion?(task.error)
                 }
             } catch {
-                #if DEBUG
-                if ProcessInfo.processInfo.environment["MTI_PRINT_ENABLED"] != nil {
-                    NSLog(
-                        "%@: Failed to render image %@ - %@",
-                        self,
-                        String(describing: imageToRender),
-                        error as NSError
-                    )
-                }
-                #endif
                 completion?(error)
             }
         } else {
