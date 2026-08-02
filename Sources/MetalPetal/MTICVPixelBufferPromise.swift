@@ -149,10 +149,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
         -> MTIImagePromiseRenderTarget
     {
         if coreImageRendererDefaultTextureDescriptor.pixelFormat == .invalid {
-            throw MTIError(
-                code: .unsupportedCVPixelBufferFormat,
-                message: "MTIErrorUnsupportedCVPixelBufferFormat"
-            )
+            throw MTIError.unsupportedCVPixelBufferFormat
         }
         let renderTarget = try renderingContext.context
             .makeRenderTarget(reusableTextureDescriptor: coreImageRendererDefaultTextureDescriptor)
@@ -176,10 +173,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange,
              kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
             guard renderingContext.context.isYCbCrPixelFormatSupported else {
-                throw MTIError(
-                    code: .unsupportedCVPixelBufferFormat,
-                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
-                )
+                throw MTIError.unsupportedCVPixelBufferFormat
             }
             let pixelFormat: MTLPixelFormat = sRGB ? .yCbCr10_420_2p_srgb : .yCbCr10_420_2p
             let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -332,10 +326,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
                 sRGB: sRGB
             )
             if pixelFormat == .invalid {
-                throw MTIError(
-                    code: .unsupportedCVPixelBufferFormat,
-                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
-                )
+                throw MTIError.unsupportedCVPixelBufferFormat
             }
             let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: pixelFormat,

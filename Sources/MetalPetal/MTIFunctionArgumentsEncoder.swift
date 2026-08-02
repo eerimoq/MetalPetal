@@ -61,15 +61,8 @@ private func MTIArgumentsEncoderEncodeBuffer(
     }
 }
 
-private let dataTypeMismatchError = MTIError(
-    code: .parameterDataTypeMismatch,
-    message: "MTIErrorParameterDataTypeMismatch"
-)
-
-private let dataSizeMismatchError = MTIError(
-    code: .parameterDataSizeMismatch,
-    message: "MTIErrorParameterDataSizeMismatch"
-)
+private let dataTypeMismatchError = MTIError.parameterDataTypeMismatch
+private let dataSizeMismatchError = MTIError.parameterDataSizeMismatch
 
 public func MTIEncodeArguments(
     _ bindings: [any MTLBinding],

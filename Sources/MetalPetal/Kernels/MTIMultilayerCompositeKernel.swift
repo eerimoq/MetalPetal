@@ -231,10 +231,7 @@ private final class MTIMultilayerCompositeKernelState {
         guard let fragmentFunctionDescriptorForBlending = key
             .createFragmentFunctionDescriptor(usesProgrammableBlending: useProgrammableBlending)
         else {
-            throw MTIError(
-                code: .blendFunctionNotFound,
-                message: "MTIErrorBlendFunctionNotFound"
-            )
+            throw MTIError.blendFunctionNotFound
         }
         let fragmentFunction = try context.function(with: fragmentFunctionDescriptorForBlending)
         renderPipelineDescriptor.vertexFunction = vertexFunction
@@ -404,7 +401,7 @@ private final class MTIMultilayerCompositingRecipe: MTIImagePromise {
             guard let msaaTexture = renderingContext.context.device
                 .makeTexture(descriptor: tempTextureDescriptor)
             else {
-                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                throw MTIError.failedToCreateTexture
             }
             renderPassDescriptor.colorAttachments[0].texture = msaaTexture
             renderPassDescriptor.colorAttachments[0].loadAction = .dontCare
@@ -418,10 +415,7 @@ private final class MTIMultilayerCompositingRecipe: MTIImagePromise {
         guard let commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         let backgroundPipeline = (backgroundImage.alphaType == .premultiplied) ? kernelState
             .unpremultiplyAlphaRenderPipeline : kernelState.passthroughRenderPipeline
@@ -585,10 +579,7 @@ private final class MTIMultilayerCompositingRecipe: MTIImagePromise {
         guard var commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         let backgroundPipeline = (backgroundImage.alphaType == .premultiplied) ? kernelState
             .unpremultiplyAlphaRenderPipeline : kernelState.passthroughRenderPipeline

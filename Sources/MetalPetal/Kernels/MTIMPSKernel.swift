@@ -43,7 +43,7 @@ private final class MTIMPSProcessingRecipe: MTIImagePromise {
         guard let kernel = try renderingContext.context
             .kernelState(for: kernel, configuration: nil) as? MPSKernel
         else {
-            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
+            throw MTIError.mpsKernelNotSupported
         }
         kernel.setValuesForKeys(parameters)
         let pixelFormat = (outputPixelFormat == .unspecified) ? renderingContext.context
@@ -58,7 +58,7 @@ private final class MTIMPSProcessingRecipe: MTIImagePromise {
         let renderTarget = try renderingContext.context
             .makeRenderTarget(reusableTextureDescriptor: textureDescriptor)
         guard let destinationTexture = renderTarget.texture else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         if inputImages.count == 1 {
             let texture = renderingContext.resolvedTexture(for: inputImages[0])
@@ -79,7 +79,7 @@ private final class MTIMPSProcessingRecipe: MTIImagePromise {
                 destinationTexture: destinationTexture
             )
         } else {
-            throw MTIError(code: .mpsKernelInputCountMismatch, message: "MTIErrorMPSKernelInputCountMismatch")
+            throw MTIError.mpsKernelInputCountMismatch
         }
         return renderTarget
     }
@@ -112,7 +112,7 @@ public final class MTIMPSKernel: MTIKernel {
 
     public func makeKernelState(context: MTIContext, configuration _: MTIKernelConfiguration?) throws -> Any {
         guard context.isMetalPerformanceShadersSupported else {
-            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
+            throw MTIError.mpsKernelNotSupported
         }
         return builder(context.device)
     }

@@ -67,7 +67,7 @@ private final class MTISKSceneImagePromise: MTIImagePromise {
         let renderer: SKRenderer
         if let device, let existingRenderer = self.renderer {
             guard renderingContext.context.device === device else {
-                throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
+                throw MTIError.crossDeviceRendering
             }
             renderer = existingRenderer
         } else if let scene {
@@ -90,7 +90,7 @@ private final class MTISKSceneImagePromise: MTIImagePromise {
                 resourceOptions: .storageModePrivate
             ))
         guard let targetTexture = renderTarget.texture else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = targetTexture
@@ -117,7 +117,7 @@ private final class MTISKSceneImagePromise: MTIImagePromise {
         guard let depthStencilTexture = renderingContext.context.device
             .makeTexture(descriptor: depthStencilTextureDescriptor)
         else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         // Depth render target
         renderPassDescriptor.depthAttachment.texture = depthStencilTexture

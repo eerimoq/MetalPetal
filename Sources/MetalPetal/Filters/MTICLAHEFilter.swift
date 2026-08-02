@@ -99,7 +99,7 @@ private final class MTICLAHELUTKernelState {
 private final class MTICLAHELUTKernel: MTIKernel {
     func makeKernelState(context: MTIContext, configuration _: MTIKernelConfiguration?) throws -> Any {
         guard context.isMetalPerformanceShadersSupported else {
-            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
+            throw MTIError.mpsKernelNotSupported
         }
         var info = MPSImageHistogramInfo()
         info.numberOfHistogramEntries = MTICLAHEHistogramBinCount
@@ -162,7 +162,7 @@ private final class MTICLAHELUTRecipe: MTIImagePromise {
         guard let kernelState = try renderingContext.context
             .kernelState(for: kernel, configuration: nil) as? MTICLAHELUTKernelState
         else {
-            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
+            throw MTIError.mpsKernelNotSupported
         }
         let textureDescriptor = MTITextureDescriptor(pixelFormat: .r8Unorm,
                                                      width: Int(MTICLAHEHistogramBinCount),
@@ -181,7 +181,7 @@ private final class MTICLAHELUTRecipe: MTIImagePromise {
             length: histogramSize * numberOfLUTs,
             options: .storageModePrivate
         ) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         for tileIndex in 0 ..< numberOfLUTs {
             let column = tileIndex % tileGridSize.width
@@ -203,10 +203,7 @@ private final class MTICLAHELUTRecipe: MTIImagePromise {
         parameters.totalPixelCountPerTile = UInt32(tileSize.width * tileSize.height)
         parameters.numberOfLUTs = UInt32(numberOfLUTs)
         guard let commandEncoder = renderingContext.commandBuffer.makeComputeCommandEncoder() else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         commandEncoder.setComputePipelineState(kernelState.lutGeneratingPipeline.state)
         commandEncoder.setBuffer(histogramBuffer, offset: 0, index: 0)

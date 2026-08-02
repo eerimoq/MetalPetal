@@ -155,20 +155,14 @@ public extension MTIContext {
             if isYCbCrPixelFormatSupported {
                 targetPixelFormat = sRGB ? .yCbCr8_420_2p_srgb : .yCbCr8_420_2p
             } else {
-                throw MTIError(
-                    code: .unsupportedCVPixelBufferFormat,
-                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
-                )
+                throw MTIError.unsupportedCVPixelBufferFormat
             }
         case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange,
              kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
             if isYCbCrPixelFormatSupported {
                 targetPixelFormat = sRGB ? .yCbCr10_420_2p_srgb : .yCbCr10_420_2p
             } else {
-                throw MTIError(
-                    code: .unsupportedCVPixelBufferFormat,
-                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
-                )
+                throw MTIError.unsupportedCVPixelBufferFormat
             }
         case kCVPixelFormatType_64RGBAHalf:
             targetPixelFormat = .rgba16Float
@@ -179,10 +173,7 @@ public extension MTIContext {
             targetPixelFormat = sRGB ? .r8Unorm_srgb : .r8Unorm
             #else
             if sRGB {
-                throw MTIError(
-                    code: .unsupportedCVPixelBufferFormat,
-                    message: "MTIErrorUnsupportedCVPixelBufferFormat"
-                )
+                throw MTIError.unsupportedCVPixelBufferFormat
             }
             targetPixelFormat = .r8Unorm
             #endif
@@ -191,10 +182,7 @@ public extension MTIContext {
         case kCVPixelFormatType_OneComponent32Float:
             targetPixelFormat = .r32Float
         default:
-            throw MTIError(
-                code: .unsupportedCVPixelBufferFormat,
-                message: "MTIErrorUnsupportedCVPixelBufferFormat"
-            )
+            throw MTIError.unsupportedCVPixelBufferFormat
         }
         let frameWidth = CVPixelBufferGetWidth(pixelBuffer)
         let frameHeight = CVPixelBufferGetHeight(pixelBuffer)
@@ -262,10 +250,7 @@ public extension MTIContext {
             guard let renderPipeline = try kernelState(for: kernel,
                                                        configuration: configuration) as? MTIRenderPipeline
             else {
-                throw MTIError(
-                    code: .failedToCreateCommandEncoder,
-                    message: "MTIErrorFailedToCreateCommandEncoder"
-                )
+                throw MTIError.failedToCreateCommandEncoder
             }
             let samplerState = try samplerState(with: image.samplerDescriptor)
             let commandEncoder = renderingContext.commandBuffer
@@ -304,18 +289,12 @@ public extension MTIContext {
             &pixelBuffer
         )
         guard errorCode == kCVReturnSuccess, let pixelBuffer else {
-            throw MTIError(
-                code: .failedToCreateCVPixelBuffer,
-                message: "MTIErrorFailedToCreateCVPixelBuffer"
-            )
+            throw MTIError.failedToCreateCVPixelBuffer
         }
         let renderTask = try startTask(toRender: image, to: pixelBuffer, sRGB: sRGB, completion: completion)
         let returnCode = VTCreateCGImageFromCVPixelBuffer(pixelBuffer, options: nil, imageOut: outImage)
         if returnCode != noErr {
-            throw MTIError(
-                code: .failedToCreateCGImageFromCVPixelBuffer,
-                message: "MTIErrorFailedToCreateCGImageFromCVPixelBuffer"
-            )
+            throw MTIError.failedToCreateCGImageFromCVPixelBuffer
         }
         return renderTask
     }
@@ -347,20 +326,14 @@ public extension MTIContext {
             &pixelBuffer
         )
         guard errorCode == kCVReturnSuccess, let pixelBuffer else {
-            throw MTIError(
-                code: .failedToCreateCVPixelBuffer,
-                message: "MTIErrorFailedToCreateCVPixelBuffer"
-            )
+            throw MTIError.failedToCreateCVPixelBuffer
         }
         let cs = colorSpace ?? CGColorSpaceCreateDeviceRGB()
         CVBufferSetAttachment(pixelBuffer, kCVImageBufferCGColorSpaceKey, cs, .shouldPropagate)
         let renderTask = try startTask(toRender: image, to: pixelBuffer, sRGB: false, completion: completion)
         let returnCode = VTCreateCGImageFromCVPixelBuffer(pixelBuffer, options: nil, imageOut: outImage)
         if returnCode != noErr {
-            throw MTIError(
-                code: .failedToCreateCGImageFromCVPixelBuffer,
-                message: "MTIErrorFailedToCreateCGImageFromCVPixelBuffer"
-            )
+            throw MTIError.failedToCreateCGImageFromCVPixelBuffer
         }
         return renderTask
     }
@@ -381,10 +354,10 @@ public extension MTIContext {
             resolution.markAsConsumed(by: self)
         }
         guard let renderPassDescriptor = drawableProvider?.renderPassDescriptor(for: request) else {
-            throw MTIError(code: .emptyDrawable, message: "MTIErrorEmptyDrawable")
+            throw MTIError.emptyDrawable
         }
         if renderPassDescriptor.colorAttachments[0].texture == nil {
-            throw MTIError(code: .emptyDrawableTexture, message: "MTIErrorEmptyDrawableTexture")
+            throw MTIError.emptyDrawableTexture
         }
         var heightScaling: Float = 1.0
         var widthScaling: Float = 1.0
@@ -426,10 +399,7 @@ public extension MTIContext {
         guard let renderPipeline = try kernelState(for: kernel,
                                                    configuration: configuration) as? MTIRenderPipeline
         else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         let samplerState = try samplerState(with: image.samplerDescriptor)
         let commandEncoder = renderingContext.commandBuffer
@@ -458,7 +428,7 @@ public extension MTIContext {
         completion: ((MTIRenderTask) -> Void)?
     ) throws -> MTIRenderTask {
         if texture.device !== device {
-            throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
+            throw MTIError.crossDeviceRendering
         }
         lockForRendering()
         defer {
@@ -521,10 +491,7 @@ public extension MTIContext {
             guard let renderPipeline = try kernelState(for: kernel,
                                                        configuration: configuration) as? MTIRenderPipeline
             else {
-                throw MTIError(
-                    code: .failedToCreateCommandEncoder,
-                    message: "MTIErrorFailedToCreateCommandEncoder"
-                )
+                throw MTIError.failedToCreateCommandEncoder
             }
             let samplerState = try samplerState(with: image.samplerDescriptor)
             let commandEncoder = renderingContext.commandBuffer

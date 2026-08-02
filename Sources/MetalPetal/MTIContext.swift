@@ -351,10 +351,7 @@ public extension MTIContext {
             library.makeFunction(name: functionName)
         }
         guard let function else {
-            throw MTIError(
-                code: .functionNotFound,
-                message: "MTIErrorFunctionNotFound"
-            )
+            throw MTIError.functionNotFound
         }
         functionCache[descriptor] = function
         return function
@@ -417,7 +414,7 @@ public extension MTIContext {
             return state
         }
         guard let state = device.makeSamplerState(descriptor: descriptor.makeMTLSamplerDescriptor()) else {
-            throw MTIError(code: .failedToCreateSamplerState, message: "MTIErrorFailedToCreateSamplerState")
+            throw MTIError.failedToCreateSamplerState
         }
         samplerStateCache[descriptor] = state
         return state

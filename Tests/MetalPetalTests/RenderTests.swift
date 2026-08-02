@@ -2591,7 +2591,7 @@ struct RenderTests {
             _ = try context.startTask(toRender: image, completion: nil)
             Issue.record()
         } catch {
-            #expect((error as? MTIError)?.code == .invalidTextureDimension)
+            #expect((error as? MTIError) == .invalidTextureDimension)
         }
     }
 
@@ -2614,7 +2614,7 @@ struct RenderTests {
             _ = try context.startTask(toRender: output, completion: nil)
             Issue.record()
         } catch {
-            #expect((error as? MTIError)?.code == .invalidTextureDimension)
+            #expect((error as? MTIError) == .invalidTextureDimension)
         }
     }
 

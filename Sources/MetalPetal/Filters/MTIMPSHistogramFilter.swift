@@ -43,7 +43,7 @@ private final class MTIMPSHistogramRecipe: MTIImagePromise {
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
         guard renderingContext.context.isMetalPerformanceShadersSupported else {
-            throw MTIError(code: .mpsKernelNotSupported, message: "MTIErrorMPSKernelNotSupported")
+            throw MTIError.mpsKernelNotSupported
         }
         let inputTexture = renderingContext.resolvedTexture(for: inputImage)
         var info = histogramInfo
@@ -56,7 +56,7 @@ private final class MTIMPSHistogramRecipe: MTIImagePromise {
             length: bufferSize,
             options: .storageModePrivate
         ) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         kernel.encode(
             to: renderingContext.commandBuffer,
@@ -77,7 +77,7 @@ private final class MTIMPSHistogramRecipe: MTIImagePromise {
             offset: 0,
             bytesPerRow: Int(histogramInfo.numberOfHistogramEntries) * bytesPerComponent
         ) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         return renderingContext.context.makeRenderTarget(texture: texture)
     }

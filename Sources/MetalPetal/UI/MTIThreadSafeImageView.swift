@@ -340,7 +340,7 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
                 }
                 commandBuffer?.commit()
             } else {
-                completion?(MTIError(code: .emptyDrawable, message: "MTIErrorEmptyDrawable"))
+                completion?(MTIError.emptyDrawable)
             }
         }
     }

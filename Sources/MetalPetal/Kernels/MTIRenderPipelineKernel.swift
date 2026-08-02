@@ -277,7 +277,7 @@ final class MTIImageRenderingRecipe {
                     guard let msaaTexture = renderingContext.context.device
                         .makeTexture(descriptor: tempTextureDescriptor)
                     else {
-                        throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                        throw MTIError.failedToCreateTexture
                     }
                     renderPassDescriptor.colorAttachments[index].texture = msaaTexture
                     renderPassDescriptor.colorAttachments[index].clearColor = outputDescriptor.clearColor
@@ -314,10 +314,7 @@ final class MTIImageRenderingRecipe {
         guard let commandEncoder = renderingContext.commandBuffer
             .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         for command in renderCommands {
             let configuration = MTIRenderPipelineKernelConfiguration.configuration(
@@ -344,10 +341,7 @@ final class MTIImageRenderingRecipe {
                     commandEncoder.setVertexSamplerState(samplerState, index: index)
                 } else {
                     commandEncoder.endEncoding()
-                    throw MTIError(
-                        code: .textureBindingFailed,
-                        message: "MTIErrorTextureBindingFailed"
-                    )
+                    throw MTIError.textureBindingFailed
                 }
             }
             for argument in renderPipeline.reflection.fragmentBindings
@@ -361,10 +355,7 @@ final class MTIImageRenderingRecipe {
                     commandEncoder.setFragmentSamplerState(samplerState, index: index)
                 } else {
                     commandEncoder.endEncoding()
-                    throw MTIError(
-                        code: .textureBindingFailed,
-                        message: "MTIErrorTextureBindingFailed"
-                    )
+                    throw MTIError.textureBindingFailed
                 }
             }
             // encode parameters

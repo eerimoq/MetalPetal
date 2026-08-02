@@ -108,7 +108,7 @@ public final class MTIDefaultTextureLoader: MTITextureLoader {
             &pixelBufferOut
         )
         guard let pixelBuffer = pixelBufferOut else {
-            throw MTIError(code: .failedToCreateCVPixelBuffer, message: "MTIErrorFailedToCreateCVPixelBuffer")
+            throw MTIError.failedToCreateCVPixelBuffer
         }
 
         let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
@@ -123,10 +123,7 @@ public final class MTIDefaultTextureLoader: MTITextureLoader {
             bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
         ) else {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-            throw MTIError(
-                code: .textureLoaderFailedToCreateCGContext,
-                message: "MTIErrorTextureLoaderFailedToCreateCGContext"
-            )
+            throw MTIError.textureLoaderFailedToCreateCGContext
         }
 
         var shouldFallbackToMTKTextureLoader = false
@@ -162,10 +159,7 @@ public final class MTIDefaultTextureLoader: MTITextureLoader {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
 
             guard let sanitizedCGImage else {
-                throw MTIError(
-                    code: .textureLoaderFailedToCreateCGImage,
-                    message: "MTIErrorTextureLoaderFailedToCreateCGImage"
-                )
+                throw MTIError.textureLoaderFailedToCreateCGImage
             }
             return try internalLoader.newTexture(cgImage: sanitizedCGImage, options: options)
         } else {

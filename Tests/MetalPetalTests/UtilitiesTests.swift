@@ -234,7 +234,7 @@ struct UtilitiesTests {
             )
         } catch {
             let encoderError = try #require(error as? MTIError)
-            #expect(encoderError.code == .parameterDataSizeMismatch)
+            #expect(encoderError == .parameterDataSizeMismatch)
         }
         try MTIEncodeArguments(
             state.reflection.bindings,
@@ -337,7 +337,7 @@ struct UtilitiesTests {
             )
         } catch {
             let encoderError = try #require(error as? MTIError)
-            #expect(encoderError.code == .parameterDataTypeMismatch)
+            #expect(encoderError == .parameterDataTypeMismatch)
         }
     }
 
@@ -541,7 +541,7 @@ struct UtilitiesTests {
             _ = try context.makeCGImage(from: outputImage)
             Issue.record()
         } catch {
-            #expect((error as? MTIError)?.code == .parameterDataTypeMismatch)
+            #expect((error as? MTIError) == .parameterDataTypeMismatch)
         }
     }
 
@@ -578,7 +578,7 @@ struct UtilitiesTests {
             _ = try context.makeCGImage(from: outputImage)
             Issue.record()
         } catch let error as MTIError {
-            #expect(error.code == .parameterDataTypeMismatch)
+            #expect(error == .parameterDataTypeMismatch)
         }
     }
 

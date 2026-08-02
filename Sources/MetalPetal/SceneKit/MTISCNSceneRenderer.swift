@@ -70,7 +70,7 @@ private final class MTISCNSceneImagePromise: MTIImagePromise {
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
         guard renderingContext.context.device === renderer.device else {
-            throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
+            throw MTIError.crossDeviceRendering
         }
         var pixelFormat = renderingContext.context.workingPixelFormat
         if self.pixelFormat != .invalid {
@@ -114,7 +114,7 @@ private final class MTISCNSceneImagePromise: MTIImagePromise {
                 guard let texture = renderingContext.context.device
                     .makeTexture(descriptor: multisampleTextureDescriptor)
                 else {
-                    throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                    throw MTIError.failedToCreateTexture
                 }
                 multisampleTexture = texture
             } else {
@@ -124,7 +124,7 @@ private final class MTISCNSceneImagePromise: MTIImagePromise {
                         .makeMTITextureDescriptor())
                 multisampleRenderTarget = target
                 guard let texture = target.texture else {
-                    throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                    throw MTIError.failedToCreateTexture
                 }
                 multisampleTexture = texture
             }
@@ -222,10 +222,7 @@ public final class MTISCNSceneRenderer {
         completion: @escaping (CVPixelBuffer) -> Void
     ) throws {
         guard let commandQueue, let commandBuffer = commandQueue.makeCommandBuffer() else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         let width = Int(viewport.size.width)
         let height = Int(viewport.size.height)
@@ -244,7 +241,7 @@ public final class MTISCNSceneRenderer {
         )
         textureDescriptor.usage = .renderTarget
         guard let textureCache else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         let cvMetalTexture = try textureCache.makeTexture(
             with: pixelBuffer,
@@ -275,7 +272,7 @@ public final class MTISCNSceneRenderer {
                 multisampleTextureDescriptor.storageMode = .private
             }
             guard let multisampleTexture = device.makeTexture(descriptor: multisampleTextureDescriptor) else {
-                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                throw MTIError.failedToCreateTexture
             }
             renderPassDescriptor.colorAttachments[0].texture = multisampleTexture
             renderPassDescriptor.colorAttachments[0].resolveTexture = cvMetalTexture.texture

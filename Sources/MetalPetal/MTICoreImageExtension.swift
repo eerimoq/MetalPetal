@@ -70,7 +70,7 @@ public struct MTICoreImageKernel {
                     guard let tempTexture = renderingContext.context.device
                         .makeTexture(descriptor: textureDescriptor)
                     else {
-                        throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                        throw MTIError.failedToCreateTexture
                     }
                     let renderPassDescriptor = MTLRenderPassDescriptor()
                     renderPassDescriptor.colorAttachments[0].texture = tempTexture
@@ -79,10 +79,7 @@ public struct MTICoreImageKernel {
                     guard let commandEncoder = renderingContext.commandBuffer
                         .makeRenderCommandEncoder(descriptor: renderPassDescriptor)
                     else {
-                        throw MTIError(
-                            code: .failedToCreateCommandEncoder,
-                            message: "MTIErrorFailedToCreateCommandEncoder"
-                        )
+                        throw MTIError.failedToCreateCommandEncoder
                     }
                     let pipeline = try (renderingContext.context.kernelState(
                         for: MTIRenderPipelineKernel.passthrough,

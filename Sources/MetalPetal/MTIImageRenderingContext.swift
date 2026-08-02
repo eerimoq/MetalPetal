@@ -204,7 +204,7 @@ public final class MTIImageRenderingContext {
                         throw error
                     }
                 } else {
-                    throw MTIError(code: .invalidTextureDimension, message: "MTIErrorInvalidTextureDimension")
+                    throw MTIError.invalidTextureDimension
                 }
                 // Make sure the render target is valid.
                 if image.cachePolicy == .persistent {
@@ -281,7 +281,7 @@ private final class MTIImageBufferPromise: MTIImagePromise {
 
     func resolve(with renderingContext: MTIImageRenderingContext) throws -> MTIImagePromiseRenderTarget {
         if renderingContext.context !== context {
-            throw MTIError(code: .crossContextRendering, message: "MTIErrorCrossContextRendering")
+            throw MTIError.crossContextRendering
         }
         _ = resolution.renderTarget.retainTexture()
         return resolution.renderTarget

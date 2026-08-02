@@ -119,7 +119,7 @@ public final class MTIDeviceTexturePool: MTITexturePoolInternal {
 
         if texture == nil {
             guard let newTexture = textureDescriptor.makeTexture(device: device) else {
-                throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+                throw MTIError.failedToCreateTexture
             }
             texture = newTexture
         }
@@ -207,13 +207,13 @@ public final class MTIHeapTexturePool: MTITexturePoolInternal {
                 heapDescriptor.hazardTrackingMode = .tracked
             }
             guard let newHeap = device.makeHeap(descriptor: heapDescriptor) else {
-                throw MTIError(code: .failedToCreateHeap, message: "MTIErrorFailedToCreateHeap")
+                throw MTIError.failedToCreateHeap
             }
             heap = newHeap
         }
 
         guard let texture = textureDescriptor.makeTexture(heap: heap!) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
 
         return MTIReusableTexture(texture: texture, descriptor: textureDescriptor, pool: self)

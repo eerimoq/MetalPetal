@@ -202,7 +202,7 @@ public final class MTICGImagePromise: MTIImagePromise {
             &pixelBufferOut
         )
         guard let pixelBuffer = pixelBufferOut else {
-            throw MTIError(code: .failedToCreateCVPixelBuffer, message: "MTIErrorFailedToCreateCVPixelBuffer")
+            throw MTIError.failedToCreateCVPixelBuffer
         }
 
         let specifiedColorSpace = options.colorSpace ?? image.colorSpace
@@ -223,10 +223,7 @@ public final class MTICGImagePromise: MTIImagePromise {
             bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
         ) else {
             CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
-            throw MTIError(
-                code: .textureLoaderFailedToCreateCGContext,
-                message: "MTIErrorTextureLoaderFailedToCreateCGContext"
-            )
+            throw MTIError.textureLoaderFailedToCreateCGContext
         }
 
         let placeholder = CIImage(color: CIColor.black).cropped(to: CGRect(
@@ -252,7 +249,7 @@ public final class MTICGImagePromise: MTIImagePromise {
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
         guard let iosurface = CVPixelBufferGetIOSurface(pixelBuffer)?.takeUnretainedValue() else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
 
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -270,7 +267,7 @@ public final class MTICGImagePromise: MTIImagePromise {
             iosurface: iosurface,
             plane: 0
         ) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
 
         #if os(iOS) && !targetEnvironment(macCatalyst)
@@ -333,7 +330,7 @@ public final class MTITexturePromise: MTIImagePromise {
         -> MTIImagePromiseRenderTarget
     {
         if renderingContext.context.device !== texture.device {
-            throw MTIError(code: .crossDeviceRendering, message: "MTIErrorCrossDeviceRendering")
+            throw MTIError.crossDeviceRendering
         }
         return renderingContext.context.makeRenderTarget(texture: texture)
     }
@@ -455,7 +452,7 @@ public final class MTIColorImagePromise: MTIImagePromise {
         textureDescriptor.pixelFormat = sRGB ? .bgra8Unorm_srgb : .bgra8Unorm
         // It's not safe to reuse a GPU texture here, 'cause we're going to fill its content using CPU.
         guard let texture = renderingContext.context.device.makeTexture(descriptor: textureDescriptor) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
         let floatColor = simd_clamp(
             color.toFloat4(),
@@ -540,7 +537,7 @@ public final class MTIBitmapDataImagePromise: MTIImagePromise {
         textureDescriptor.usage = .shaderRead
         // It's not safe to reuse a GPU texture here, 'cause we're going to fill its content using CPU.
         guard let texture = renderingContext.context.device.makeTexture(descriptor: textureDescriptor) else {
-            throw MTIError(code: .failedToCreateTexture, message: "MTIErrorFailedToCreateTexture")
+            throw MTIError.failedToCreateTexture
         }
 
         data.withUnsafeBytes { rawBuffer in
@@ -610,7 +607,7 @@ public final class MTINamedImagePromise: MTIImagePromise {
         {
             return renderingContext.context.makeRenderTarget(texture: texture)
         } else {
-            throw MTIError(code: .textureDimensionsMismatch, message: "MTIErrorTextureDimensionsMismatch")
+            throw MTIError.textureDimensionsMismatch
         }
     }
 
@@ -671,7 +668,7 @@ public final class MTIMDLTexturePromise: MTIImagePromise {
         {
             return renderingContext.context.makeRenderTarget(texture: texture)
         } else {
-            throw MTIError(code: .textureDimensionsMismatch, message: "MTIErrorTextureDimensionsMismatch")
+            throw MTIError.textureDimensionsMismatch
         }
     }
 

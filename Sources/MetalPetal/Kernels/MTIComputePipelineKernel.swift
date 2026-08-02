@@ -68,10 +68,7 @@ private final class MTIImageComputeRecipe: MTIImagePromise {
             for: kernel,
             configuration: nil
         ) as? MTIComputePipeline else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         let pixelFormat = (outputPixelFormat == .unspecified) ? renderingContext.context
             .workingPixelFormat : outputPixelFormat
@@ -98,10 +95,7 @@ private final class MTIImageComputeRecipe: MTIImagePromise {
             .makeRenderTarget(reusableTextureDescriptor: textureDescriptor)
 
         guard let commandEncoder = renderingContext.commandBuffer.makeComputeCommandEncoder() else {
-            throw MTIError(
-                code: .failedToCreateCommandEncoder,
-                message: "MTIErrorFailedToCreateCommandEncoder"
-            )
+            throw MTIError.failedToCreateCommandEncoder
         }
         commandEncoder.setComputePipelineState(computePipeline.state)
         var index = 0
