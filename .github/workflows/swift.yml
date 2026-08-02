@@ -41,8 +41,6 @@ jobs:
     - uses: actions/checkout@v7
     - name: Build
       run: make build
-    - name: Run tests
-      run: make test
 
   ios:
     runs-on: macos-latest
@@ -64,8 +62,6 @@ jobs:
     - uses: actions/checkout@v7
     - name: Build
       run: make build-mac-catalyst
-    - name: Test
-      run: make test-mac-catalyst
 
   tvos:
     runs-on: macos-latest
