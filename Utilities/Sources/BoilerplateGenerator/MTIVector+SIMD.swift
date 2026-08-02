@@ -47,7 +47,6 @@ public enum MTIVectorSIMDTypeSupportCodeGenerator {
 
             {MTIVectorSIMDSupport}
             }
-
             """
 
         private var lines: [String] = []

@@ -19,14 +19,13 @@ public final class MTIVibranceFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public var parameters: [String: MTIFunctionArgumentValue] {
-        let amount = Double(amount)
         let vector = simd_float4(
-            Float(3 * amount),
-            Float(-9.0 / 2.0 * amount * amount - 3.0 / 2.0 * amount),
-            Float(9.0 / 2.0 * amount * amount * amount - amount / 2.0),
-            Float(-9.0 / 2.0 * amount * amount * amount + 9.0 / 2.0 * amount * amount - amount)
+            3 * amount,
+            -9.0 / 2.0 * amount * amount - 3.0 / 2.0 * amount,
+            9.0 / 2.0 * amount * amount * amount - amount / 2.0,
+            -9.0 / 2.0 * amount * amount * amount + 9.0 / 2.0 * amount * amount - amount
         )
-        return ["amount": .float(self.amount),
+        return ["amount": .float(amount),
                 "vibranceVector": .vector(MTIVector(value: vector)),
                 "avoidsSaturatingSkinTones": .bool(avoidsSaturatingSkinTones),
                 "grayColorTransform": .vector(MTIVector(value: grayColorTransform))]
