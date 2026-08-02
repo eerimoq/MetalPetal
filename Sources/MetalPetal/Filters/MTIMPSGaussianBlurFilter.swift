@@ -9,13 +9,13 @@ import MetalPerformanceShaders
 import os
 
 public final class MTIMPSGaussianBlurFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var radius: Float = 0
     private static var kernels: [Int: MTIMPSKernel] = [:]
     private static let kernelsLock = OSAllocatedUnfairLock()
+
+    public init() {}
 
     private static func kernel(radius: Int) -> MTIMPSKernel {
         kernelsLock.lock()

@@ -5,7 +5,6 @@
 //  Created by Yu Ao on 28/10/2017.
 //
 
-import CoreGraphics
 import Foundation
 import Metal
 

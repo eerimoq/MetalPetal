@@ -3,11 +3,8 @@
 //  MetalPetal
 //
 
-import CoreGraphics
 import Foundation
 import Metal
-import QuartzCore
-import simd
 
 /*
            ^  y+
@@ -101,8 +98,6 @@ public func MTITransformFilterApplyTransformToImage(
 }
 
 public final class MTITransformFilter: MTIUnaryFilter {
-    public init() {}
-
     public typealias Viewport = CGRect
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
@@ -114,6 +109,8 @@ public final class MTITransformFilter: MTIUnaryFilter {
     public var fieldOfView: Float = 0.0
     public var viewport: Viewport = CGRect(x: 0, y: 0, width: 0, height: 0)
     public var rasterSampleCount: Int = 1
+
+    public init() {}
 
     public static func defaultViewport(for image: MTIImage) -> Viewport {
         let inputImageSize = image.size

@@ -7,7 +7,6 @@
 
 import Foundation
 import Metal
-import MetalPerformanceShaders
 
 public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
     public var inputImage: MTIImage?
