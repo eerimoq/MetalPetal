@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-private func MTIArgumentsEncoderEncodeBytes(
+private func argumentsEncoderEncodeBytes(
     _ functionType: MTLFunctionType,
     _ encoder: MTLCommandEncoder,
     _ bytes: UnsafeRawPointer,
@@ -35,7 +35,7 @@ private func MTIArgumentsEncoderEncodeBytes(
     }
 }
 
-private func MTIArgumentsEncoderEncodeBuffer(
+private func argumentsEncoderEncodeBuffer(
     _ functionType: MTLFunctionType,
     _ encoder: MTLCommandEncoder,
     _ buffer: MTLBuffer,
@@ -84,7 +84,7 @@ public func MTIEncodeArguments(
             }
         }
         func encodeBytes(_ bytes: UnsafeRawBufferPointer) {
-            MTIArgumentsEncoderEncodeBytes(
+            argumentsEncoderEncodeBytes(
                 functionType,
                 encoder,
                 bytes.baseAddress!,
@@ -147,13 +147,11 @@ public func MTIEncodeArguments(
             }
         case let .data(value):
             value.withUnsafeBytes { bytes in
-                if bytes.baseAddress != nil {
-                    encodeBytes(bytes)
-                }
+                encodeBytes(bytes)
             }
         case let .dataBuffer(value):
             if let buffer = value.buffer(for: encoder.device) {
-                MTIArgumentsEncoderEncodeBuffer(functionType, encoder, buffer, binding.index)
+                argumentsEncoderEncodeBuffer(functionType, encoder, buffer, binding.index)
             }
         }
     }

@@ -70,8 +70,11 @@ private final class MTIImageComputeRecipe: MTIImagePromise {
         ) as? MTIComputePipeline else {
             throw MTIError.failedToCreateCommandEncoder
         }
-        let pixelFormat = (outputPixelFormat == .unspecified) ? renderingContext.context
-            .workingPixelFormat : outputPixelFormat
+        let pixelFormat = if outputPixelFormat == .unspecified {
+            renderingContext.context.workingPixelFormat
+        } else {
+            outputPixelFormat
+        }
         let textureDescriptor: MTITextureDescriptor
         if dimensions.depth > 1 {
             let mtlTextureDescriptor = MTLTextureDescriptor()

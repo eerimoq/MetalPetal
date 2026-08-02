@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIComputePipeline {
+public struct MTIComputePipeline {
     public let state: MTLComputePipelineState
     public let reflection: MTLComputePipelineReflection
 

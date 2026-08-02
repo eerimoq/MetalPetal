@@ -176,8 +176,7 @@ public final class MTICGImagePromise: MTIImagePromise {
             depth: 1
         )
         self.options = options ?? MTICGImageLoadingOptions.default
-        alphaType = isOpaque ? .alphaIsOne :
-            .premultiplied // kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst
+        alphaType = isOpaque ? .alphaIsOne : .premultiplied
     }
 
     public var dependencies: [MTIImage] {
