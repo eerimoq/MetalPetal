@@ -195,8 +195,8 @@ public final class MTIRenderPipelineKernel: MTIKernel {
     }
 
     public static let passthrough = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughFragmentFunctionName),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: MTIFilterPassthroughFragmentFunctionName),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: .passthrough

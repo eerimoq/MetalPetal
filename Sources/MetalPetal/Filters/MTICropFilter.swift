@@ -35,8 +35,8 @@ public final class MTICropFilter: MTIUnaryFilter {
     public var roundingMode: MTICropFilterRoundingMode = .plain
 
     private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughFragmentFunctionName),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: MTIFilterPassthroughFragmentFunctionName),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: .passthrough

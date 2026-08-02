@@ -54,8 +54,8 @@ private let computeKernel =
     ))
 
 private let renderKernel = MTIRenderPipelineKernel(
-    vertexFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallVertex", in: .main),
-    fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "bouncingBallFragment", in: .main)
+    vertexFunctionDescriptor: .init(name: "bouncingBallVertex", in: .main),
+    fragmentFunctionDescriptor: .init(name: "bouncingBallFragment", in: .main)
 )
 
 struct BouncingBallsView: View {

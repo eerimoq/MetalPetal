@@ -159,8 +159,8 @@ public final class MTIRGBToneCurveFilter: MTIFilter {
     }
 
     private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "rgbToneCurveAdjust")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "rgbToneCurveAdjust")
     )
 
     public var toneCurveColorLookupImage: MTIImage {

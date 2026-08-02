@@ -1418,7 +1418,7 @@ struct RenderTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),
@@ -1468,7 +1468,7 @@ struct RenderTests {
         constantValues.setConstantValue(&color, type: .float4, withName: "constColor")
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(
+            fragmentFunctionDescriptor: .init(
                 name: "testRender",
                 constantValues: constantValues,
                 libraryURL: libraryURL

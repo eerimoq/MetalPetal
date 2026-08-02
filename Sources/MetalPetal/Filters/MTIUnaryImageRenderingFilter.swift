@@ -28,7 +28,7 @@ public class MTIUnaryImageRenderingFilter: MTIUnaryFilter {
             return kernel
         }
         let kernel = MTIRenderPipelineKernel(
-            vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
+            vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
             fragmentFunctionDescriptor: fragmentFunctionDescriptor,
             vertexDescriptor: nil,
             colorAttachmentCount: 1,

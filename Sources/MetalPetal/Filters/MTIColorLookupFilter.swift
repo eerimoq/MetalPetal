@@ -87,23 +87,23 @@ public final class MTIColorLookupFilter: MTIFilter {
     public var intensity: Float = 1.0
 
     private static let squareLookupKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "colorLookup2DSquare")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "colorLookup2DSquare")
     )
 
     private static let horizontalStripLookupKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "colorLookup2DHorizontalStrip")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "colorLookup2DHorizontalStrip")
     )
 
     private static let verticalStripLookupKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "colorLookup2DVerticalStrip")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "colorLookup2DVerticalStrip")
     )
 
     private static let lookup3DKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "colorLookup3D")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "colorLookup3D")
     )
 
     public var outputImage: MTIImage? {

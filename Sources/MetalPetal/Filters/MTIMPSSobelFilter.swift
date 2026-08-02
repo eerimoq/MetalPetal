@@ -36,8 +36,8 @@ public final class MTIMPSSobelFilter: MTIUnaryFilter {
     }
 
     private static let rToMonochromeKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "rToMonochrome"),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "rToMonochrome"),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: .general

@@ -20,8 +20,8 @@ public final class MTIMPSDefinitionFilter: MTIUnaryFilter {
     private let blurFilter = MTIMPSGaussianBlurFilter()
     private static var kernel: MTIRenderPipelineKernel {
         MTIRenderPipelineKernel(
-            vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "clarity")
+            vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+            fragmentFunctionDescriptor: .init(name: "clarity")
         )
     }
 

@@ -96,7 +96,7 @@ public final class MTIBlendFilter: MTIFilter {
             outputAlphaType: outputAlphaType
         )
         let kernel = MTIRenderPipelineKernel(
-            vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
+            vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
             fragmentFunctionDescriptor: fragmentFunctionDescriptor,
             vertexDescriptor: nil,
             colorAttachmentCount: 1,
@@ -116,7 +116,7 @@ public final class MTIBlendFilter: MTIFilter {
                                            outputAlphaType: outputAlphaType)
         return kernel.apply(to: [inputBackgroundImage, inputImage],
                             parameters: ["intensity": .float(intensity)],
-                            outputDimensions: MTITextureDimensions(cgSize: inputBackgroundImage.size),
+                            outputDimensions: .init(cgSize: inputBackgroundImage.size),
                             outputPixelFormat: outputPixelFormat)
     }
 }

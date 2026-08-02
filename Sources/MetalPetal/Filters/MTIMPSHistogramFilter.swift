@@ -139,8 +139,8 @@ public final class MTIHistogramDisplayFilter: MTIUnaryFilter {
     public var outputSize: CGSize = .zero
 
     private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "histogramDisplay"),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "histogramDisplay"),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: .general

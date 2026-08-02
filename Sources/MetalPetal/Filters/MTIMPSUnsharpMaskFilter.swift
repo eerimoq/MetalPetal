@@ -33,8 +33,8 @@ public final class MTIMPSUnsharpMaskFilter: MTIUnaryFilter {
     }
 
     private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "usmSecondPass")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "usmSecondPass")
     )
 
     public var outputImage: MTIImage? {

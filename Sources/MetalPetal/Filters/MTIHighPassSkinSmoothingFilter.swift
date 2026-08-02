@@ -49,15 +49,13 @@ public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
     }
 
     private static let gbChannelOverlayBlendKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "highPassSkinSmoothingGBChannelOverlay")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingGBChannelOverlay")
     )
 
     private static let maskProcessAndCompositeKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(
-            name: "highPassSkinSmoothingMaskProcessAndComposite"
-        )
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingMaskProcessAndComposite")
     )
 
     public var outputImage: MTIImage? {

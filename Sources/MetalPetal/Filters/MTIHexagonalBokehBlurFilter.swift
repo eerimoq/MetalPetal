@@ -20,21 +20,21 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
     public var angle: Float = 0
 
     private static let prepassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "hexagonalBokehBlurPre")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurPre")
     )
 
     private static let alphaPassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "hexagonalBokehBlurAlpha"),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurAlpha"),
         vertexDescriptor: nil,
         colorAttachmentCount: 2,
         alphaTypeHandlingRule: .general
     )
 
     private static let bravoCharliePassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "hexagonalBokehBlurBravoCharlie")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurBravoCharlie")
     )
 
     public var outputImage: MTIImage? {

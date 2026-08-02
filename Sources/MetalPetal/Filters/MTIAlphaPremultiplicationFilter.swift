@@ -13,10 +13,8 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
     public var outputPixelFormat: MTLPixelFormat = .unspecified
 
     public static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(
-            name: MTIFilterUnpremultiplyAlphaFragmentFunctionName
-        ),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: MTIFilterUnpremultiplyAlphaFragmentFunctionName),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: MTIAlphaTypeHandlingRule(
@@ -63,10 +61,8 @@ public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
     public init() {}
 
     public static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(
-            name: MTIFilterPremultiplyAlphaFragmentFunctionName
-        ),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: MTIFilterPremultiplyAlphaFragmentFunctionName),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: MTIAlphaTypeHandlingRule(

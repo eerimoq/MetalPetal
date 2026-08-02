@@ -83,7 +83,7 @@ struct UtilitiesTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),
@@ -126,7 +126,7 @@ struct UtilitiesTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),
@@ -168,7 +168,7 @@ struct UtilitiesTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),
@@ -271,7 +271,7 @@ struct UtilitiesTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),
@@ -367,7 +367,7 @@ struct UtilitiesTests {
         )
         let renderKernel = MTIRenderPipelineKernel(
             vertexFunctionDescriptor: .passthroughVertex,
-            fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "testRender", libraryURL: libraryURL)
+            fragmentFunctionDescriptor: .init(name: "testRender", libraryURL: libraryURL)
         )
         let image = MTIImage(
             color: MTIColor(red: 0, green: 1, blue: 0, alpha: 1),

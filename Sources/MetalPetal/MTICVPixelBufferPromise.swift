@@ -135,10 +135,8 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
         colorAttachmentPixelFormat pixelFormat: MTLPixelFormat,
         context: MTIContext
     ) throws -> MTIRenderPipeline {
-        let vertexFunction = try context
-            .function(with: MTIFunctionDescriptor(name: MTIColorConversionVertexFunctionName))
-        let fragmentFunction = try context
-            .function(with: MTIFunctionDescriptor(name: MTIColorConversionFragmentFunctionName))
+        let vertexFunction = try context.function(with: .init(name: MTIColorConversionVertexFunctionName))
+        let fragmentFunction = try context.function(with: .init(name: MTIColorConversionFragmentFunctionName))
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineDescriptor.vertexFunction = vertexFunction
         renderPipelineDescriptor.fragmentFunction = fragmentFunction

@@ -169,7 +169,7 @@ enum DemoImages {
 enum RGUVGradientImage {
     private static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: .passthroughVertex,
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "rgUVGradient", in: Bundle.main)
+        fragmentFunctionDescriptor: .init(name: "rgUVGradient", in: Bundle.main)
     )
     static func makeImage(size: CGSize) -> MTIImage {
         kernel.makeImage(dimensions: MTITextureDimensions(cgSize: size))
@@ -179,7 +179,7 @@ enum RGUVGradientImage {
 enum RGUVB1GradientImage {
     private static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: .passthroughVertex,
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "rgUVB1Gradient", in: Bundle.main)
+        fragmentFunctionDescriptor: .init(name: "rgUVB1Gradient", in: Bundle.main)
     )
     static func makeImage(size: CGSize) -> MTIImage {
         kernel.makeImage(dimensions: MTITextureDimensions(cgSize: size))

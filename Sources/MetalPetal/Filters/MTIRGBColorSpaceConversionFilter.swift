@@ -136,7 +136,7 @@ public final class MTIRGBColorSpaceConversionFilter: MTIUnaryFilter {
             outputAlphaType: outputAlphaType
         )
         let kernel = MTIRenderPipelineKernel(
-            vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
+            vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
             fragmentFunctionDescriptor: fragmentFunctionDescriptor,
             vertexDescriptor: nil,
             colorAttachmentCount: 1,

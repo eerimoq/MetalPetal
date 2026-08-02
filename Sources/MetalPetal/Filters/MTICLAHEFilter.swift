@@ -27,8 +27,8 @@ public final class MTICLAHEFilter: MTIUnaryFilter {
     public var tileGridSize = MTICLAHESize(width: 8, height: 8)
     private static let lutGeneratorKernel = MTICLAHELUTKernel()
     private static let rgb2LightnessKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHERGB2Lightness"),
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "CLAHERGB2Lightness"),
         vertexDescriptor: nil,
         colorAttachmentCount: 1,
         alphaTypeHandlingRule: MTIAlphaTypeHandlingRule(
@@ -37,8 +37,8 @@ public final class MTICLAHEFilter: MTIUnaryFilter {
         )
     )
     private static let claheLookupKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: MTIFunctionDescriptor(name: "CLAHEColorLookup")
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "CLAHEColorLookup")
     )
 
     public init() {}

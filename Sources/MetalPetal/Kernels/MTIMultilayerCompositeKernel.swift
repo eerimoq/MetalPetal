@@ -152,9 +152,8 @@ private final class MTIMultilayerCompositeKernelState {
         context: MTIContext
     ) throws -> MTIRenderPipeline {
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
-        let vertexFunction = try context
-            .function(with: MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName))
-        let fragmentFunction = try context.function(with: MTIFunctionDescriptor(name: fragmentFunctionName))
+        let vertexFunction = try context.function(with: .init(name: MTIFilterPassthroughVertexFunctionName))
+        let fragmentFunction = try context.function(with: .init(name: fragmentFunctionName))
         renderPipelineDescriptor.vertexFunction = vertexFunction
         renderPipelineDescriptor.fragmentFunction = fragmentFunction
         renderPipelineDescriptor.colorAttachments[0] = colorAttachmentDescriptor
@@ -228,8 +227,7 @@ private final class MTIMultilayerCompositeKernelState {
         let useProgrammableBlending = context.defaultLibrarySupportsProgrammableBlending && context
             .isProgrammableBlendingSupported
         let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
-        let vertexFunction = try context
-            .function(with: MTIFunctionDescriptor(name: "multilayerCompositeVertexShader"))
+        let vertexFunction = try context.function(with: .init(name: "multilayerCompositeVertexShader"))
         guard let fragmentFunctionDescriptorForBlending = key
             .createFragmentFunctionDescriptor(usesProgrammableBlending: useProgrammableBlending)
         else {
