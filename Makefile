@@ -11,6 +11,8 @@ CODE_DIRS += "Sources"
 CODE_DIRS += "Tests"
 CODE_DIRS += "MetalPetalExamples"
 
+CLANG_FORMAT_ARGS = $(shell find $(CODE_DIRS) \( -name "*.h" -o -name "*.metal" \))
+
 SHELL = /usr/bin/env bash
 
 .PHONY: build test
@@ -19,9 +21,11 @@ default:
 
 style:
 	swiftformat $(CODE_DIRS) $(SWIFTFORMAT_ARGS)
+	clang-format -i $(CLANG_FORMAT_ARGS)
 
 style-check:
 	swiftformat $(CODE_DIRS) $(SWIFTFORMAT_ARGS) --lint
+	clang-format --dry-run -Werror $(CLANG_FORMAT_ARGS)
 
 lint:
 	swiftlint lint $(SWIFTLINT_ARGS) $(CODE_DIRS)
