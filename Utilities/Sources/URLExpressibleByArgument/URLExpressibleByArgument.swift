@@ -8,7 +8,7 @@
 import ArgumentParser
 import Foundation
 
-extension URL: ExpressibleByArgument {
+extension URL: @retroactive ExpressibleByArgument {
     public init?(argument: String) {
         if let url = URL(string: argument), url.scheme != nil {
             self.init(string: argument)

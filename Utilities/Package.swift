@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -15,7 +15,7 @@ let package = Package(
         .target(
             name: "BoilerplateGenerator",
             dependencies: [
-                "ArgumentParser",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "SIMDType",
                 "URLExpressibleByArgument",
                 "MetalPetalSourceLocator",
@@ -23,10 +23,12 @@ let package = Package(
         ),
         .target(
             name: "URLExpressibleByArgument",
-            dependencies: ["ArgumentParser"]
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
         ),
         .target(name: "MetalPetalSourceLocator"),
-        .target(
+        .executableTarget(
             name: "main",
             dependencies: ["BoilerplateGenerator"]
         ),
