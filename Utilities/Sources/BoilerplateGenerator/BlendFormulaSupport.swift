@@ -1,21 +1,19 @@
 //
-//  File.swift
-//  
+//  BlendFormulaSupport.swift
+//
 //
 //  Created by YuAo on 2021/2/6.
 //
 
 import Foundation
 
-struct BlendFormulaSupport {
-    
+enum BlendFormulaSupport {
     static func generateBlendFormulaSupportFiles(sourceDirectory: URL) -> [String: String] {
         let sourceHeaderFile = sourceDirectory.appendingPathComponent("Shaders/MTIShaderLib.h")
         let shaderHeaderContent = try! String(contentsOf: sourceHeaderFile, encoding: .utf8)
-        
-        let functionConstantsHeaderFile = sourceDirectory.appendingPathComponent("Shaders/MTIShaderFunctionConstants.h")
+        let functionConstantsHeaderFile = sourceDirectory
+            .appendingPathComponent("Shaders/MTIShaderFunctionConstants.h")
         let functionConstantsContent = try! String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
-        
         // The shader template is embedded verbatim in a raw string literal (`#"""..."""#`) so it needs no
         // escaping. In the outer `##"""..."""##` raw string, `\##(...)` is interpolation, while `\(...)` and
         // `\n` are emitted literally into the generated file's own (regular) string literals.
@@ -37,9 +35,15 @@ struct BlendFormulaSupport {
 
         {MTIBlendFormula}
 
-        \##(MetalPetalBlendingShadersCodeGenerator.generateBlendFilterFragmentShader(shaderFunctionName: "customBlend", blendFunctionName: "blend"))
+        \##(MetalPetalBlendingShadersCodeGenerator.generateBlendFilterFragmentShader(
+            shaderFunctionName: "customBlend",
+            blendFunctionName: "blend"
+        ))
 
-        \##(MetalPetalBlendingShadersCodeGenerator.generateMultilayerCompositeFilterFragmentShader(shaderFunctionName: "multilayerCompositeCustomBlend", blendFunctionName: "blend"))
+        \##(MetalPetalBlendingShadersCodeGenerator.generateMultilayerCompositeFilterFragmentShader(
+            shaderFunctionName: "multilayerCompositeCustomBlend",
+            blendFunctionName: "blend"
+        ))
 
         """#
 

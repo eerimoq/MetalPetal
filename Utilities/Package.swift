@@ -9,18 +9,26 @@ let package = Package(
     products: [],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.0.1"),
-        .package(url: "https://github.com/MetalPetal/SIMDType.git", from: "0.0.3")
+        .package(url: "https://github.com/MetalPetal/SIMDType.git", from: "0.0.3"),
     ],
     targets: [
         .target(
             name: "BoilerplateGenerator",
-            dependencies: ["ArgumentParser", "SIMDType", "URLExpressibleByArgument", "MetalPetalSourceLocator"]),
+            dependencies: [
+                "ArgumentParser",
+                "SIMDType",
+                "URLExpressibleByArgument",
+                "MetalPetalSourceLocator",
+            ]
+        ),
         .target(
             name: "URLExpressibleByArgument",
-            dependencies: ["ArgumentParser"]),
+            dependencies: ["ArgumentParser"]
+        ),
         .target(name: "MetalPetalSourceLocator"),
         .target(
             name: "main",
-            dependencies: ["BoilerplateGenerator"])
+            dependencies: ["BoilerplateGenerator"]
+        ),
     ]
 )

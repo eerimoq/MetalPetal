@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MTISIMDArgumentValue.swift
 //
 //
 //  Created by YuAo on 2020/7/11.
@@ -8,7 +8,7 @@
 import Foundation
 import SIMDType
 
-fileprivate let template: String = """
+private let template: String = """
 //
 //  MTISIMDArgumentValue.swift
 //  MetalPetal
@@ -39,30 +39,30 @@ public enum MTISIMDArgumentValue {
 
 """
 
-public struct MTISIMDArgumentValueGenerator {
+public enum MTISIMDArgumentValueGenerator {
     private static func caseName(for simdType: SIMDType) -> String {
         let scalar = simdType.scalarType.description(capitalized: false)
         switch simdType.dimension {
-        case .vector(let count):
+        case let .vector(count):
             return "\(scalar)\(count)"
-        case .matrix(let c, let r):
+        case let .matrix(c, r):
             return "\(scalar)\(c)x\(r)"
         }
     }
 
     private static func swiftTypeName(for simdType: SIMDType) -> String {
         switch simdType.dimension {
-        case .vector(let count):
-            return "SIMD\(count)<\(simdType.scalarType.swiftTypeName)>"
+        case let .vector(count):
+            "SIMD\(count)<\(simdType.scalarType.swiftTypeName)>"
         case .matrix:
-            return caseName(for: simdType)
+            caseName(for: simdType)
         }
     }
 
     public static func generate() -> [String: String] {
-        var cases: String = ""
-        var dataTypes: String = ""
-        var bytes: String = ""
+        var cases = ""
+        var dataTypes = ""
+        var bytes = ""
         for simdType in SIMDType.metalSupportedSIMDTypes {
             let name = caseName(for: simdType)
             let type = swiftTypeName(for: simdType)

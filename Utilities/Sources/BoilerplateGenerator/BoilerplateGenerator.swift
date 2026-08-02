@@ -1,29 +1,54 @@
 //
-//  File.swift
-//  
+//  BoilerplateGenerator.swift
+//
 //
 //  Created by YuAo on 2020/3/16.
 //
 
-import Foundation
 import ArgumentParser
-import URLExpressibleByArgument
+import Foundation
 import MetalPetalSourceLocator
+import URLExpressibleByArgument
 
 public struct BoilerplateGenerator: ParsableCommand {
-    
     @Argument(help: "The root directory of the MetalPetal repo.")
     var projectRoot: URL
-    
+
     enum CodingKeys: CodingKey {
         case projectRoot
     }
-    
-    public init() { }
-    
+
+    public init() {}
+
     public func run() throws {
-        // Sources
-        let blendModes = ["Normal","Darken","Multiply","ColorBurn","LinearBurn","DarkerColor","Lighten","Screen","ColorDodge","Add","LighterColor","Overlay","SoftLight","HardLight","VividLight","LinearLight","PinLight","HardMix", "Difference", "Exclusion", "Subtract", "Divide","Hue","Saturation","Color", "Luminosity"]
+        let blendModes = [
+            "Normal",
+            "Darken",
+            "Multiply",
+            "ColorBurn",
+            "LinearBurn",
+            "DarkerColor",
+            "Lighten",
+            "Screen",
+            "ColorDodge",
+            "Add",
+            "LighterColor",
+            "Overlay",
+            "SoftLight",
+            "HardLight",
+            "VividLight",
+            "LinearLight",
+            "PinLight",
+            "HardMix",
+            "Difference",
+            "Exclusion",
+            "Subtract",
+            "Divide",
+            "Hue",
+            "Saturation",
+            "Color",
+            "Luminosity",
+        ]
         let sourceDirectory = MetalPetalSourcesRootURL(in: projectRoot)
         let shadersFileDirectory = sourceDirectory.appendingPathComponent("Shaders")
         for (file, content) in MTIVectorSIMDTypeSupportCodeGenerator.generate() {
@@ -38,7 +63,9 @@ public struct BoilerplateGenerator: ParsableCommand {
             let url = sourceDirectory.appendingPathComponent(file)
             try! content.write(to: url, atomically: true, encoding: .utf8)
         }
-        for (file, content) in BlendFormulaSupport.generateBlendFormulaSupportFiles(sourceDirectory: sourceDirectory) {
+        for (file, content) in BlendFormulaSupport
+            .generateBlendFormulaSupportFiles(sourceDirectory: sourceDirectory)
+        {
             let url = sourceDirectory.appendingPathComponent(file)
             try! content.write(to: url, atomically: true, encoding: .utf8)
         }

@@ -9,11 +9,13 @@ extension String {
     }
 }
 
-public struct MetalPetalBlendingShadersCodeGenerator {
-    
-    static func generateMultilayerCompositeFilterFragmentShader(shaderFunctionName: String, blendFunctionName: String) -> String {
-        return """
-        
+public enum MetalPetalBlendingShadersCodeGenerator {
+    static func generateMultilayerCompositeFilterFragmentShader(
+        shaderFunctionName: String,
+        blendFunctionName: String
+    ) -> String {
+        """
+
         #if __HAVE_COLOR_ARGUMENTS__ && !TARGET_OS_SIMULATOR
             
         fragment float4 \(shaderFunctionName)_programmableBlending(
@@ -66,7 +68,7 @@ public struct MetalPetalBlendingShadersCodeGenerator {
             textureColor.a *= parameters.opacity;
             return \(blendFunctionName)(currentColor,textureColor);
         }
-        
+
         #endif
 
         fragment float4 \(shaderFunctionName)(
@@ -121,13 +123,15 @@ public struct MetalPetalBlendingShadersCodeGenerator {
             return \(blendFunctionName)(backgroundColor,textureColor);
         }
 
-        
+
         """
     }
-    
-    static func generateBlendFilterFragmentShader(shaderFunctionName: String, blendFunctionName: String) -> String {
-        return """
-        
+
+    static func generateBlendFilterFragmentShader(shaderFunctionName: String,
+                                                  blendFunctionName: String) -> String
+    {
+        """
+
         fragment float4 \(shaderFunctionName)(VertexOut vertexIn [[ stage_in ]],
                                             texture2d<float, access::sample> colorTexture [[ texture(0) ]],
                                             sampler colorSampler [[ sampler(0) ]],
@@ -159,41 +163,43 @@ public struct MetalPetalBlendingShadersCodeGenerator {
             }
         }
 
-        
+
         """
     }
-    
+
     static func generateBlendingShaders(blendModes: [String]) -> [String: String] {
         var fileContent = ""
         fileContent += """
         //
         // This is an auto-generated source file.
         //
-        
+
         #include <metal_stdlib>
         #include "MTIShaderLib.h"
         #include "MTIShaderFunctionConstants.h"
 
         using namespace metal;
         using namespace metalpetal;
-        
+
         namespace metalpetal {
-        
+
         """
-        
+
         for mode in blendModes {
-            fileContent += generateBlendFilterFragmentShader(shaderFunctionName: mode.lowerCamelCased + "Blend",
-                                                             blendFunctionName: mode.lowerCamelCased + "Blend")
+            fileContent += generateBlendFilterFragmentShader(
+                shaderFunctionName: mode.lowerCamelCased + "Blend",
+                blendFunctionName: mode.lowerCamelCased + "Blend"
+            )
         }
-        
+
         fileContent += """
 
         }
-        
+
         """
         return ["BlendingShaders.metal": fileContent]
     }
-    
+
     static func generateMultilayerCompositeShaders(blendModes: [String]) -> [String: String] {
         var fileContent = """
         //
@@ -208,10 +214,10 @@ public struct MetalPetalBlendingShadersCodeGenerator {
         #ifndef TARGET_OS_SIMULATOR
             #error TARGET_OS_SIMULATOR not defined. Check <TargetConditionals.h>
         #endif
-        
+
         using namespace metal;
         using namespace metalpetal;
-        
+
         namespace metalpetal {
 
         vertex MTIMultilayerCompositingLayerVertexOut multilayerCompositeVertexShader(
@@ -228,25 +234,27 @@ public struct MetalPetalBlendingShadersCodeGenerator {
             return outVertex;
         }
 
-        
+
         """
-        
+
         for mode in blendModes {
-            fileContent += generateMultilayerCompositeFilterFragmentShader(shaderFunctionName: "multilayerComposite" + mode + "Blend",
-                                                                           blendFunctionName: mode.lowerCamelCased + "Blend")
+            fileContent += generateMultilayerCompositeFilterFragmentShader(
+                shaderFunctionName: "multilayerComposite" + mode + "Blend",
+                blendFunctionName: mode.lowerCamelCased + "Blend"
+            )
         }
-        
+
         fileContent += """
 
         }
-        
+
         """
         return ["MultilayerCompositeShaders.metal": fileContent]
     }
-    
+
     public static func generate(blendModes: [String]) -> [String: String] {
-        let blendingShaders = self.generateBlendingShaders(blendModes: blendModes)
-        let multilayerCompositeShaders = self.generateMultilayerCompositeShaders(blendModes: blendModes)
-        return blendingShaders.merging(multilayerCompositeShaders, uniquingKeysWith: { (first, _) in first })
+        let blendingShaders = generateBlendingShaders(blendModes: blendModes)
+        let multilayerCompositeShaders = generateMultilayerCompositeShaders(blendModes: blendModes)
+        return blendingShaders.merging(multilayerCompositeShaders, uniquingKeysWith: { first, _ in first })
     }
 }

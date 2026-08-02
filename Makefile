@@ -10,6 +10,7 @@ CODESPELL_ARGS = \
 CODE_DIRS += "Sources"
 CODE_DIRS += "Tests"
 CODE_DIRS += "MetalPetalExamples"
+CODE_DIRS += "Utilities"
 
 CLANG_FORMAT_ARGS = $(shell find $(CODE_DIRS) \( -name "*.h" -o -name "*.metal" \))
 
