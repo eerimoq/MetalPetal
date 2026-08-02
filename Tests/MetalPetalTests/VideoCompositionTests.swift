@@ -22,8 +22,9 @@ struct VideoCompositionTests {
         filter: @escaping (MTIAsyncVideoCompositionRequestHandler.Request) throws -> MTIImage
     ) async throws -> (composition: MTIVideoComposition, pixel: PixelEnumerator.Pixel) {
         let url = try await VideoGenerator.makeTestVideo(width: width, height: height, frameCount: 4)
-        defer { try? FileManager.default.removeItem(at: url) }
-
+        defer {
+            try? FileManager.default.removeItem(at: url)
+        }
         let asset = AVURLAsset(url: url)
         let context = try makeContext()
         let composition = try await MTIVideoComposition(
@@ -32,7 +33,6 @@ struct VideoCompositionTests {
             queue: nil,
             filter: filter
         )
-
         let reader = try AVAssetReader(asset: asset)
         let output = try await AVAssetReaderVideoCompositionOutput(
             videoTracks: asset.loadTracks(withMediaType: .video),
@@ -41,11 +41,12 @@ struct VideoCompositionTests {
         output.videoComposition = composition.makeAVVideoComposition()
         reader.add(output)
         #expect(reader.startReading())
-
         let sample = try #require(output.copyNextSampleBuffer(), "no composed frame produced")
         let pixelBuffer = try #require(CMSampleBufferGetImageBuffer(sample))
         CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+        defer {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
+        }
         let base = try #require(CVPixelBufferGetBaseAddress(pixelBuffer)?.assumingMemoryBound(to: UInt8.self))
         return (composition, PixelEnumerator.Pixel(b: base[0], g: base[1], r: base[2], a: base[3]))
     }

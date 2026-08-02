@@ -88,7 +88,9 @@ public enum VideoGenerator {
             throw Error.failedToCreatePixelBuffer
         }
         CVPixelBufferLockBaseAddress(pixelBuffer, [])
-        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
+        defer {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
+        }
         if let base = CVPixelBufferGetBaseAddress(pixelBuffer)?.assumingMemoryBound(to: UInt8.self) {
             let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
             for y in 0 ..< height {
