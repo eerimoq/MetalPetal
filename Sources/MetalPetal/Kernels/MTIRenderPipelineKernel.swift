@@ -370,13 +370,13 @@ final class MTIImageRenderingRecipe {
             // encode parameters
             if command.parameters.count > 0 {
                 do {
-                    try MTIFunctionArgumentsEncoder.encode(
+                    try MTIEncodeArguments(
                         renderPipeline.reflection.vertexBindings,
                         values: command.parameters,
                         functionType: .vertex,
                         encoder: commandEncoder
                     )
-                    try MTIFunctionArgumentsEncoder.encode(
+                    try MTIEncodeArguments(
                         renderPipeline.reflection.fragmentBindings,
                         values: command.parameters,
                         functionType: .fragment,

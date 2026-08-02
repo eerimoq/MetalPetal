@@ -71,98 +71,96 @@ private let dataSizeMismatchError = MTIError(
     message: "MTIErrorParameterDataSizeMismatch"
 )
 
-public enum MTIFunctionArgumentsEncoder {
-    public static func encode(
-        _ bindings: [any MTLBinding],
-        values parameters: [String: MTIFunctionArgumentValue],
-        functionType: MTLFunctionType,
-        encoder: MTLCommandEncoder
-    ) throws {
-        for binding in bindings {
-            guard binding.type == .buffer, let binding = binding as? any MTLBufferBinding else {
-                continue
+public func MTIEncodeArguments(
+    _ bindings: [any MTLBinding],
+    values parameters: [String: MTIFunctionArgumentValue],
+    functionType: MTLFunctionType,
+    encoder: MTLCommandEncoder
+) throws {
+    for binding in bindings {
+        guard binding.type == .buffer, let binding = binding as? any MTLBufferBinding else {
+            continue
+        }
+        guard let value = parameters[binding.name] else {
+            continue
+        }
+        func encodeScalar(_ scalar: some Any) {
+            var scalar = scalar
+            withUnsafeBytes(of: &scalar) {
+                encodeBytes($0)
             }
-            guard let value = parameters[binding.name] else {
-                continue
+        }
+        func encodeBytes(_ bytes: UnsafeRawBufferPointer) {
+            MTIArgumentsEncoderEncodeBytes(
+                functionType,
+                encoder,
+                bytes.baseAddress!,
+                bytes.count,
+                binding.index
+            )
+        }
+        switch value {
+        case let .bool(value):
+            guard binding.bufferDataType == .bool else {
+                throw dataTypeMismatchError
             }
-            func encodeScalar(_ scalar: some Any) {
-                var scalar = scalar
-                withUnsafeBytes(of: &scalar) {
-                    encodeBytes($0)
-                }
-            }
-            func encodeBytes(_ bytes: UnsafeRawBufferPointer) {
-                MTIArgumentsEncoderEncodeBytes(
-                    functionType,
-                    encoder,
-                    bytes.baseAddress!,
-                    bytes.count,
-                    binding.index
-                )
-            }
-            switch value {
-            case let .bool(value):
-                guard binding.bufferDataType == .bool else {
-                    throw dataTypeMismatchError
-                }
+            encodeScalar(value)
+        case let .int(value):
+            switch binding.bufferDataType {
+            case .int:
                 encodeScalar(value)
-            case let .int(value):
-                switch binding.bufferDataType {
-                case .int:
-                    encodeScalar(value)
-                case .short:
-                    encodeScalar(Int16(truncatingIfNeeded: value))
-                case .char:
-                    encodeScalar(Int8(truncatingIfNeeded: value))
-                default:
-                    throw dataTypeMismatchError
+            case .short:
+                encodeScalar(Int16(truncatingIfNeeded: value))
+            case .char:
+                encodeScalar(Int8(truncatingIfNeeded: value))
+            default:
+                throw dataTypeMismatchError
+            }
+        case let .uint(value):
+            switch binding.bufferDataType {
+            case .uint:
+                encodeScalar(value)
+            case .ushort:
+                encodeScalar(UInt16(truncatingIfNeeded: value))
+            case .uchar:
+                encodeScalar(UInt8(truncatingIfNeeded: value))
+            default:
+                throw dataTypeMismatchError
+            }
+        case let .float(value):
+            switch binding.bufferDataType {
+            case .float:
+                encodeScalar(value)
+            #if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))
+            case .half:
+                encodeScalar(Float16(value))
+            #endif
+            default:
+                throw dataTypeMismatchError
+            }
+        case let .simd(value):
+            guard binding.bufferDataType == value.dataType else {
+                throw dataTypeMismatchError
+            }
+            try value.withUnsafeBytes { bytes in
+                guard bytes.count == binding.bufferDataSize else {
+                    throw dataSizeMismatchError
                 }
-            case let .uint(value):
-                switch binding.bufferDataType {
-                case .uint:
-                    encodeScalar(value)
-                case .ushort:
-                    encodeScalar(UInt16(truncatingIfNeeded: value))
-                case .uchar:
-                    encodeScalar(UInt8(truncatingIfNeeded: value))
-                default:
-                    throw dataTypeMismatchError
-                }
-            case let .float(value):
-                switch binding.bufferDataType {
-                case .float:
-                    encodeScalar(value)
-                #if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))
-                case .half:
-                    encodeScalar(Float16(value))
-                #endif
-                default:
-                    throw dataTypeMismatchError
-                }
-            case let .simd(value):
-                guard binding.bufferDataType == value.dataType else {
-                    throw dataTypeMismatchError
-                }
-                try value.withUnsafeBytes { bytes in
-                    guard bytes.count == binding.bufferDataSize else {
-                        throw dataSizeMismatchError
-                    }
+                encodeBytes(bytes)
+            }
+        case let .vector(value):
+            value.withUnsafeBytes { bytes in
+                encodeBytes(bytes)
+            }
+        case let .data(value):
+            value.withUnsafeBytes { bytes in
+                if bytes.baseAddress != nil {
                     encodeBytes(bytes)
                 }
-            case let .vector(value):
-                value.withUnsafeBytes { bytes in
-                    encodeBytes(bytes)
-                }
-            case let .data(value):
-                value.withUnsafeBytes { bytes in
-                    if bytes.baseAddress != nil {
-                        encodeBytes(bytes)
-                    }
-                }
-            case let .dataBuffer(value):
-                if let buffer = value.buffer(for: encoder.device) {
-                    MTIArgumentsEncoderEncodeBuffer(functionType, encoder, buffer, binding.index)
-                }
+            }
+        case let .dataBuffer(value):
+            if let buffer = value.buffer(for: encoder.device) {
+                MTIArgumentsEncoderEncodeBuffer(functionType, encoder, buffer, binding.index)
             }
         }
     }
