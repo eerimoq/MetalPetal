@@ -20,7 +20,7 @@ public final class MTITwirlDistortionFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public var parameters: [String: MTIFunctionArgumentValue] {
-        ["center": .vector(MTIVector(value: center)),
+        ["center": .simd(.float2(center)),
          "radius": .float(radius),
          "angle": .float(angle)]
     }

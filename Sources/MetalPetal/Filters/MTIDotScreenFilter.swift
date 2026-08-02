@@ -22,7 +22,7 @@ public final class MTIDotScreenFilter: MTIUnaryImageRenderingFilter {
     override public var parameters: [String: MTIFunctionArgumentValue] {
         ["angle": .float(angle),
          "scale": .float(max(scale, 1.0)),
-         "grayColorTransform": .vector(MTIVector(value: grayColorTransform))]
+         "grayColorTransform": .simd(.float3(grayColorTransform))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

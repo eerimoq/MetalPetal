@@ -59,13 +59,13 @@ public final class MTICLAHEFilter: MTIUnaryFilter {
             width: inputImage.size.width + CGFloat(dX),
             height: inputImage.size.height + CGFloat(dY)
         ))
-        let lightnessImageScale = MTIVector(value: simd_make_float2(
+        let lightnessImageScale = simd_make_float2(
             Float((inputImage.size.width + CGFloat(dX)) / inputImage.size.width),
             Float((inputImage.size.height + CGFloat(dY)) / inputImage.size.height)
-        ))
+        )
         let lightnessImage = MTICLAHEFilter.rgb2LightnessKernel.apply(
             to: [inputImageForLUT],
-            parameters: ["scale": .vector(lightnessImageScale)],
+            parameters: ["scale": .simd(.float2(lightnessImageScale))],
             outputDimensions: lightnessTextureDimensions,
             outputPixelFormat: .r8Unorm
         )
@@ -73,13 +73,10 @@ public final class MTICLAHEFilter: MTIUnaryFilter {
                                                            inputLightnessImage: lightnessImage,
                                                            clipLimit: clipLimit,
                                                            tileGridSize: tileGridSize))
-        let tileGridSizeVector = MTIVector(value: simd_make_float2(
-            Float(tileGridSize.width),
-            Float(tileGridSize.height)
-        ))
+        let tileGridSizeVector = simd_make_float2(Float(tileGridSize.width), Float(tileGridSize.height))
         return MTICLAHEFilter.claheLookupKernel.apply(
             to: [inputImage, lutImage],
-            parameters: ["tileGridSize": .vector(tileGridSizeVector)],
+            parameters: ["tileGridSize": .simd(.float2(tileGridSizeVector))],
             outputDimensions: MTITextureDimensions(cgSize: inputImage
                 .size),
             outputPixelFormat: outputPixelFormat

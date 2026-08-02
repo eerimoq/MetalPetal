@@ -44,7 +44,7 @@ public final class MTIRoundCornerFilter: MTIUnaryFilter {
             MTIRoundCornerFilter.circularCornerKernel
         }
         return kernel.apply(to: [inputImage],
-                            parameters: ["radius": .vector(MTIVector(value: radius))],
+                            parameters: ["radius": .simd(.float4(radius))],
                             outputDimensions: inputImage.dimensions,
                             outputPixelFormat: outputPixelFormat)
     }

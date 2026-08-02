@@ -21,7 +21,7 @@ public final class MTIBulgeDistortionFilter: MTIUnaryImageRenderingFilter {
     }
 
     override public var parameters: [String: MTIFunctionArgumentValue] {
-        ["center": .vector(MTIVector(value: center)),
+        ["center": .simd(.float2(center)),
          "radius": .float(radius),
          "scale": .float(scale)]
     }

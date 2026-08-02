@@ -1287,7 +1287,7 @@ struct RenderTests {
             )
             let outputImage = computeKernel.apply(
                 toInputImages: [image],
-                parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
+                parameters: ["color": .simd(.float4(SIMD4<Float>(1, 0, 0, 0)))],
                 dispatchOptions: nil,
                 outputTextureDimensions: image.dimensions,
                 outputPixelFormat: .unspecified
@@ -1307,7 +1307,7 @@ struct RenderTests {
             )
             let outputImage = computeKernel.apply(
                 toInputImages: [image],
-                parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
+                parameters: ["color": .simd(.float4(SIMD4<Float>(1, 0, 0, 0)))],
                 dispatchOptions: nil,
                 outputTextureDimensions: image.dimensions,
                 outputPixelFormat: .unspecified
@@ -1427,7 +1427,7 @@ struct RenderTests {
         )
         let outputImage = renderKernel.apply(
             to: [image],
-            parameters: ["color": .vector(MTIVector(value: SIMD4<Float>(1, 0, 0, 0)))],
+            parameters: ["color": .simd(.float4(SIMD4<Float>(1, 0, 0, 0)))],
             outputDimensions: image.dimensions,
             outputPixelFormat: .unspecified
         )

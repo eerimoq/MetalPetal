@@ -27,7 +27,7 @@ public final class MTIChromaKeyBlendFilter: MTIFilter {
         }
         return MTIChromaKeyBlendFilter.kernel.apply(
             to: [inputImage, inputBackgroundImage],
-            parameters: ["color": .vector(MTIVector(value: color.toFloat4())),
+            parameters: ["color": .simd(.float4(color.toFloat4())),
                          "thresholdSensitivity": .float(thresholdSensitivity),
                          "smoothing": .float(smoothing)],
             outputDimensions: MTITextureDimensions(cgSize: inputImage.size),

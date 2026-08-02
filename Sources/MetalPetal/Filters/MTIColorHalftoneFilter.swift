@@ -21,7 +21,7 @@ public final class MTIColorHalftoneFilter: MTIUnaryImageRenderingFilter {
     override public var parameters: [String: MTIFunctionArgumentValue] {
         let allAnglesAreEqual = angles.x == angles.y && angles.y == angles.z
         return ["scale": .float(max(scale, 1.0)),
-                "angles": .vector(MTIVector(value: angles)),
+                "angles": .simd(.float3(angles)),
                 "singleAngleMode": .bool(allAnglesAreEqual)]
     }
 

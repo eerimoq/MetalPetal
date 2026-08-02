@@ -26,9 +26,9 @@ public final class MTIVibranceFilter: MTIUnaryImageRenderingFilter {
             -9.0 / 2.0 * amount * amount * amount + 9.0 / 2.0 * amount * amount - amount
         )
         return ["amount": .float(amount),
-                "vibranceVector": .vector(MTIVector(value: vector)),
+                "vibranceVector": .simd(.float4(vector)),
                 "avoidsSaturatingSkinTones": .bool(avoidsSaturatingSkinTones),
-                "grayColorTransform": .vector(MTIVector(value: grayColorTransform))]
+                "grayColorTransform": .simd(.float3(grayColorTransform))]
     }
 
     override public static func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

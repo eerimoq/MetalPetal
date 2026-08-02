@@ -45,11 +45,11 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
             return inputImage
         }
         let mask = inputMask ?? MTIMask(content: MTIImage.white, component: .red, mode: .normal)
-        var deltas: [MTIVector] = []
+        var deltas: [simd_float2] = []
         for i in 0 ..< 3 {
             let a = angle + Float(i) * Float.pi * 2.0 / 3.0
-            deltas.append(MTIVector(value: simd_make_float2(radius * sin(a) / Float(inputImage.size.width),
-                                                            radius * cos(a) / Float(inputImage.size.height))))
+            deltas.append(simd_make_float2(radius * sin(a) / Float(inputImage.size.width),
+                                           radius * cos(a) / Float(inputImage.size.height)))
         }
         let power = powf(10, min(max(brightness, -1), 1))
         let usesOneMinusMaskValue = mask.mode == .oneMinusMaskValue
@@ -64,8 +64,8 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
         )
         let alphaOutputs = MTIHexagonalBokehBlurFilter.alphaPassKernel.apply(
             to: [prepassOutputImage.withSamplerDescriptor(inputImage.samplerDescriptor)],
-            parameters: ["delta0": .vector(deltas[0]),
-                         "delta1": .vector(deltas[1])],
+            parameters: ["delta0": .simd(.float2(deltas[0])),
+                         "delta1": .simd(.float2(deltas[1]))],
             outputDescriptors: [
                 MTIRenderPassOutputDescriptor(dimensions: dimensions, pixelFormat: .rgba16Float),
                 MTIRenderPassOutputDescriptor(dimensions: dimensions, pixelFormat: .rgba16Float),
@@ -74,8 +74,8 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
         return MTIHexagonalBokehBlurFilter.bravoCharliePassKernel.apply(
             to: [alphaOutputs[0].withSamplerDescriptor(inputImage.samplerDescriptor),
                  alphaOutputs[1].withSamplerDescriptor(inputImage.samplerDescriptor)],
-            parameters: ["delta0": .vector(deltas[1]),
-                         "delta1": .vector(deltas[2]),
+            parameters: ["delta0": .simd(.float2(deltas[1])),
+                         "delta1": .simd(.float2(deltas[2])),
                          "power": .float(Float(1.0) / power)],
             outputDimensions: dimensions,
             outputPixelFormat: outputPixelFormat
