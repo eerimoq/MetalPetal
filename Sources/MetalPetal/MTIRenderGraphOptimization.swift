@@ -136,9 +136,8 @@ extension MTIImageRenderingRecipe {
     var colorMatrix: MTIColorMatrix {
         var matrix = MTIColorMatrix.identity
         if renderCommands.count == 1 {
-            if case let .data(data) = renderCommands[0]
-                .parameters[filterColorMatrixParameterKey],
-                data.count == MemoryLayout<MTIColorMatrix>.size
+            if case let .data(data) = renderCommands[0].parameters[filterColorMatrixParameterKey],
+               data.count == MemoryLayout<MTIColorMatrix>.size
             {
                 _ = withUnsafeMutableBytes(of: &matrix) { dst in
                     data.copyBytes(to: dst.bindMemory(to: UInt8.self))
