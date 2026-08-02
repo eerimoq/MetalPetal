@@ -9,6 +9,7 @@ import Foundation
 
 struct DescriptiveError: LocalizedError {
     let errorDescription: String?
+
     init(_ errorDescription: String) {
         self.errorDescription = errorDescription
     }
