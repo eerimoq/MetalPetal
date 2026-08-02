@@ -7,7 +7,7 @@ import Foundation
 import Metal
 import simd
 
-public let MTIColorMatrixFilterColorMatrixParameterKey = "colorMatrix"
+let filterColorMatrixParameterKey = "colorMatrix"
 
 public class MTIColorMatrixFilter: MTIUnaryImageRenderingFilter {
     public var colorMatrix: MTIColorMatrix = .identity
@@ -18,7 +18,7 @@ public class MTIColorMatrixFilter: MTIUnaryImageRenderingFilter {
 
     override public var parameters: [String: MTIFunctionArgumentValue] {
         let data = withUnsafeBytes(of: &colorMatrix) { Data($0) }
-        return [MTIColorMatrixFilterColorMatrixParameterKey: .data(data)]
+        return [filterColorMatrixParameterKey: .data(data)]
     }
 
     override public class func alphaTypeHandlingRule() -> MTIAlphaTypeHandlingRule {

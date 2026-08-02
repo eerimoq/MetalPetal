@@ -1834,7 +1834,7 @@ struct RenderTests {
             let outputImage = computeKernel.apply(
                 toInputImages: [],
                 parameters: ["outBuffer": .dataBuffer(dataBuffer),
-                             "count": .vector(MTIVector(values: [UInt32(dataCount)]))],
+                             "count": .uint(UInt32(dataCount))],
                 dispatchOptions: nil,
                 outputTextureDimensions: MTITextureDimensions(width: dataCount, height: 1),
                 outputPixelFormat: .unspecified

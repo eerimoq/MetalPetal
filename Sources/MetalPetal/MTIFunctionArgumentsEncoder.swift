@@ -141,10 +141,6 @@ public func MTIEncodeArguments(
                 }
                 encodeBytes(bytes)
             }
-        case let .vector(value):
-            value.withUnsafeBytes { bytes in
-                encodeBytes(bytes)
-            }
         case let .data(value):
             value.withUnsafeBytes { bytes in
                 encodeBytes(bytes)

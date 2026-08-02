@@ -12,7 +12,6 @@ public enum MTIFunctionArgumentValue {
     case uint(UInt32)
     case float(Float)
     case simd(MTISIMDArgumentValue)
-    case vector(MTIVector)
     case data(Data)
     case dataBuffer(MTIDataBuffer)
 }
