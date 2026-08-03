@@ -24,7 +24,7 @@ enum BlendFormulaSupport {
 
         import Foundation
 
-        private let MTIBlendFormulaSupportShaderTemplate = #"""
+        private let shaderTemplate = #"""
         \##(shaderHeaderContent)
         \##(functionConstantsContent)
 
@@ -57,7 +57,7 @@ enum BlendFormulaSupport {
                 #endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)
 
                 """
-            return MTIBlendFormulaSupportShaderTemplate
+            return shaderTemplate
                 .replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
         }
 

@@ -345,6 +345,9 @@ extension CapturePipeline.Effect {
             filter.radius = 8
             return filter
         }, inputImage: \.inputImage)),
+        .init("CRT", makeFilter: applying({
+            MTICrtFilter()
+        }, inputImage: \.inputImage)),
         .init("Color Halftone", makeFilter: applying {
             let filter = MTIColorHalftoneFilter()
             filter.scale = 16
