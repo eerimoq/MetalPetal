@@ -4,7 +4,7 @@
 
 import Foundation
 
-private let MTIBlendFormulaSupportShaderTemplate = #"""
+private let shaderTemplate = #"""
 //
 //  MTIShader.h
 //  Pods
@@ -1065,6 +1065,6 @@ func MTIBuildBlendFormulaShaderSource(_ formula: String) -> String {
     #endif\n\n#define MTI_CUSTOM_BLEND_HAS_TEXTURE_COORDINATES_MODIFIER \(hasTextureCoordinatesModifier)
 
     """
-    return MTIBlendFormulaSupportShaderTemplate
+    return shaderTemplate
         .replacingOccurrences(of: "{MTIBlendFormula}", with: targetConditionals + formula)
 }
