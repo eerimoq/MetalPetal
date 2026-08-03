@@ -27,7 +27,6 @@ public final class MTIMask: Hashable {
         self.init(content: content, component: .red, mode: .normal)
     }
 
-    // Identity semantics, matching the pointer-based `isEqual:`/`hash` MTIMask inherited from NSObject.
     public static func == (lhs: MTIMask, rhs: MTIMask) -> Bool {
         lhs === rhs
     }

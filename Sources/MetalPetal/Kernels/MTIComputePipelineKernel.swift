@@ -108,10 +108,9 @@ private final class MTIImageComputeRecipe: MTIImagePromise {
         }
         commandEncoder.setTexture(renderTarget.texture, index: index)
         do {
-            try MTIEncodeArguments(bindings: computePipeline.reflection.bindings,
-                                   parameters: functionParameters,
-                                   functionType: .kernel,
-                                   encoder: commandEncoder)
+            try encodeKernelArguments(bindings: computePipeline.reflection.bindings,
+                                      parameters: functionParameters,
+                                      encoder: commandEncoder)
         } catch {
             commandEncoder.endEncoding()
             throw error

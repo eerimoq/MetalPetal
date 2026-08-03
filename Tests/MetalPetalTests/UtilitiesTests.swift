@@ -226,20 +226,18 @@ struct UtilitiesTests {
             commandEncoder?.endEncoding()
         }
         do {
-            try MTIEncodeArguments(
+            try encodeKernelArguments(
                 bindings: state.reflection.bindings,
                 parameters: ["color": .simd(.float3(SIMD3<Float>(0, 0, 0)))],
-                functionType: .kernel,
                 encoder: #require(commandEncoder)
             )
         } catch {
             let encoderError = try #require(error as? MTIError)
             #expect(encoderError == .parameterDataSizeMismatch)
         }
-        try MTIEncodeArguments(
+        try encodeKernelArguments(
             bindings: state.reflection.bindings,
             parameters: ["color": .simd(.packedFloat3(MTLPackedFloat3Make(0, 0, 0)))],
-            functionType: .kernel,
             encoder: #require(commandEncoder)
         )
     }
@@ -328,10 +326,9 @@ struct UtilitiesTests {
             commandEncoder?.endEncoding()
         }
         do {
-            try MTIEncodeArguments(
+            try encodeKernelArguments(
                 bindings: state.reflection.bindings,
                 parameters: ["color": .simd(.float4(simd_make_float4(128, 0, 0, 0)))],
-                functionType: .kernel,
                 encoder: #require(commandEncoder)
             )
         } catch {

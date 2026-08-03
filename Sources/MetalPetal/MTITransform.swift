@@ -23,9 +23,7 @@ public func MTIMakeOrthographicMatrix(
     let tx = -(right + left) / (right - left)
     let ty = -(top + bottom) / (bottom - top)
     let tz = -(far + near) / (far - near)
-
     let scale: Float = 2.0
-
     return simd_float4x4(columns: (
         simd_float4(scale / r_l, 0, 0, tx),
         simd_float4(0, scale / t_b, 0, ty),
@@ -44,7 +42,6 @@ public func MTIMakePerspectiveMatrix(
 ) -> simd_float4x4 {
     let near = -near
     let far = -far
-
     return simd_float4x4(columns: (
         simd_float4(2 * near / (right - left), 0, (right + left) / (right - left), 0),
         simd_float4(0, 2 * near / (bottom - top), (top + bottom) / (bottom - top), 0),
