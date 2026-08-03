@@ -10,11 +10,15 @@ let package = Package(
     products: [
         .library(
             name: "MetalPetal",
-            targets: ["MetalPetal"]
+            targets: ["MetalPetal", "MetalPetalShaderTypes"]
         )
     ],
     dependencies: [],
     targets: [
+        .target(
+            name: "MetalPetalShaderTypes",
+            path: "Sources/MetalPetalShaderTypes",
+            publicHeadersPath: "include"),
         .target(
             name: "MetalPetal",
             dependencies: [],
