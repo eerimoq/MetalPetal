@@ -143,6 +143,50 @@ METAL_FUNC float3 linearToITUR709(float3 c)
     return float3(linearToITUR709(c.r), linearToITUR709(c.g), linearToITUR709(c.b));
 }
 
+// Apple Log Profile constants (from Apple Log Profile White Paper)
+// Reference: https://developer.apple.com/download/all/?q=Apple%20log%20profile
+constant constexpr float appleLog_R0 = -0.05641088f;
+constant constexpr float appleLog_Rt = 0.01f;
+constant constexpr float appleLog_sigma = 47.28711236f;
+constant constexpr float appleLog_beta = 0.00964052f;
+constant constexpr float appleLog_gamma = 0.08550479f;
+constant constexpr float appleLog_delta = 0.69336945f;
+constant constexpr float appleLog_Pt = appleLog_sigma * (appleLog_Rt - appleLog_R0) * (appleLog_Rt - appleLog_R0);
+
+template <typename T, typename _E = typename enable_if<is_floating_point<T>::value>::type>
+METAL_FUNC T appleLogToLinear(T P)
+{
+    if (P >= appleLog_Pt) {
+        return T(pow(2.0f, (float(P) - appleLog_delta) / appleLog_gamma) - appleLog_beta);
+    } else if (P >= 0) {
+        return T(sqrt(float(P) / appleLog_sigma) + appleLog_R0);
+    } else {
+        return T(appleLog_R0);
+    }
+}
+
+METAL_FUNC float3 appleLogToLinear(float3 c)
+{
+    return float3(appleLogToLinear(c.r), appleLogToLinear(c.g), appleLogToLinear(c.b));
+}
+
+template <typename T, typename _E = typename enable_if<is_floating_point<T>::value>::type>
+METAL_FUNC T linearToAppleLog(T R)
+{
+    if (float(R) >= appleLog_Rt) {
+        return T(appleLog_gamma * log2(float(R) + appleLog_beta) + appleLog_delta);
+    } else if (float(R) >= appleLog_R0) {
+        return T(appleLog_sigma * (float(R) - appleLog_R0) * (float(R) - appleLog_R0));
+    } else {
+        return T(0);
+    }
+}
+
+METAL_FUNC float3 linearToAppleLog(float3 c)
+{
+    return float3(linearToAppleLog(c.r), linearToAppleLog(c.g), linearToAppleLog(c.b));
+}
+
 METAL_FUNC float4 unpremultiply(float4 s) { return float4(s.rgb / max(s.a, 0.00001), s.a); }
 
 METAL_FUNC float4 premultiply(float4 s) { return float4(s.rgb * s.a, s.a); }
