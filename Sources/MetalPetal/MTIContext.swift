@@ -49,9 +49,6 @@ public final class MTIContextOptions {
     /// Whether the render graph optimization is enabled. The default value for this property is NO.
     public var enablesRenderGraphOptimization = false
 
-    /// Automatically reclaims resources on memory warning.
-    public var automaticallyReclaimsResources = true
-
     /// Whether to enable native support for YCbCr textures. The default value for this property is YES.
     public var enablesYCbCrPixelFormatSupport = true
 
@@ -127,10 +124,6 @@ public final class MTIContext {
     /// Stand-in cache key for a kernel invoked without a configuration. All instances compare equal.
     private struct MTIKernelNoConfiguration: Hashable {}
 
-    deinit {
-        MTIMemoryWarningObserver.removeMemoryWarningHandler(self)
-    }
-
     public convenience init(device: MTLDevice) throws {
         try self.init(device: device, options: MTIContextOptions())
     }
@@ -192,9 +185,6 @@ public final class MTIContext {
         )
         coreVideoTextureBridge = try options.makeCoreVideoMetalTextureBridge?(device)
             ?? MTICVMetalIOSurfaceBridge(device: device)
-        if options.automaticallyReclaimsResources {
-            MTIMemoryWarningObserver.addMemoryWarningHandler(self)
-        }
         MTIContext.markInstanceCreation(self)
     }
 
@@ -284,12 +274,6 @@ public final class MTIContext {
             _enablesSimulatorSupport = newValue
             enablesSimulatorSupportLock.unlock()
         }
-    }
-}
-
-extension MTIContext: MTIMemoryWarningHandling {
-    public func handleMemoryWarning() {
-        reclaimResources()
     }
 }
 
