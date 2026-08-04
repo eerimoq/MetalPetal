@@ -17,9 +17,7 @@ public struct MTIColorMatrix: Equatable {
         self.matrix = matrix
         self.bias = bias
     }
-}
 
-public extension MTIColorMatrix {
     static let identity = MTIColorMatrix(
         matrix: simd_float4x4(columns: (
             SIMD4<Float>(1, 0, 0, 0),
@@ -111,26 +109,52 @@ public extension MTIColorMatrix {
     private static func fillFloat5x5(_ m: MTIColorMatrix) -> [Float] {
         var s = [Float](repeating: 0, count: 25)
         let c = m.matrix
-        s[0 * 5 + 0] = c[0][0]; s[1 * 5 + 0] = c[0][1]; s[2 * 5 + 0] = c[0][2]; s[3 * 5 + 0] = c[0][3]
-        s[0 * 5 + 1] = c[1][0]; s[1 * 5 + 1] = c[1][1]; s[2 * 5 + 1] = c[1][2]; s[3 * 5 + 1] = c[1][3]
-        s[0 * 5 + 2] = c[2][0]; s[1 * 5 + 2] = c[2][1]; s[2 * 5 + 2] = c[2][2]; s[3 * 5 + 2] = c[2][3]
-        s[0 * 5 + 3] = c[3][0]; s[1 * 5 + 3] = c[3][1]; s[2 * 5 + 3] = c[3][2]; s[3 * 5 + 3] = c[3][3]
-        s[4 * 5 + 0] = m.bias[0]; s[4 * 5 + 1] = m.bias[1]; s[4 * 5 + 2] = m.bias[2]; s[4 * 5 + 3] = m.bias[3]
+        s[0 * 5 + 0] = c[0][0]
+        s[1 * 5 + 0] = c[0][1]
+        s[2 * 5 + 0] = c[0][2]
+        s[3 * 5 + 0] = c[0][3]
+        s[0 * 5 + 1] = c[1][0]
+        s[1 * 5 + 1] = c[1][1]
+        s[2 * 5 + 1] = c[1][2]
+        s[3 * 5 + 1] = c[1][3]
+        s[0 * 5 + 2] = c[2][0]
+        s[1 * 5 + 2] = c[2][1]
+        s[2 * 5 + 2] = c[2][2]
+        s[3 * 5 + 2] = c[2][3]
+        s[0 * 5 + 3] = c[3][0]
+        s[1 * 5 + 3] = c[3][1]
+        s[2 * 5 + 3] = c[3][2]
+        s[3 * 5 + 3] = c[3][3]
+        s[4 * 5 + 0] = m.bias[0]
+        s[4 * 5 + 1] = m.bias[1]
+        s[4 * 5 + 2] = m.bias[2]
+        s[4 * 5 + 3] = m.bias[3]
         s[4 * 5 + 4] = 1
         return s
     }
 
     private static func makeFromFloat5x5(_ s: [Float]) -> MTIColorMatrix {
         var m = MTIColorMatrix.identity
-        m.matrix[0][0] = s[0 * 5 + 0]; m.matrix[0][1] = s[1 * 5 + 0]; m.matrix[0][2] = s[2 * 5 + 0]; m
-            .matrix[0][3] = s[3 * 5 + 0]
-        m.matrix[1][0] = s[0 * 5 + 1]; m.matrix[1][1] = s[1 * 5 + 1]; m.matrix[1][2] = s[2 * 5 + 1]; m
-            .matrix[1][3] = s[3 * 5 + 1]
-        m.matrix[2][0] = s[0 * 5 + 2]; m.matrix[2][1] = s[1 * 5 + 2]; m.matrix[2][2] = s[2 * 5 + 2]; m
-            .matrix[2][3] = s[3 * 5 + 2]
-        m.matrix[3][0] = s[0 * 5 + 3]; m.matrix[3][1] = s[1 * 5 + 3]; m.matrix[3][2] = s[2 * 5 + 3]; m
-            .matrix[3][3] = s[3 * 5 + 3]
-        m.bias[0] = s[4 * 5 + 0]; m.bias[1] = s[4 * 5 + 1]; m.bias[2] = s[4 * 5 + 2]; m.bias[3] = s[4 * 5 + 3]
+        m.matrix[0][0] = s[0 * 5 + 0]
+        m.matrix[0][1] = s[1 * 5 + 0]
+        m.matrix[0][2] = s[2 * 5 + 0]
+        m.matrix[0][3] = s[3 * 5 + 0]
+        m.matrix[1][0] = s[0 * 5 + 1]
+        m.matrix[1][1] = s[1 * 5 + 1]
+        m.matrix[1][2] = s[2 * 5 + 1]
+        m.matrix[1][3] = s[3 * 5 + 1]
+        m.matrix[2][0] = s[0 * 5 + 2]
+        m.matrix[2][1] = s[1 * 5 + 2]
+        m.matrix[2][2] = s[2 * 5 + 2]
+        m.matrix[2][3] = s[3 * 5 + 2]
+        m.matrix[3][0] = s[0 * 5 + 3]
+        m.matrix[3][1] = s[1 * 5 + 3]
+        m.matrix[3][2] = s[2 * 5 + 3]
+        m.matrix[3][3] = s[3 * 5 + 3]
+        m.bias[0] = s[4 * 5 + 0]
+        m.bias[1] = s[4 * 5 + 1]
+        m.bias[2] = s[4 * 5 + 2]
+        m.bias[3] = s[4 * 5 + 3]
         return m
     }
 }

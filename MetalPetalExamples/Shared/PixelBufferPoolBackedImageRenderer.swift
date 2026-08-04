@@ -35,7 +35,6 @@ class PixelBufferPoolBackedImageRenderer {
             self.pixelBufferPool = pixelBufferPool
         }
         let pixelBuffer = try pixelBufferPool.makePixelBuffer(allocationThreshold: 30)
-
         renderSemaphore.wait()
         do {
             _ = try context.startTask(toRender: image, to: pixelBuffer, sRGB: false, completion: { _ in
@@ -45,7 +44,6 @@ class PixelBufferPoolBackedImageRenderer {
             renderSemaphore.signal()
             throw error
         }
-
         var cgImage: CGImage!
         VTCreateCGImageFromCVPixelBuffer(pixelBuffer, options: nil, imageOut: &cgImage)
         return (pixelBuffer, cgImage)

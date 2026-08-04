@@ -241,13 +241,13 @@ extension CapturePipeline.Effect {
         .init("Color Matrix (Sepia)", makeFilter: applying {
             let filter = MTIColorMatrixFilter()
             filter.colorMatrix = MTIColorMatrix(
-                matrix: simd_float4x4(columns: (
-                    SIMD4<Float>(0.393, 0.769, 0.189, 0),
-                    SIMD4<Float>(0.349, 0.686, 0.168, 0),
-                    SIMD4<Float>(0.272, 0.534, 0.131, 0),
-                    SIMD4<Float>(0, 0, 0, 1)
+                matrix: .init(columns: (
+                    .init(0.393, 0.769, 0.189, 0),
+                    .init(0.349, 0.686, 0.168, 0),
+                    .init(0.272, 0.534, 0.131, 0),
+                    .init(0, 0, 0, 1)
                 )),
-                bias: SIMD4<Float>(0, 0, 0, 0)
+                bias: .init(0, 0, 0, 0)
             )
             return filter
         }),

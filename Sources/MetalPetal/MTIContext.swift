@@ -17,6 +17,7 @@ public let MTIContextDefaultLabel = "MetalPetal"
 
 public struct MTIContextPromiseAssociatedValueTableName: RawRepresentable, Hashable {
     public let rawValue: String
+
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
@@ -24,6 +25,7 @@ public struct MTIContextPromiseAssociatedValueTableName: RawRepresentable, Hasha
 
 public struct MTIContextImageAssociatedValueTableName: RawRepresentable, Hashable {
     public let rawValue: String
+
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
@@ -111,6 +113,10 @@ public final class MTIContext {
     private let promiseRenderTargetTable: NSMapTable<AnyObject, MTIImagePromiseRenderTarget>
     private let promiseRenderTargetTableLock = OSAllocatedUnfairLock()
     private let renderingLock = OSAllocatedUnfairLock()
+    private static let instancesLock = OSAllocatedUnfairLock()
+    private static let allInstances = NSPointerArray.weakObjects()
+    private static let enablesSimulatorSupportLock = OSAllocatedUnfairLock()
+    private static var _enablesSimulatorSupport = true
 
     /// Kernel states for one kernel, keyed by `MTIKernelConfiguration.identifier`. A reference type so it
     /// can be an `NSMapTable` value; the map table holds kernels weakly.
@@ -250,11 +256,6 @@ public final class MTIContext {
         #endif
     }
 
-    // MARK: - Instance Tracking
-
-    private static let instancesLock = OSAllocatedUnfairLock()
-    private static let allInstances = NSPointerArray.weakObjects()
-
     private static func instancesTracking(_ action: (NSPointerArray) -> Void) {
         instancesLock.lock()
         action(allInstances)
@@ -268,9 +269,6 @@ public final class MTIContext {
             instances.compact()
         }
     }
-
-    private static let enablesSimulatorSupportLock = OSAllocatedUnfairLock()
-    private static var _enablesSimulatorSupport = true
 
     /// Whether to render on iOS simulators. The default value is YES.
     public static var enablesSimulatorSupport: Bool {
