@@ -17,6 +17,22 @@ public final class MTIMPSGaussianBlurFilter: MTIUnaryFilter {
 
     public init() {}
 
+    public var outputImage: MTIImage? {
+        guard let inputImage else {
+            return nil
+        }
+        let radius = ceil(radius)
+        if radius <= 0 {
+            return inputImage
+        }
+        return MTIMPSGaussianBlurFilter.kernel(radius: Int(radius)).apply(
+            toInputImages: [inputImage],
+            parameters: [:],
+            outputTextureDimensions: MTITextureDimensions(cgSize: inputImage.size),
+            outputPixelFormat: outputPixelFormat
+        )
+    }
+
     private static func kernel(radius: Int) -> MTIMPSKernel {
         kernelsLock.lock()
         defer {
@@ -34,21 +50,5 @@ public final class MTIMPSGaussianBlurFilter: MTIUnaryFilter {
         })
         kernels[radius] = kernel
         return kernel
-    }
-
-    public var outputImage: MTIImage? {
-        guard let inputImage else {
-            return nil
-        }
-        let radius = ceil(radius)
-        if radius <= 0 {
-            return inputImage
-        }
-        return MTIMPSGaussianBlurFilter.kernel(radius: Int(radius)).apply(
-            toInputImages: [inputImage],
-            parameters: [:],
-            outputTextureDimensions: MTITextureDimensions(cgSize: inputImage.size),
-            outputPixelFormat: outputPixelFormat
-        )
     }
 }

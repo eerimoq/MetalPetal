@@ -19,7 +19,9 @@ import Metal
            |
  */
 
-private func transformMatrix(imageSize: CGSize, viewport: CGRect, fieldOfView: Float,
+private func transformMatrix(imageSize: CGSize,
+                             viewport: CGRect,
+                             fieldOfView: Float,
                              transform: CATransform3D) -> simd_float4x4
 {
     if fieldOfView > 0.0 {

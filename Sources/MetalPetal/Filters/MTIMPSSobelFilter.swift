@@ -35,14 +35,6 @@ public final class MTIMPSSobelFilter: MTIUnaryFilter {
         })
     }
 
-    private static let rToMonochromeKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "rToMonochrome"),
-        vertexDescriptor: nil,
-        colorAttachmentCount: 1,
-        alphaTypeHandlingRule: .general
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage else {
             return nil
@@ -68,4 +60,12 @@ public final class MTIMPSSobelFilter: MTIUnaryFilter {
             )
         }
     }
+
+    private static let rToMonochromeKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "rToMonochrome"),
+        vertexDescriptor: nil,
+        colorAttachmentCount: 1,
+        alphaTypeHandlingRule: .general
+    )
 }

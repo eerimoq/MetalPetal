@@ -37,6 +37,25 @@ public final class MTIMPSConvolutionFilter: MTIUnaryFilter {
     private static var kernels: [MTIMPSImageConvolutionSettings: MTIMPSKernel] = [:]
     private static let kernelsLock = OSAllocatedUnfairLock()
 
+    public init(kernelWidth: Int, kernelHeight: Int, weights kernelWeights: UnsafePointer<Float>) {
+        let settings = MTIMPSImageConvolutionSettings(
+            kernelWidth: Int(kernelWidth),
+            kernelHeight: Int(kernelHeight),
+            weights: kernelWeights
+        )
+        kernel = MTIMPSConvolutionFilter.kernel(settings: settings)
+    }
+
+    public var outputImage: MTIImage? {
+        guard let inputImage else {
+            return nil
+        }
+        return kernel.apply(toInputImages: [inputImage],
+                            parameters: ["bias": bias],
+                            outputTextureDimensions: MTITextureDimensions(cgSize: inputImage.size),
+                            outputPixelFormat: outputPixelFormat)
+    }
+
     private static func kernel(settings: MTIMPSImageConvolutionSettings) -> MTIMPSKernel {
         kernelsLock.lock()
         defer {
@@ -57,24 +76,5 @@ public final class MTIMPSConvolutionFilter: MTIUnaryFilter {
         })
         kernels[settings] = kernel
         return kernel
-    }
-
-    public init(kernelWidth: Int, kernelHeight: Int, weights kernelWeights: UnsafePointer<Float>) {
-        let settings = MTIMPSImageConvolutionSettings(
-            kernelWidth: Int(kernelWidth),
-            kernelHeight: Int(kernelHeight),
-            weights: kernelWeights
-        )
-        kernel = MTIMPSConvolutionFilter.kernel(settings: settings)
-    }
-
-    public var outputImage: MTIImage? {
-        guard let inputImage else {
-            return nil
-        }
-        return kernel.apply(toInputImages: [inputImage],
-                            parameters: ["bias": bias],
-                            outputTextureDimensions: MTITextureDimensions(cgSize: inputImage.size),
-                            outputPixelFormat: outputPixelFormat)
     }
 }

@@ -13,12 +13,6 @@ import Metal
 @_exported import AVFoundation
 @_exported import SceneKit
 
-public let MTISCNSceneRendererErrorDomain = "MTISCNSceneRendererErrorDomain"
-
-public enum MTISCNSceneRendererError {
-    case sceneKitDoesNotSupportMetal
-}
-
 private func sampleCount(for antialiasingMode: SCNAntialiasingMode) -> Int {
     switch antialiasingMode {
     case .none:

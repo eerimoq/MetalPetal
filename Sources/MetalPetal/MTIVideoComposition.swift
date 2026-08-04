@@ -55,10 +55,6 @@ extension AVAsynchronousVideoCompositionRequest: MTIMutableVideoCompositionReque
 }
 
 public class MTIAsyncVideoCompositionRequestHandler {
-    public enum Error: Swift.Error {
-        case cannotGenerateOutputPixelBuffer
-    }
-
     public struct Request {
         /// The track's preferred transform is applied.
         public let sourceImages: [CMPersistentTrackID: MTIImage]
@@ -167,7 +163,7 @@ public class MTIAsyncVideoCompositionRequestHandler {
             }
         }
         guard let pixelBuffer = request.renderContext.newPixelBuffer() else {
-            enqueue { request.finish(.failure(Error.cannotGenerateOutputPixelBuffer)) }
+            enqueue { request.finish(.failure(MTIError.cannotGenerateOutputPixelBuffer)) }
             return
         }
         enqueue {
@@ -196,10 +192,6 @@ public class MTIAsyncVideoCompositionRequestHandler {
 }
 
 public class MTIVideoComposition {
-    public enum Error: Swift.Error {
-        case unsupportedInstruction
-    }
-
     private class Compositor: NSObject, AVVideoCompositing {
         class VideoCompositionRequest: Hashable, MTIMutableVideoCompositionRequest,
             MTITrackedVideoCompositionRequest
@@ -307,7 +299,7 @@ public class MTIVideoComposition {
         func startRequest(_ asyncVideoCompositionRequest: AVAsynchronousVideoCompositionRequest) {
             guard let instruction = asyncVideoCompositionRequest.videoCompositionInstruction as? Instruction
             else {
-                asyncVideoCompositionRequest.finish(with: Error.unsupportedInstruction)
+                asyncVideoCompositionRequest.finish(with: MTIError.unsupportedVideoCompositionInstruction)
                 return
             }
             let request = VideoCompositionRequest(request: asyncVideoCompositionRequest)

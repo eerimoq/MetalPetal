@@ -61,9 +61,12 @@ public extension MTIImage {
         @unknown default:
             .unknown
         }
-        return MTIUnaryImageRenderingFilter.image(byProcessingImage: withCachePolicy(.transient),
-                                                  orientation: imageOrientation,
-                                                  parameters: [:],
-                                                  outputPixelFormat: pixelFormat).withCachePolicy(cachePolicy)
+        return MTIUnaryImageRenderingFilter.image(
+            byProcessingImage: withCachePolicy(.transient),
+            orientation: imageOrientation,
+            parameters: [:],
+            outputPixelFormat: pixelFormat
+        )
+        .withCachePolicy(cachePolicy)
     }
 }

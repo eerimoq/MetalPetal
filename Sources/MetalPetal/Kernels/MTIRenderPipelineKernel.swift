@@ -9,7 +9,7 @@ import Foundation
 import Metal
 import os
 
-public let MTIRenderPipelineMaximumColorAttachmentCount = 8
+let maximumColorAttachmentCount = 8
 
 public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration, Hashable {
     private let pixelFormats: [MTLPixelFormat]
@@ -28,7 +28,7 @@ public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration,
         stencilAttachmentPixelFormat: MTLPixelFormat,
         rasterSampleCount: Int
     ) {
-        let count = min(colorAttachmentPixelFormats.count, MTIRenderPipelineMaximumColorAttachmentCount)
+        let count = min(colorAttachmentPixelFormats.count, maximumColorAttachmentCount)
         pixelFormats = Array(colorAttachmentPixelFormats.prefix(count))
         colorAttachmentCount = count
         self.depthAttachmentPixelFormat = depthAttachmentPixelFormat

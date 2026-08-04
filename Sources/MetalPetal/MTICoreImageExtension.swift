@@ -11,11 +11,6 @@ import Foundation
 /// `MTICoreImageKernel` provides the ability to use CoreImage filters with MetalPetal with little or no
 /// overhead.
 public struct MTICoreImageKernel {
-    public enum Error: Swift.Error {
-        case failedToCreateCIImage
-        case nilOutput
-    }
-
     private final class Promise: MTIImagePromise {
         let dimensions: MTITextureDimensions
         let dependencies: [MTIImage]
@@ -49,7 +44,7 @@ public struct MTICoreImageKernel {
                     return image.oriented(.downMirrored)
                 }
             } else {
-                throw Error.failedToCreateCIImage
+                throw MTIError.failedToCreateCIImage
             }
         }
 
@@ -186,7 +181,7 @@ public struct MTICoreImageKernel {
             if let image = copiedFilter.outputImage {
                 return image
             } else {
-                throw Error.nilOutput
+                throw MTIError.coreImageFilterReturnedNilOutput
             }
         }, colorSpace: colorSpace,
         outputDimensions: outputDimensions,

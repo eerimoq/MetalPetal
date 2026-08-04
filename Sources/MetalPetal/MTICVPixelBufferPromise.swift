@@ -57,7 +57,7 @@ private let MTIYUVColorConversion709 = MTIYUVColorConversion(
     offset: simd_float3(-(16.0 / 255.0), -0.5, -0.5)
 )
 
-public let MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable =
+let cvMetalTextureHolderTable =
     MTIContextPromiseAssociatedValueTableName(
         rawValue: "MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable"
     )
@@ -191,7 +191,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
             renderingContext.context.setValue(
                 cvMetalTexture,
                 forPromise: self,
-                in: MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable
+                in: cvMetalTextureHolderTable
             )
             return renderingContext.context.makeRenderTarget(texture: cvMetalTexture.texture)
 
@@ -213,7 +213,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
                 renderingContext.context.setValue(
                     cvMetalTexture,
                     forPromise: self,
-                    in: MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable
+                    in: cvMetalTextureHolderTable
                 )
                 return renderingContext.context.makeRenderTarget(texture: cvMetalTexture.texture)
             } else {
@@ -343,7 +343,7 @@ public final class MTICVPixelBufferPromise: MTIImagePromise {
             renderingContext.context.setValue(
                 cvMetalTexture,
                 forPromise: self,
-                in: MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable
+                in: cvMetalTextureHolderTable
             )
             #if os(iOS) && !targetEnvironment(macCatalyst)
             // Workaround for #64. See https://github.com/MetalPetal/MetalPetal/issues/64
@@ -443,7 +443,7 @@ public final class MTICVPixelBufferDirectBridgePromise: MTIImagePromise {
         renderingContext.context.setValue(
             cvMetalTexture,
             forPromise: self,
-            in: MTIContextCVPixelBufferPromiseCVMetalTextureHolderTable
+            in: cvMetalTextureHolderTable
         )
         return renderingContext.context.makeRenderTarget(texture: cvMetalTexture.texture)
     }

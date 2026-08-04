@@ -7,8 +7,6 @@ import Foundation
 import Metal
 
 public final class MTIMPSDefinitionFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage? {
         didSet {
             blurFilter.inputImage = inputImage
@@ -24,6 +22,8 @@ public final class MTIMPSDefinitionFilter: MTIUnaryFilter {
             fragmentFunctionDescriptor: .init(name: "clarity")
         )
     }
+
+    public init() {}
 
     public var outputImage: MTIImage? {
         guard let inputImage else {

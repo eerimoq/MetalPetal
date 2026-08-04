@@ -10,8 +10,6 @@ import simd
 /// An implementation of lens blur (bokeh) based on `Siggraph 2011 - Advances in Real-Time Rendering`
 /// https://colinbarrebrisebois.com/2017/04/18/hexagonal-bokeh-blur-revisited/
 public final class MTIHexagonalBokehBlurFilter: MTIFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var inputMask: MTIMask?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
@@ -19,23 +17,7 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
     public var brightness: Float = 0
     public var angle: Float = 0
 
-    private static let prepassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurPre")
-    )
-
-    private static let alphaPassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurAlpha"),
-        vertexDescriptor: nil,
-        colorAttachmentCount: 2,
-        alphaTypeHandlingRule: .general
-    )
-
-    private static let bravoCharliePassKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurBravoCharlie")
-    )
+    public init() {}
 
     public var outputImage: MTIImage? {
         guard let inputImage else {
@@ -81,4 +63,22 @@ public final class MTIHexagonalBokehBlurFilter: MTIFilter {
             outputPixelFormat: outputPixelFormat
         )
     }
+
+    private static let prepassKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurPre")
+    )
+
+    private static let alphaPassKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurAlpha"),
+        vertexDescriptor: nil,
+        colorAttachmentCount: 2,
+        alphaTypeHandlingRule: .general
+    )
+
+    private static let bravoCharliePassKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "hexagonalBokehBlurBravoCharlie")
+    )
 }

@@ -17,16 +17,6 @@ public final class MTIRoundCornerFilter: MTIUnaryFilter {
 
     public init() {}
 
-    private static let circularCornerKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "circularCorner")
-    )
-
-    private static let continuousCornerKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "continuousCorner")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage else {
             return nil
@@ -48,4 +38,14 @@ public final class MTIRoundCornerFilter: MTIUnaryFilter {
                             outputDimensions: inputImage.dimensions,
                             outputPixelFormat: outputPixelFormat)
     }
+
+    private static let circularCornerKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "circularCorner")
+    )
+
+    private static let continuousCornerKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "continuousCorner")
+    )
 }

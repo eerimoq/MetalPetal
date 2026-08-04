@@ -16,11 +16,6 @@ public final class MTIChromaKeyBlendFilter: MTIFilter {
 
     public init() {}
 
-    private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "chromaKeyBlend")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage, let inputBackgroundImage else {
             return nil
@@ -34,4 +29,9 @@ public final class MTIChromaKeyBlendFilter: MTIFilter {
             outputPixelFormat: outputPixelFormat
         )
     }
+
+    private static let kernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "chromaKeyBlend")
+    )
 }

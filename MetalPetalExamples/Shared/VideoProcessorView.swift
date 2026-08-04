@@ -81,14 +81,13 @@ struct VideoProcessorView: View {
                             component: .alpha,
                             mode: .oneMinusMaskValue
                         ))]
-                    return FilterGraph.makeImage(builder: { output in
-                        sourceImage => blendWithMaskFilter.inputPorts.inputImage
-                        sourceImage => grayScaleFilter => dotScreenFilter => blendWithMaskFilter.inputPorts
-                            .inputBackgroundImage
-                        blendWithMaskFilter => pixellateFilter => watermarkFilter.inputPorts
-                            .inputBackgroundImage
-                        watermarkFilter => output
-                    })!
+                    blendWithMaskFilter.inputImage = sourceImage
+                    grayScaleFilter.inputImage = sourceImage
+                    dotScreenFilter.inputImage = grayScaleFilter.outputImage
+                    blendWithMaskFilter.inputBackgroundImage = dotScreenFilter.outputImage
+                    pixellateFilter.inputImage = blendWithMaskFilter.outputImage
+                    watermarkFilter.inputBackgroundImage = pixellateFilter.outputImage
+                    return watermarkFilter.outputImage!
                 }
             )
             let playerItem = AVPlayerItem(asset: asset)

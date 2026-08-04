@@ -289,31 +289,27 @@ If you'd like to move the GPU command encoding process out of the main thread, y
 
 ### Connect Filters
 
-You can use `=>` operator in `FilterGraph.makeImage` function to connect filters and get the output image.
+Chain filters by assigning one filter's `outputImage` to the next filter's input.
 
 Here are some examples:
 
 ```Swift
-let image = try? FilterGraph.makeImage { output in
-    inputImage => saturationFilter => exposureFilter => output
-}
+saturationFilter.inputImage = inputImage
+exposureFilter.inputImage = saturationFilter.outputImage
+let image = exposureFilter.outputImage
 ```
 
 ```Swift
-let image = try? FilterGraph.makeImage { output in
-    inputImage => saturationFilter => exposureFilter => contrastFilter => blendFilter.inputPorts.inputImage
-    exposureFilter => blendFilter.inputPorts.inputBackgroundImage
-    blendFilter => output
-}
+saturationFilter.inputImage = inputImage
+exposureFilter.inputImage = saturationFilter.outputImage
+contrastFilter.inputImage = exposureFilter.outputImage
+blendFilter.inputImage = contrastFilter.outputImage
+blendFilter.inputBackgroundImage = exposureFilter.outputImage
+let image = blendFilter.outputImage
 ```
 
-- You can connect unary filters (`MTIUnaryFilter`) directly using `=>`.
-
-- For a filter with multiple inputs, you need to connect to one of its `inputPorts`.
-
-- `=>` operator only works in `FilterGraph.makeImage` method.
-
-- One and only one filter's output can be connected to `output`.
+- `outputImage` is a computed property — each read builds a new `MTIImage`. Read it once and reuse
+  the result when you need the same output in more than one place.
 
 ### Process Video Files
 
@@ -323,9 +319,9 @@ Working with `AVPlayer`:
 let context = try MTIContext(device: device)
 let asset = AVAsset(url: videoURL)
 let composition = MTIVideoComposition(asset: asset, context: context, queue: DispatchQueue.main, filter: { request in
-    return FilterGraph.makeImage { output in
-        request.anySourceImage! => filterA => filterB => output
-    }!
+    filterA.inputImage = request.anySourceImage!
+    filterB.inputImage = filterA.outputImage
+    return filterB.outputImage!
 }
 let playerItem = AVPlayerItem(asset: asset)
 playerItem.videoComposition = composition.makeAVVideoComposition()

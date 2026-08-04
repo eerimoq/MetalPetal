@@ -23,8 +23,6 @@ public enum MTICropFilterRoundingMode {
 }
 
 public final class MTICropFilter: MTIUnaryFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var cropRegion: MTICropRegion = .init(
@@ -34,13 +32,7 @@ public final class MTICropFilter: MTIUnaryFilter {
     public var scale: Float = 1
     public var roundingMode: MTICropFilterRoundingMode = .plain
 
-    private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: MTIFilterPassthroughFragmentFunctionName),
-        vertexDescriptor: nil,
-        colorAttachmentCount: 1,
-        alphaTypeHandlingRule: .passthrough
-    )
+    public init() {}
 
     public var outputImage: MTIImage? {
         guard let inputImage, cropRegion.bounds.size.width > 0, cropRegion.bounds.size.height > 0 else {
@@ -97,4 +89,12 @@ public final class MTICropFilter: MTIUnaryFilter {
         )
         return [command].makeImages(outputDescriptors: [outputDescriptor]).first
     }
+
+    private static let kernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: MTIFilterPassthroughFragmentFunctionName),
+        vertexDescriptor: nil,
+        colorAttachmentCount: 1,
+        alphaTypeHandlingRule: .passthrough
+    )
 }

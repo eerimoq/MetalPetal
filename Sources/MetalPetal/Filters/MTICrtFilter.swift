@@ -12,11 +12,6 @@ public final class MTICrtFilter: MTIFilter {
 
     public init() {}
 
-    private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: "passthroughVertex"),
-        fragmentFunctionDescriptor: .init(name: "crt")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage else {
             return nil
@@ -34,4 +29,9 @@ public final class MTICrtFilter: MTIFilter {
             outputPixelFormat: outputPixelFormat
         )
     }
+
+    private static let kernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: "passthroughVertex"),
+        fragmentFunctionDescriptor: .init(name: "crt")
+    )
 }

@@ -6,10 +6,8 @@
 import Foundation
 import Metal
 
-public let MTIContextImagePersistentResolutionHolderTableName = "MTIContextImagePersistentResolutionHolderTable"
-
 private let MTIContextImagePersistentResolutionHolderTable =
-    MTIContextImageAssociatedValueTableName(rawValue: MTIContextImagePersistentResolutionHolderTableName)
+    MTIContextImageAssociatedValueTableName(rawValue: "MTIContextImagePersistentResolutionHolderTable")
 
 public protocol MTIImagePromiseResolution: AnyObject {
     var texture: MTLTexture { get }

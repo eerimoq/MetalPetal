@@ -10,8 +10,6 @@ import Foundation
 import Metal
 
 public final class MTIRGBToneCurveFilter: MTIFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
     public var redControlPoints: [MTIVector] = [] {
@@ -54,6 +52,8 @@ public final class MTIRGBToneCurveFilter: MTIFilter {
     /// lookup image is built on first access even when no control points are ever set.
     private var toneCurveColorLookupImageIsDirty = true
     private var cachedToneCurveColorLookupImage: MTIImage?
+
+    public init() {}
 
     private static func updatePreparedSplineCurve(_ curve: inout [Float], controlPoints: [MTIVector]) {
         guard controlPoints.count > 1 else {

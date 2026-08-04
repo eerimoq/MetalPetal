@@ -10,11 +10,6 @@ import Metal
 import os
 
 public let MTIURLSchemeForLibraryWithSource = "mti.library-source"
-public let MTILibrarySourceErrorDomain = "MTILibrarySourceErrorDomain"
-
-public enum MTILibrarySourceError: Int {
-    case libraryNotFound = 10001
-}
 
 private func urlForLibrarySource(_ identifier: String) -> URL {
     var components = URLComponents()
@@ -66,11 +61,7 @@ public final class MTILibrarySourceRegistration {
         let librarySource = sources[libraryURL]
         lock.unlock()
         guard let librarySource else {
-            throw NSError(
-                domain: MTILibrarySourceErrorDomain,
-                code: MTILibrarySourceError.libraryNotFound.rawValue,
-                userInfo: nil
-            )
+            throw MTIError.libraryNotFound
         }
         return try device.makeLibrary(source: librarySource.source, options: librarySource.compileOptions)
     }

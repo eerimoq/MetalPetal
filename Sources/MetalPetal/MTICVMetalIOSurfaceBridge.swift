@@ -9,14 +9,6 @@ import CoreVideo
 import Foundation
 import Metal
 
-public let MTICVMetalIOSurfaceBridgeErrorDomain = "MTICVMetalIOSurfaceBridgeErrorDomain"
-
-public enum MTICVMetalIOSurfaceBridgeError: Int {
-    case imageBufferIsNotBackedByIOSurface = 10001
-    case failedToCreateTexture = 10002
-    case coreVideoDoesNotSupportIOSurface = 10003
-}
-
 private final class MTICVMetalIOSurfaceBridgeTexture: MTICVMetalTexture {
     let texture: MTLTexture
 
@@ -38,22 +30,14 @@ public final class MTICVMetalIOSurfaceBridge: MTICVMetalTextureBridging {
         planeIndex: Int
     ) throws -> MTICVMetalTexture {
         guard let ioSurface = CVPixelBufferGetIOSurface(imageBuffer)?.takeUnretainedValue() else {
-            throw NSError(
-                domain: MTICVMetalIOSurfaceBridgeErrorDomain,
-                code: MTICVMetalIOSurfaceBridgeError.imageBufferIsNotBackedByIOSurface.rawValue,
-                userInfo: [:]
-            )
+            throw MTIError.imageBufferIsNotBackedByIOSurface
         }
         guard let texture = device.makeTexture(
             descriptor: textureDescriptor,
             iosurface: ioSurface,
             plane: planeIndex
         ) else {
-            throw NSError(
-                domain: MTICVMetalIOSurfaceBridgeErrorDomain,
-                code: MTICVMetalIOSurfaceBridgeError.failedToCreateTexture.rawValue,
-                userInfo: [:]
-            )
+            throw MTIError.failedToCreateTexture
         }
         return MTICVMetalIOSurfaceBridgeTexture(texture: texture)
     }

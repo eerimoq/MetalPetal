@@ -42,22 +42,6 @@ public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
         toneCurveFilter.rgbCompositeControlPoints = storedToneCurveControlPoints
     }
 
-    private static var defaultToneCurveControlPoints: [MTIVector] {
-        [MTIVector(x: 0, y: 0),
-         MTIVector(x: 120 / 255.0, y: 146 / 255.0),
-         MTIVector(x: 1.0, y: 1.0)]
-    }
-
-    private static let gbChannelOverlayBlendKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingGBChannelOverlay")
-    )
-
-    private static let maskProcessAndCompositeKernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingMaskProcessAndComposite")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage else {
             return nil
@@ -90,4 +74,20 @@ public final class MTIHighPassSkinSmoothingFilter: MTIFilter {
     public static func isSupported(on device: MTLDevice) -> Bool {
         MPSSupportsMTLDevice(device)
     }
+
+    private static var defaultToneCurveControlPoints: [MTIVector] {
+        [MTIVector(x: 0, y: 0),
+         MTIVector(x: 120 / 255.0, y: 146 / 255.0),
+         MTIVector(x: 1.0, y: 1.0)]
+    }
+
+    private static let gbChannelOverlayBlendKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingGBChannelOverlay")
+    )
+
+    private static let maskProcessAndCompositeKernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "highPassSkinSmoothingMaskProcessAndComposite")
+    )
 }

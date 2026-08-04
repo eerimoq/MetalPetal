@@ -32,11 +32,6 @@ public final class MTIMPSUnsharpMaskFilter: MTIUnaryFilter {
         gaussianBlurFilter.radius = radius
     }
 
-    private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "usmSecondPass")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage, let blurImage = gaussianBlurFilter.outputImage else {
             return nil
@@ -50,4 +45,9 @@ public final class MTIMPSUnsharpMaskFilter: MTIUnaryFilter {
             outputPixelFormat: outputPixelFormat
         )
     }
+
+    private static let kernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "usmSecondPass")
+    )
 }

@@ -84,8 +84,8 @@ Layering, roughly bottom-up:
   Kernels must be stateless; per-configuration state is cached in the context, keyed by
   `MTIKernelConfiguration.identifier` — that identifier must cover everything `makeKernelState` reads.
 - `Filters/` — thin wrappers over kernels. Simple effects subclass `MTIUnaryImageRenderingFilter`
-  (override `parameters` and `fragmentFunctionDescriptor()`); `Filter.swift` provides the
-  `FilterGraph` / `=>` port-connecting DSL.
+  (override `parameters` and `fragmentFunctionDescriptor()`). Filters are chained by hand: assign one
+  filter's `outputImage` to the next filter's input.
 - `UI/`, `SceneKit/`, `SpriteKit/`, `MTICoreImage*`, `MTICV*` — I/O and interop edges.
 
 ### Shader library loading (important)

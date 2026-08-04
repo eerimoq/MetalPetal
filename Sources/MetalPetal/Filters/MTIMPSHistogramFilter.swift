@@ -11,13 +11,12 @@ import simd
 
 public struct MTIHistogramType: OptionSet {
     public let rawValue: Int
+    public static let luminance = MTIHistogramType(rawValue: 1 << 0)
+    public static let rgb = MTIHistogramType(rawValue: 1 << 1)
 
     public init(rawValue: Int) {
         self.rawValue = rawValue
     }
-
-    public static let luminance = MTIHistogramType(rawValue: 1 << 0)
-    public static let rgb = MTIHistogramType(rawValue: 1 << 1)
 }
 
 private final class MTIMPSHistogramRecipe: MTIImagePromise {
@@ -96,15 +95,12 @@ private final class MTIMPSHistogramRecipe: MTIImagePromise {
 }
 
 public final class MTIMPSHistogramFilter: MTIFilter {
-    public init() {}
-
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .r32Uint
     /// Unimplemented
     public var scaleFactor: Float = 0
     /// Unimplemented
     public var type: MTIHistogramType = []
-
     private let histogramInfo: MPSImageHistogramInfo = {
         var info = MPSImageHistogramInfo()
         info.numberOfHistogramEntries = 256
@@ -114,11 +110,12 @@ public final class MTIMPSHistogramFilter: MTIFilter {
         return info
     }()
 
+    public init() {}
+
     public var outputImage: MTIImage? {
         guard let inputImage else {
             return nil
         }
-        // handle histogram type and scale
         let recipe = MTIMPSHistogramRecipe(inputImage: inputImage,
                                            histogramInfo: histogramInfo,
                                            sourceRegion: MTLRegionMake2D(

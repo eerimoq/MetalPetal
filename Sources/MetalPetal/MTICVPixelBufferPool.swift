@@ -7,18 +7,6 @@ import AVFoundation
 import CoreVideo
 import Foundation
 
-public let MTICVPixelBufferPoolErrorDomain = "MTICVPixelBufferPoolErrorDomain"
-
-/// Error codes reported under `MTICVPixelBufferPoolErrorDomain`. These are `CVReturn` values, so
-/// they are declared in terms of the CoreVideo constants rather than restated as literals.
-public enum MTICVPixelBufferPoolError {
-    public static let none = kCVReturnSuccess
-    public static let wouldExceedAllocationThreshold = kCVReturnWouldExceedAllocationThreshold
-    public static let poolAllocationFailed = kCVReturnPoolAllocationFailed
-    public static let invalidPoolAttributes = kCVReturnInvalidPoolAttributes
-    public static let retry = kCVReturnRetry
-}
-
 /// Create a symbolic breakpoint of MTICVPixelBufferPoolIsOutOfBuffer to debug.
 @inline(never)
 private func MTICVPixelBufferPoolIsOutOfBuffer(_ pool: MTICVPixelBufferPool) {
@@ -85,7 +73,7 @@ public final class MTICVPixelBufferPool {
             &pool
         )
         guard result == kCVReturnSuccess, let pool else {
-            throw NSError(domain: MTICVPixelBufferPoolErrorDomain, code: Int(result), userInfo: [:])
+            throw MTIError.cvPixelBufferPoolError(result)
         }
         self.init(cvPixelBufferPool: pool)
     }
@@ -121,14 +109,10 @@ public final class MTICVPixelBufferPool {
             if err == kCVReturnWouldExceedAllocationThreshold {
                 MTICVPixelBufferPoolIsOutOfBuffer(self)
             }
-            throw NSError(domain: MTICVPixelBufferPoolErrorDomain, code: Int(err), userInfo: [:])
+            throw MTIError.cvPixelBufferPoolError(err)
         }
         guard let pixelBuffer else {
-            throw NSError(
-                domain: MTICVPixelBufferPoolErrorDomain,
-                code: Int(kCVReturnPoolAllocationFailed),
-                userInfo: [:]
-            )
+            throw MTIError.cvPixelBufferPoolError(kCVReturnPoolAllocationFailed)
         }
         return pixelBuffer
     }

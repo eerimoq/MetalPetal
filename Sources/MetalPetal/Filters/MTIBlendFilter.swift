@@ -24,6 +24,20 @@ public final class MTIBlendFilter: MTIFilter {
         blendMode = mode
     }
 
+    public var outputImage: MTIImage? {
+        guard let inputBackgroundImage, let inputImage else {
+            return nil
+        }
+        let kernel = MTIBlendFilter.kernel(blendMode: blendMode,
+                                           backdropAlphaType: inputBackgroundImage.alphaType,
+                                           sourceAlphaType: inputImage.alphaType,
+                                           outputAlphaType: outputAlphaType)
+        return kernel.apply(to: [inputBackgroundImage, inputImage],
+                            parameters: ["intensity": .float(intensity)],
+                            outputDimensions: .init(cgSize: inputBackgroundImage.size),
+                            outputPixelFormat: outputPixelFormat)
+    }
+
     private struct KernelKey: Hashable {
         let mode: MTIBlendMode
         let sourceHasPremultipliedAlpha: Bool
@@ -104,19 +118,5 @@ public final class MTIBlendFilter: MTIFilter {
         )
         kernels[key] = kernel
         return kernel
-    }
-
-    public var outputImage: MTIImage? {
-        guard let inputBackgroundImage, let inputImage else {
-            return nil
-        }
-        let kernel = MTIBlendFilter.kernel(blendMode: blendMode,
-                                           backdropAlphaType: inputBackgroundImage.alphaType,
-                                           sourceAlphaType: inputImage.alphaType,
-                                           outputAlphaType: outputAlphaType)
-        return kernel.apply(to: [inputBackgroundImage, inputImage],
-                            parameters: ["intensity": .float(intensity)],
-                            outputDimensions: .init(cgSize: inputBackgroundImage.size),
-                            outputPixelFormat: outputPixelFormat)
     }
 }

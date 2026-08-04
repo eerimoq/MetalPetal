@@ -14,11 +14,6 @@ public final class MTIBlendWithMaskFilter: MTIFilter {
 
     public init() {}
 
-    private static let kernel = MTIRenderPipelineKernel(
-        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
-        fragmentFunctionDescriptor: .init(name: "blendWithMask")
-    )
-
     public var outputImage: MTIImage? {
         guard let inputImage,
               let inputMask,
@@ -35,4 +30,9 @@ public final class MTIBlendWithMaskFilter: MTIFilter {
             outputPixelFormat: outputPixelFormat
         )
     }
+
+    private static let kernel = MTIRenderPipelineKernel(
+        vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
+        fragmentFunctionDescriptor: .init(name: "blendWithMask")
+    )
 }

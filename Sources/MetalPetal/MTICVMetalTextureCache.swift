@@ -10,13 +10,6 @@ import Foundation
 import Metal
 import os
 
-public let MTICVMetalTextureCacheErrorDomain = "MTICVMetalTextureCacheErrorDomain"
-
-public enum MTICVMetalTextureCacheError: Int {
-    case failedToInitialize
-    case failedToCreateTexture
-}
-
 private final class MTICVMetalTextureCacheTexture: MTICVMetalTexture {
     let texture: MTLTexture
     // Keep the CVMetalTexture alive for the lifetime of this wrapper.
@@ -47,17 +40,7 @@ public final class MTICVMetalTextureCache: MTICVMetalTextureBridging {
             &cacheOut
         )
         guard status == kCVReturnSuccess, let cache = cacheOut else {
-            throw NSError(
-                domain: MTICVMetalTextureCacheErrorDomain,
-                code: MTICVMetalTextureCacheError.failedToInitialize.rawValue,
-                userInfo: [
-                    NSUnderlyingErrorKey: NSError(
-                        domain: NSOSStatusErrorDomain,
-                        code: Int(status),
-                        userInfo: [:]
-                    ),
-                ]
-            )
+            throw MTIError.cvMetalTextureCacheFailedToInitialize(status)
         }
         self.cache = cache
     }
@@ -91,17 +74,7 @@ public final class MTICVMetalTextureCache: MTICVMetalTextureBridging {
         lock.unlock()
         guard status == kCVReturnSuccess, let textureRef = textureRefOut else {
             flushCache()
-            throw NSError(
-                domain: MTICVMetalTextureCacheErrorDomain,
-                code: MTICVMetalTextureCacheError.failedToCreateTexture.rawValue,
-                userInfo: [
-                    NSUnderlyingErrorKey: NSError(
-                        domain: NSOSStatusErrorDomain,
-                        code: Int(status),
-                        userInfo: [:]
-                    ),
-                ]
-            )
+            throw MTIError.cvMetalTextureCacheFailedToCreate(status)
         }
         return MTICVMetalTextureCacheTexture(cvMetalTexture: textureRef)
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum MTIError: Error {
+public enum MTIError: Error, Equatable {
     // Core errors
     case functionNotFound
     case failedToCreateSamplerState
@@ -15,6 +15,8 @@ public enum MTIError: Error {
     case failedToCreateCommandEncoder
     case failedToCreateHeap
     case blendFunctionNotFound
+    case imageBufferIsNotBackedByIOSurface
+    case coreVideoDoesNotSupportIOSurface
     // Texture loading errors
     case unsupportedCVPixelBufferFormat
     case textureDimensionsMismatch
@@ -37,4 +39,16 @@ public enum MTIError: Error {
     case invalidTextureDimension
     // For features not available on iOS simulator.
     case featureNotAvailableOnSimulator
+    case imageViewContextNotFound
+    case imageViewSameImage
+    case libraryNotFound
+    case cvMetalTextureCacheFailedToInitialize(CVReturn)
+    case cvMetalTextureCacheFailedToCreate(CVReturn)
+    case cvPixelBufferPoolError(CVReturn)
+    // Video composition errors
+    case cannotGenerateOutputPixelBuffer
+    case unsupportedVideoCompositionInstruction
+    // Core Image interoperability errors
+    case failedToCreateCIImage
+    case coreImageFilterReturnedNilOutput
 }

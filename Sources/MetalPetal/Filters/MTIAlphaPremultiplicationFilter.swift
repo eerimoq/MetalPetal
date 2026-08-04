@@ -12,7 +12,7 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
     public var inputImage: MTIImage?
     public var outputPixelFormat: MTLPixelFormat = .unspecified
 
-    public static let kernel = MTIRenderPipelineKernel(
+    static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
         fragmentFunctionDescriptor: .init(name: MTIFilterUnpremultiplyAlphaFragmentFunctionName),
         vertexDescriptor: nil,
@@ -25,8 +25,18 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
 
     public init() {}
 
-    public static func image(byProcessingImage image: MTIImage,
-                             outputPixelFormat pixelFormat: MTLPixelFormat) -> MTIImage
+    public var outputImage: MTIImage? {
+        guard let inputImage else {
+            return nil
+        }
+        return MTIUnpremultiplyAlphaFilter.image(
+            byProcessingImage: inputImage,
+            outputPixelFormat: outputPixelFormat
+        )
+    }
+
+    static func image(byProcessingImage image: MTIImage,
+                      outputPixelFormat pixelFormat: MTLPixelFormat) -> MTIImage
     {
         if image.alphaType == .alphaIsOne || image.alphaType == .nonPremultiplied {
             return image
@@ -39,18 +49,8 @@ public final class MTIUnpremultiplyAlphaFilter: MTIUnaryFilter {
         )
     }
 
-    public static func image(byProcessingImage image: MTIImage) -> MTIImage {
+    static func image(byProcessingImage image: MTIImage) -> MTIImage {
         self.image(byProcessingImage: image, outputPixelFormat: .unspecified)
-    }
-
-    public var outputImage: MTIImage? {
-        guard let inputImage else {
-            return nil
-        }
-        return MTIUnpremultiplyAlphaFilter.image(
-            byProcessingImage: inputImage,
-            outputPixelFormat: outputPixelFormat
-        )
     }
 }
 
@@ -60,7 +60,17 @@ public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
 
     public init() {}
 
-    public static let kernel = MTIRenderPipelineKernel(
+    public var outputImage: MTIImage? {
+        guard let inputImage else {
+            return nil
+        }
+        return MTIPremultiplyAlphaFilter.image(
+            byProcessingImage: inputImage,
+            outputPixelFormat: outputPixelFormat
+        )
+    }
+
+    static let kernel = MTIRenderPipelineKernel(
         vertexFunctionDescriptor: .init(name: MTIFilterPassthroughVertexFunctionName),
         fragmentFunctionDescriptor: .init(name: MTIFilterPremultiplyAlphaFragmentFunctionName),
         vertexDescriptor: nil,
@@ -71,8 +81,8 @@ public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
         )
     )
 
-    public static func image(byProcessingImage image: MTIImage,
-                             outputPixelFormat pixelFormat: MTLPixelFormat) -> MTIImage
+    static func image(byProcessingImage image: MTIImage,
+                      outputPixelFormat pixelFormat: MTLPixelFormat) -> MTIImage
     {
         if image.alphaType == .alphaIsOne || image.alphaType == .premultiplied {
             return image
@@ -85,17 +95,7 @@ public final class MTIPremultiplyAlphaFilter: MTIUnaryFilter {
         )
     }
 
-    public static func image(byProcessingImage image: MTIImage) -> MTIImage {
+    static func image(byProcessingImage image: MTIImage) -> MTIImage {
         self.image(byProcessingImage: image, outputPixelFormat: .unspecified)
-    }
-
-    public var outputImage: MTIImage? {
-        guard let inputImage else {
-            return nil
-        }
-        return MTIPremultiplyAlphaFilter.image(
-            byProcessingImage: inputImage,
-            outputPixelFormat: outputPixelFormat
-        )
     }
 }

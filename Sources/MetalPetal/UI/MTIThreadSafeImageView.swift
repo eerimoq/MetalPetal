@@ -13,13 +13,6 @@ import os
 import QuartzCore
 import UIKit
 
-public let MTIImageViewErrorDomain = "MTIImageViewErrorDomain"
-
-public enum MTIImageViewError: Int {
-    case contextNotFound = 1001
-    case sameImage = 1002
-}
-
 private protocol MTICAMetalLayer: AnyObject {
     var device: MTLDevice? { get set }
     var pixelFormat: MTLPixelFormat { get set }
@@ -241,11 +234,7 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
         lock.unlock()
 
         if !renderedImage {
-            renderCompletion?(NSError(
-                domain: MTIImageViewErrorDomain,
-                code: MTIImageViewError.sameImage.rawValue,
-                userInfo: nil
-            ))
+            renderCompletion?(MTIError.imageViewSameImage)
         }
     }
 
@@ -282,11 +271,7 @@ public final class MTIThreadSafeImageView: UIView, MTIDrawableProvider {
     private func renderImage(_ image: MTIImage?, completion: ((Error?) -> Void)?) {
         setupContextIfNeeded()
         guard let context = _context else {
-            completion?(contextCreationError ?? NSError(
-                domain: MTIImageViewErrorDomain,
-                code: MTIImageViewError.contextNotFound.rawValue,
-                userInfo: nil
-            ))
+            completion?(contextCreationError ?? MTIError.imageViewContextNotFound)
             return
         }
         updateContentScaleFactor()
