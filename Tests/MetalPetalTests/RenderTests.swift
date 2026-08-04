@@ -26,6 +26,39 @@ private func renderedPixelBuffer(
     }
 }
 
+private enum AppleLog {
+    static let r0: Float = -0.05641088
+    static let rt: Float = 0.01
+    static let c: Float = 47.28711236
+    static let beta: Float = 0.00964052
+    static let gamma: Float = 0.08550479
+    static let delta: Float = 0.69336945
+
+    static var pt: Float {
+        encode(rt)
+    }
+
+    static func encode(_ x: Float) -> Float {
+        if x < r0 {
+            return 0
+        }
+        if x < rt {
+            return c * (x - r0) * (x - r0)
+        }
+        return gamma * log2(x + beta) + delta
+    }
+
+    static func decode(_ y: Float) -> Float {
+        if y <= 0 {
+            return r0
+        }
+        if y < pt {
+            return (y / c).squareRoot() + r0
+        }
+        return exp2((y - delta) / gamma) - beta
+    }
+}
+
 @Suite(.enabled(if: metalDeviceIsAvailable))
 struct RenderTests {
     @Test func solidColorImageRendering() throws {
@@ -2480,6 +2513,183 @@ struct RenderTests {
                 let c = inputValue
                 let value = UInt8(c * 255.0)
                 #expect(pixel.r == value && pixel.g == value && pixel.b == value && pixel.a == 255)
+            }
+        }
+    }
+
+    @Test func appleLogTransferFunctionIsContinuousAtRt() {
+        let quadraticBranch = AppleLog.c * (AppleLog.rt - AppleLog.r0) * (AppleLog.rt - AppleLog.r0)
+        let logBranch = AppleLog.gamma * log2(AppleLog.rt + AppleLog.beta) + AppleLog.delta
+        #expect(abs(quadraticBranch - logBranch) < 1e-4)
+        #expect(abs(AppleLog.pt - 0.20855529) < 1e-4)
+    }
+
+    @Test func appleLogTransferFunctionRoundTrips() {
+        for encoded in stride(from: Float(0), through: 1, by: 0.05) {
+            #expect(abs(AppleLog.encode(AppleLog.decode(encoded)) - encoded) < 1e-4)
+        }
+    }
+
+    @Test func appleLogToLinear() throws {
+        let inputValue: Float = 128.0 / 255.0
+        let outputImage = MTIRGBColorSpaceConversionFilter.convert(
+            MTIImage(
+                color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            from: .appleLog,
+            to: .linearSRGB,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .unspecified
+        )
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        let expected = Int(round(AppleLog.decode(inputValue) * 255.0))
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - expected) <= 1)
+                #expect(pixel.r == pixel.g && pixel.g == pixel.b && pixel.a == 255)
+            }
+        }
+    }
+
+    @Test func appleLogToLinear_toe() throws {
+        let inputValue: Float = 45.0 / 255.0
+        #expect(inputValue < AppleLog.pt)
+        let outputImage = MTIRGBColorSpaceConversionFilter.convert(
+            MTIImage(
+                color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            from: .appleLog,
+            to: .linearSRGB,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .unspecified
+        )
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        let decoded = AppleLog.decode(inputValue)
+        #expect(decoded > 0)
+        let expected = Int(round(decoded * 255.0))
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - expected) <= 1)
+            }
+        }
+    }
+
+    @Test func linearToAppleLog() throws {
+        let inputValue: Float = 128.0 / 255.0
+        let outputImage = MTIRGBColorSpaceConversionFilter.convert(
+            MTIImage(
+                color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            from: .linearSRGB,
+            to: .appleLog,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .unspecified
+        )
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        let expected = Int(round(AppleLog.encode(inputValue) * 255.0))
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - expected) <= 1)
+                #expect(pixel.r == pixel.g && pixel.g == pixel.b && pixel.a == 255)
+            }
+        }
+    }
+
+    @Test func appleLogRoundTrip() throws {
+        let inputValue: Float = 200.0 / 255.0
+        let image = MTIImage(
+            color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+            sRGB: false,
+            size: CGSize(width: 1, height: 1)
+        )
+        let linear = MTIRGBColorSpaceConversionFilter.convert(
+            image,
+            from: .appleLog,
+            to: .linearSRGB,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .rgba16Float
+        )
+        let outputImage = MTIRGBColorSpaceConversionFilter.convert(
+            linear,
+            from: .linearSRGB,
+            to: .appleLog,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .unspecified
+        )
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - 200) <= 1)
+            }
+        }
+    }
+
+    @Test func appleLogToAppleLog() throws {
+        let inputValue: Float = 128.0 / 255.0
+        let outputImage = MTIRGBColorSpaceConversionFilter.convert(
+            MTIImage(
+                color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            from: .appleLog,
+            to: .appleLog,
+            alphaType: .nonPremultiplied,
+            pixelFormat: .unspecified
+        )
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - 128) <= 1)
+            }
+        }
+    }
+
+    @Test func appleLogToSRGBFilter() throws {
+        let inputValue: Float = 128.0 / 255.0
+        let image = MTIImage(
+            color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+            sRGB: false,
+            size: CGSize(width: 1, height: 1)
+        )
+        let outputImage = MTIAppleLogToSRGBFilter.image(byProcessingImage: image)
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        let linear = AppleLog.decode(inputValue)
+        let sRGB = linear < 0.0031308 ? 12.92 * linear : 1.055 * pow(linear, 1.0 / 2.4) - 0.055
+        let expected = Int(round(sRGB * 255.0))
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - expected) <= 1)
+            }
+        }
+    }
+
+    @Test func appleLogToLinearRGBFilter() throws {
+        let inputValue: Float = 128.0 / 255.0
+        let image = MTIImage(
+            color: MTIColor(red: inputValue, green: inputValue, blue: inputValue, alpha: 1),
+            sRGB: false,
+            size: CGSize(width: 1, height: 1)
+        )
+        let outputImage = MTIAppleLogToLinearRGBFilter.image(byProcessingImage: image)
+        let context = try makeContext()
+        let cgImage = try context.makeCGImage(from: outputImage)
+        let expected = Int(round(AppleLog.decode(inputValue) * 255.0))
+        PixelEnumerator.enumeratePixels(in: cgImage) { pixel, coordinates in
+            if coordinates.x == 0, coordinates.y == 0 {
+                #expect(abs(Int(pixel.r) - expected) <= 1)
             }
         }
     }

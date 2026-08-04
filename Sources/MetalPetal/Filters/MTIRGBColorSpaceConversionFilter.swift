@@ -49,10 +49,31 @@ public final class MTIITUR709RGBToSRGBFilter: MTIUnaryImageRenderingFilter {
     }
 }
 
+public final class MTIAppleLogToLinearRGBFilter: MTIUnaryImageRenderingFilter {
+    override public static func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
+        MTIFunctionDescriptor(name: "convertAppleLogToLinearRGB")
+    }
+
+    public static func image(byProcessingImage image: MTIImage) -> MTIImage {
+        self.image(byProcessingImage: image, withInputParameters: [:], outputPixelFormat: .unspecified)
+    }
+}
+
+public final class MTIAppleLogToSRGBFilter: MTIUnaryImageRenderingFilter {
+    override public static func fragmentFunctionDescriptor() -> MTIFunctionDescriptor {
+        MTIFunctionDescriptor(name: "convertAppleLogToSRGB")
+    }
+
+    public static func image(byProcessingImage image: MTIImage) -> MTIImage {
+        self.image(byProcessingImage: image, withInputParameters: [:], outputPixelFormat: .unspecified)
+    }
+}
+
 public enum MTIRGBColorSpace: Int {
     case linearSRGB = 0
     case sRGB = 1
     case itur709 = 2
+    case appleLog = 3
 }
 
 public final class MTIRGBColorSpaceConversionFilter: MTIUnaryFilter {

@@ -157,6 +157,25 @@ fragment float4 convertITUR709RGBToSRGB(VertexOut vertexIn [[stage_in]],
     return textureColor;
 }
 
+fragment float4 convertAppleLogToLinearRGB(VertexOut vertexIn [[stage_in]],
+                                           texture2d<float, access::sample> colorTexture [[texture(0)]],
+                                           sampler colorSampler [[sampler(0)]])
+{
+    float4 textureColor = colorTexture.sample(colorSampler, vertexIn.textureCoordinate);
+    textureColor.rgb = appleLogToLinear(textureColor.rgb);
+    return textureColor;
+}
+
+fragment float4 convertAppleLogToSRGB(VertexOut vertexIn [[stage_in]],
+                                      texture2d<float, access::sample> colorTexture [[texture(0)]],
+                                      sampler colorSampler [[sampler(0)]])
+{
+    float4 textureColor = colorTexture.sample(colorSampler, vertexIn.textureCoordinate);
+    textureColor.rgb = appleLogToLinear(textureColor.rgb);
+    textureColor.rgb = linearToSRGB(textureColor.rgb);
+    return textureColor;
+}
+
 fragment float4 rgbColorSpaceConvert(VertexOut vertexIn [[stage_in]],
                                      texture2d<float, access::sample> colorTexture [[texture(0)]],
                                      sampler colorSampler [[sampler(0)]])
@@ -177,6 +196,10 @@ fragment float4 rgbColorSpaceConvert(VertexOut vertexIn [[stage_in]],
         // ITUR709
         textureColor.rgb = ITUR709ToLinear(textureColor.rgb);
         break;
+    case 3:
+        // Apple Log
+        textureColor.rgb = appleLogToLinear(textureColor.rgb);
+        break;
     }
     switch (rgb_color_space_conversion_output_color_space) {
     case 0:
@@ -189,6 +212,10 @@ fragment float4 rgbColorSpaceConvert(VertexOut vertexIn [[stage_in]],
     case 2:
         // ITUR709
         textureColor.rgb = linearToITUR709(textureColor.rgb);
+        break;
+    case 3:
+        // Apple Log
+        textureColor.rgb = linearToAppleLog(textureColor.rgb);
         break;
     }
     if (rgb_color_space_conversion_outputs_premultiplied_alpha) {

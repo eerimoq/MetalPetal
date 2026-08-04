@@ -602,6 +602,24 @@ You can use `MTIRGBColorSpaceConversionFilter` to perform color space conversion
 - `metalpetal::linearToSRGB` (linear sRGB to sRGB IEC61966-2.1)
 - `metalpetal::linearToITUR709` (linear sRGB to ITU-R 709)
 - `metalpetal::ITUR709ToLinear` (ITU-R 709 to linear sRGB)
+- `metalpetal::linearToAppleLog` (scene linear to Apple Log)
+- `metalpetal::appleLogToLinear` (Apple Log to scene linear)
+
+#### Apple Log
+
+Apple Log (`MTIRGBColorSpace.appleLog`, captured by the iPhone 15 Pro and later) is supported by
+`MTIRGBColorSpaceConversionFilter`, plus the `MTIAppleLogToLinearRGBFilter` and
+`MTIAppleLogToSRGBFilter` convenience filters.
+
+These apply the Apple Log **transfer curve** only. Apple Log uses the ITU-R BT.2020 primaries, so
+converting to `linearSRGB` gives you scene linear light still in the BT.2020 primaries — if you need
+Rec. 709 / sRGB primaries, follow up with an `MTIColorMatrixFilter` carrying the appropriate gamut
+conversion matrix.
+
+Apple Log is a scene-referred encoding: it maps linear values well above `1.0` into the `0...1`
+encoded range, and encodes sub-black (negative linear) values below `0.1505`. Decoding into an
+8-bit texture therefore clips both ends. Use a wide-gamut float pixel format, such as
+`.rgba16Float`, for the linear intermediate if you intend to re-encode.
 
 ## Extensions
 

@@ -29,6 +29,8 @@ struct PublicInitializerTests {
             MTIHistogramDisplayFilter(),
             MTIITUR709RGBToLinearRGBFilter(),
             MTIITUR709RGBToSRGBFilter(),
+            MTIAppleLogToLinearRGBFilter(),
+            MTIAppleLogToSRGBFilter(),
             MTILinearToSRGBToneCurveFilter(),
             MTIMPSBoxBlurFilter(),
             MTIMPSDefinitionFilter(),
@@ -49,7 +51,7 @@ struct PublicInitializerTests {
             MTIUnpremultiplyAlphaFilter(),
             MTIVibranceFilter(),
         ]
-        #expect(filters.count == 36)
+        #expect(filters.count == 38)
         for filter in filters {
             #expect(filter.outputImage == nil)
         }

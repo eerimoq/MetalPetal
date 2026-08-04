@@ -150,6 +150,41 @@ METAL_FUNC float3 linearToITUR709(float3 c)
     return float3(linearToITUR709(c.r), linearToITUR709(c.g), linearToITUR709(c.b));
 }
 
+template <typename T, typename _E = typename enable_if<is_floating_point<T>::value>::type>
+METAL_FUNC T appleLogToLinear(T c)
+{
+    if (c <= 0.0f) {
+        return -0.05641088f;
+    }
+    if (c < 0.20855529f) {
+        return sqrt(c / 47.28711236f) - 0.05641088f;
+    }
+    return exp2((c - 0.69336945f) / 0.08550479f) - 0.00964052f;
+}
+
+METAL_FUNC float3 appleLogToLinear(float3 c)
+{
+    return float3(appleLogToLinear(c.r), appleLogToLinear(c.g), appleLogToLinear(c.b));
+}
+
+template <typename T, typename _E = typename enable_if<is_floating_point<T>::value>::type>
+METAL_FUNC T linearToAppleLog(T c)
+{
+    if (c < -0.05641088f) {
+        return 0.0f;
+    }
+    if (c < 0.01f) {
+        T toe = c + 0.05641088f;
+        return 47.28711236f * toe * toe;
+    }
+    return 0.08550479f * log2(c + 0.00964052f) + 0.69336945f;
+}
+
+METAL_FUNC float3 linearToAppleLog(float3 c)
+{
+    return float3(linearToAppleLog(c.r), linearToAppleLog(c.g), linearToAppleLog(c.b));
+}
+
 METAL_FUNC float4 unpremultiply(float4 s) { return float4(s.rgb / max(s.a, 0.00001), s.a); }
 
 METAL_FUNC float4 premultiply(float4 s) { return float4(s.rgb * s.a, s.a); }
