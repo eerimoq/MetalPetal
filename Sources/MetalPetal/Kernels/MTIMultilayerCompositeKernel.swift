@@ -603,7 +603,7 @@ private final class MTIMultilayerCompositingRecipe: MTIImagePromise {
                 commandEncoder = renderingContext.commandBuffer
                     .makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
                 #else
-                commandEncoder.textureBarrier()
+                commandEncoder.memoryBarrier(scope: .renderTargets, after: .fragment, before: .fragment)
                 #endif
             }
         }
