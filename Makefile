@@ -69,5 +69,5 @@ test-tvos:
 test-all: test test-ios test-mac-catalyst test-tvos
 
 generate:
-	cd Utilities && swift run main boilerplate-generator $(CURDIR)
+	cd Utilities && swift run main $(CURDIR)
 	$(MAKE) style

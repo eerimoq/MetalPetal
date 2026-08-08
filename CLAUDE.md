@@ -56,7 +56,7 @@ The `xcodebuild` targets use `-workspace .` — that is the SwiftPM-generated
 - `Sources/MetalPetal/Shaders/MultilayerCompositeShaders.metal`
 
 Blend modes are driven by the `blendModes` array in
-`Utilities/Sources/BoilerplateGenerator/BoilerplateGenerator.swift`; blend-formula support is parsed
+`Utilities/Sources/main/MetalPetalBlendingShaders.swift`; blend-formula support is parsed
 out of `Shaders/MTIShaderLib.h` and `Shaders/MTIShaderFunctionConstants.h`. To change any of the
 above, change the generator (or the headers it reads) and re-run `make generate`.
 

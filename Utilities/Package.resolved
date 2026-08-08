@@ -1,25 +1,14 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "SIMDType",
-        "repositoryURL": "https://github.com/MetalPetal/SIMDType.git",
-        "state": {
-          "branch": null,
-          "revision": "005afa4670fc970a0b6a6232c3b6a3099bb41ae8",
-          "version": "0.0.3"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "8d31a0905c346a45c87773ad50862b5b3df8dff6",
-          "version": "0.0.4"
-        }
+  "pins" : [
+    {
+      "identity" : "simdtype",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MetalPetal/SIMDType.git",
+      "state" : {
+        "revision" : "005afa4670fc970a0b6a6232c3b6a3099bb41ae8",
+        "version" : "0.0.3"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 2
 }
