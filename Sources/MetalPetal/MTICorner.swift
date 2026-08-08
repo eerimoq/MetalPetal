@@ -28,6 +28,11 @@ public struct MTICornerRadius: Hashable {
     public var isZero: Bool {
         topLeft == 0 && topRight == 0 && bottomLeft == 0 && bottomRight == 0
     }
+
+    /// The per-corner radii the shaders expect, scaled for the given curve.
+    func shadingParameterValue(for curve: MTICornerCurve) -> simd_float4 {
+        simd_make_float4(topLeft, topRight, bottomRight, bottomLeft) * curve.expansionFactor
+    }
 }
 
 public enum MTICornerCurve {
@@ -35,9 +40,7 @@ public enum MTICornerCurve {
     case circular
     /// A continuous corner curve. This option mimics the behavior of `kCACornerCurveContinuous`.
     case continuous
-}
 
-public extension MTICornerCurve {
     /// Expansion scale factor applied to the rounded corner bounding box size when a specific corner curve is
     /// used.
     var expansionFactor: Float {
@@ -47,12 +50,5 @@ public extension MTICornerCurve {
         case .continuous:
             1.528665
         }
-    }
-}
-
-extension MTICornerRadius {
-    /// The per-corner radii the shaders expect, scaled for the given curve.
-    func shadingParameterValue(for curve: MTICornerCurve) -> simd_float4 {
-        simd_make_float4(topLeft, topRight, bottomRight, bottomLeft) * curve.expansionFactor
     }
 }
