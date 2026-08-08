@@ -21,9 +21,7 @@ public struct MTICropRegion {
         self.bounds = bounds
         self.unit = unit
     }
-}
 
-public extension MTICropRegion {
     static func pixel(_ rect: CGRect) -> MTICropRegion {
         MTICropRegion(bounds: rect, unit: .pixel)
     }
