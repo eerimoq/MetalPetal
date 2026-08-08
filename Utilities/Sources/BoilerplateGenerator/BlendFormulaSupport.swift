@@ -1,7 +1,6 @@
 //
 //  BlendFormulaSupport.swift
 //
-//
 //  Created by YuAo on 2021/2/6.
 //
 
@@ -14,9 +13,6 @@ enum BlendFormulaSupport {
         let functionConstantsHeaderFile = sourceDirectory
             .appending(path: "Shaders/MTIShaderFunctionConstants.h")
         let functionConstantsContent = try String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
-        // The shader template is embedded verbatim in a raw string literal (`#"""..."""#`) so it needs no
-        // escaping. In the outer `##"""..."""##` raw string, `\##(...)` is interpolation, while `\(...)` and
-        // `\n` are emitted literally into the generated file's own (regular) string literals.
         let imp = ##"""
         //
         // This is an auto-generated source file.

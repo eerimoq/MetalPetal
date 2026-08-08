@@ -267,7 +267,35 @@ public enum MetalPetalBlendingShadersCodeGenerator {
         return ["MultilayerCompositeShaders.metal": fileContent]
     }
 
-    public static func generate(blendModes: [String]) -> [String: String] {
+    public static func generate() -> [String: String] {
+        let blendModes = [
+            "Normal",
+            "Darken",
+            "Multiply",
+            "ColorBurn",
+            "LinearBurn",
+            "DarkerColor",
+            "Lighten",
+            "Screen",
+            "ColorDodge",
+            "Add",
+            "LighterColor",
+            "Overlay",
+            "SoftLight",
+            "HardLight",
+            "VividLight",
+            "LinearLight",
+            "PinLight",
+            "HardMix",
+            "Difference",
+            "Exclusion",
+            "Subtract",
+            "Divide",
+            "Hue",
+            "Saturation",
+            "Color",
+            "Luminosity",
+        ]
         let blendingShaders = generateBlendingShaders(blendModes: blendModes)
         let multilayerCompositeShaders = generateMultilayerCompositeShaders(blendModes: blendModes)
         return blendingShaders.merging(multilayerCompositeShaders, uniquingKeysWith: { first, _ in first })

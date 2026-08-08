@@ -21,41 +21,13 @@ public struct BoilerplateGenerator: ParsableCommand {
     public init() {}
 
     public func run() throws {
-        let blendModes = [
-            "Normal",
-            "Darken",
-            "Multiply",
-            "ColorBurn",
-            "LinearBurn",
-            "DarkerColor",
-            "Lighten",
-            "Screen",
-            "ColorDodge",
-            "Add",
-            "LighterColor",
-            "Overlay",
-            "SoftLight",
-            "HardLight",
-            "VividLight",
-            "LinearLight",
-            "PinLight",
-            "HardMix",
-            "Difference",
-            "Exclusion",
-            "Subtract",
-            "Divide",
-            "Hue",
-            "Saturation",
-            "Color",
-            "Luminosity",
-        ]
         let sourceDirectory = MetalPetalSourcesRootURL(in: projectRoot)
         let shadersFileDirectory = sourceDirectory.appending(component: "Shaders")
         for (file, content) in MTIVectorSIMDTypeSupportCodeGenerator.generate() {
             let url = sourceDirectory.appending(component: "Generated").appending(component: file)
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
-        for (file, content) in MetalPetalBlendingShadersCodeGenerator.generate(blendModes: blendModes) {
+        for (file, content) in MetalPetalBlendingShadersCodeGenerator.generate() {
             let url = shadersFileDirectory.appending(component: file)
             try content.write(to: url, atomically: true, encoding: .utf8)
         }
