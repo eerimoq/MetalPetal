@@ -45,28 +45,30 @@ public final class MTILayer {
     public let blendMode: MTIBlendMode
 
     public init(content: MTIImage,
-                contentRegion: CGRect,
-                contentFlipOptions: FlipOptions,
-                mask: MTIMask?,
-                compositingMask: MTIMask?,
-                layoutUnit: LayoutUnit,
-                position: CGPoint,
-                size: CGSize,
-                rotation: Float,
-                opacity: Float,
-                cornerRadius: MTICornerRadius,
-                cornerCurve: MTICornerCurve,
-                tintColor: MTIColor,
-                blendMode: MTIBlendMode)
+                contentRegion: CGRect? = nil,
+                contentFlipOptions: FlipOptions = [],
+                mask: MTIMask? = nil,
+                compositingMask: MTIMask? = nil,
+                layoutUnit: LayoutUnit = .pixel,
+                position: CGPoint? = nil,
+                size: CGSize? = nil,
+                rotation: Float = 0,
+                opacity: Float = 1,
+                cornerRadius: MTICornerRadius = .init(0),
+                cornerCurve: MTICornerCurve = .circular,
+                tintColor: MTIColor = .clear,
+                blendMode: MTIBlendMode = .normal)
     {
+        let contentSize = content.size
         self.content = content
-        self.contentRegion = contentRegion
+        self.contentRegion = contentRegion ?? content.extent
         self.contentFlipOptions = contentFlipOptions
         self.mask = mask
         self.compositingMask = compositingMask
         self.layoutUnit = layoutUnit
-        self.position = position
-        self.size = size
+        self.position = position ?? CGPoint(x: contentSize.width / 2,
+                                            y: contentSize.height / 2)
+        self.size = size ?? contentSize
         self.rotation = rotation
         self.opacity = opacity
         self.cornerRadius = cornerRadius
