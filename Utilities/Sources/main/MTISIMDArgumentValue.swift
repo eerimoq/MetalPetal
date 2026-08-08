@@ -34,28 +34,28 @@ func generateMtiSimdArgumentValue() -> [String: String] {
     for simdType in SIMDType.metalSupportedSIMDTypes {
         let name = caseName(for: simdType)
         let type = swiftTypeName(for: simdType)
-        cases.append("case \(name)(\(type))\n")
-        dataTypes.append("case .\(name):\n.\(name)\n")
-        bytes.append("case let .\(name)(value):\ntry Swift.withUnsafeBytes(of: value, body)\n")
+        cases += "case \(name)(\(type))\n"
+        dataTypes += "case .\(name):\n.\(name)\n"
+        bytes += "case let .\(name)(value):\ntry Swift.withUnsafeBytes(of: value, body)\n"
     }
     // `packed_float3` shares its data type with `float3`; the two are told apart by their size.
-    cases.append("""
+    cases += """
     #if !os(tvOS)
         case packedFloat3(MTLPackedFloat3)
     #endif
-    """)
-    dataTypes.append("""
+    """
+    dataTypes += """
     #if !os(tvOS)
             case .packedFloat3:
             .float3
     #endif
-    """)
-    bytes.append("""
+    """
+    bytes += """
     #if !os(tvOS)
             case let .packedFloat3(value):
             try Swift.withUnsafeBytes(of: value, body)
     #endif
-    """)
+    """
     let fileContent = """
     //
     // This is an auto-generated source file.
