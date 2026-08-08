@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 public final class MTIDotScreenFilter: MTIUnaryImageRenderingFilter {
     /// Specifies the angle of the effect.

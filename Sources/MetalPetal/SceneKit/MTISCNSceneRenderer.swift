@@ -9,9 +9,7 @@ import CoreGraphics
 import CoreVideo
 import Foundation
 import Metal
-
-@_exported import AVFoundation
-@_exported import SceneKit
+import SceneKit
 
 private func sampleCount(for antialiasingMode: SCNAntialiasingMode) -> Int {
     switch antialiasingMode {

@@ -5,7 +5,12 @@
 //  Created by YuAo on 2021/2/2.
 //
 
+import CoreImage
+import Metal
+import MetalKit
+import MetalPerformanceShaders
 @testable import MetalPetal
+import MetalPetalTestHelpers
 import Testing
 
 func listMetalDevices() -> String {

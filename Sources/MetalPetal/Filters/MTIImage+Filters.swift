@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import ImageIO
 import Metal
 
 public extension MTIImage {

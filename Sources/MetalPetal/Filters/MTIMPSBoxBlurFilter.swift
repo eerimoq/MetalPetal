@@ -5,7 +5,9 @@
 
 import Foundation
 import Metal
+import MetalPerformanceShaders
 import os
+import simd
 
 public final class MTIMPSBoxBlurFilter: MTIUnaryFilter {
     public var inputImage: MTIImage?

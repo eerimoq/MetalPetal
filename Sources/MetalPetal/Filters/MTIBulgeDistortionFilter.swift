@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 public final class MTIBulgeDistortionFilter: MTIUnaryImageRenderingFilter {
     /// Specifies the center of the distortion in pixels.

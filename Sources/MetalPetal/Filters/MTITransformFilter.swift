@@ -5,6 +5,8 @@
 
 import Foundation
 import Metal
+import QuartzCore
+import simd
 
 /*
            ^  y+

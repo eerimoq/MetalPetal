@@ -9,10 +9,7 @@ import CoreImage
 import CoreVideo
 import Foundation
 import Metal
-
-// MetalKit is part of MetalPetal's public API (e.g. `MTKTextureLoader.Option`), and the Objective-C
-// umbrella used to re-export it. Preserve that so consumers importing MetalPetal keep seeing MetalKit.
-@_exported import MetalKit
+import MetalKit
 
 /// Abstract interface for texture loaders.
 public protocol MTITextureLoader: AnyObject {

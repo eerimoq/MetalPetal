@@ -5,9 +5,12 @@
 //  Created by YuAo on 2021/2/2.
 //
 
+import AVFoundation
 import Foundation
+import Metal
 @testable import MetalPetal
 import MetalPetalTestHelpers
+import simd
 import Testing
 
 @Suite(.enabled(if: metalDeviceIsAvailable))

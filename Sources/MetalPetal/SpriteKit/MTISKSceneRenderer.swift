@@ -10,8 +10,7 @@
 import CoreGraphics
 import Foundation
 import Metal
-
-@_exported import SpriteKit
+import SpriteKit
 
 private final class MTISKSceneImagePromise: MTIImagePromise {
     private let pixelFormat: MTLPixelFormat

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 public final class MTIVibranceFilter: MTIUnaryImageRenderingFilter {
     /// Specifies the scale of the operation in the range of -1 to 1, with 0 being no-change.

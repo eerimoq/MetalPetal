@@ -7,6 +7,7 @@
 
 import CoreGraphics
 import Foundation
+import simd
 
 public final class MTIPixellateFilter: MTIUnaryImageRenderingFilter {
     /// Specifies the scale of the operation, i.e. the size for the pixels in the resulting image.

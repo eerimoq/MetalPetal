@@ -5,6 +5,9 @@
 //  Created by YuAo on 2021/2/2.
 //
 
+import CoreGraphics
+import Metal
+import MetalKit
 import MetalPetal
 import MetalPetalTestHelpers
 import Testing

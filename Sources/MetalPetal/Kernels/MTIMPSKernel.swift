@@ -7,8 +7,7 @@
 
 import Foundation
 import Metal
-
-@_exported import MetalPerformanceShaders
+import MetalPerformanceShaders
 
 public typealias MTIMPSKernelBuilder = (MTLDevice) -> MPSKernel
 

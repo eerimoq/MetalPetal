@@ -5,8 +5,17 @@
 //  Created by YuAo on 2021/2/2.
 //
 
+import AVFoundation
+import CoreImage
+import Metal
+import MetalKit
+import MetalPerformanceShaders
 @testable import MetalPetal
 import MetalPetalTestHelpers
+import QuartzCore
+import SceneKit
+import simd
+import SpriteKit
 import Testing
 import VideoToolbox
 

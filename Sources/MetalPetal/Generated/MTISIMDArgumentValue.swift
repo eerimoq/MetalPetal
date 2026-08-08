@@ -7,6 +7,7 @@
 
 import Foundation
 import Metal
+import simd
 
 /// A SIMD vector or matrix value that can be encoded into a shader function argument.
 public enum MTISIMDArgumentValue {

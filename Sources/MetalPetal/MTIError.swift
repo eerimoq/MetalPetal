@@ -5,6 +5,7 @@
 //  Created by YuAo on 10/08/2017.
 //
 
+import CoreVideo
 import Foundation
 
 public enum MTIError: Error, Equatable {

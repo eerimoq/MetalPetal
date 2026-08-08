@@ -7,6 +7,7 @@
 
 import Foundation
 import MetalPetal
+import SceneKit
 import SwiftUI
 
 struct SceneKitSupportView: View {
