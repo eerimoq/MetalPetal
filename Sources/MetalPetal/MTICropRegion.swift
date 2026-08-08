@@ -22,11 +22,11 @@ public struct MTICropRegion {
         self.unit = unit
     }
 
-    static func pixel(_ rect: CGRect) -> MTICropRegion {
+    public static func pixel(_ rect: CGRect) -> MTICropRegion {
         MTICropRegion(bounds: rect, unit: .pixel)
     }
 
-    static func fractional(_ rect: CGRect) -> MTICropRegion {
+    public static func fractional(_ rect: CGRect) -> MTICropRegion {
         MTICropRegion(bounds: rect, unit: .percentage)
     }
 }

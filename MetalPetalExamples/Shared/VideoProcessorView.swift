@@ -31,7 +31,7 @@ struct VideoProcessorView: View {
             let blendWithMaskFilter = MTIBlendWithMaskFilter()
             blendWithMaskFilter
                 .inputMask = MTIMask(content: RadialGradientImage.makeImage(size: presentationSize))
-            let watermarkFilter = MultilayerCompositingFilter()
+            let watermarkFilter = MTIMultilayerCompositingFilter()
             let whiteSquare = MTIImage.white.resized(to: CGSize(
                 width: presentationSize.width / 10,
                 height: presentationSize.width / 10
@@ -69,18 +69,20 @@ struct VideoProcessorView: View {
                         t: min(Float(request.compositionTime.seconds), 1)
                     )
                     pixellateFilter.scale = pixellateScale
-                    watermarkFilter.layers = [MultilayerCompositingFilter.Layer(content: watermarkImage)
-                        .blendMode(.normal)
-                        .frame(CGRect(x: sourceImage.size.width - watermarkImage.size.width - 16,
-                                      y: sourceImage.size.height - watermarkImage.size.height - 16,
-                                      width: watermarkImage.size.width,
-                                      height: watermarkImage.size.height),
-                               layoutUnit: .pixel)
-                        .mask(MTIMask(
+                    watermarkFilter.layers = [MTILayer(
+                        content: watermarkImage,
+                        mask: MTIMask(
                             content: watermarkMaskTransformFilter.outputImage!,
                             component: .alpha,
                             mode: .oneMinusMaskValue
-                        ))]
+                        ),
+                        position: CGPoint(
+                            x: sourceImage.size.width - watermarkImage.size.width / 2 - 16,
+                            y: sourceImage.size.height - watermarkImage.size.height / 2 - 16
+                        ),
+                        size: watermarkImage.size,
+                        blendMode: .normal
+                    )]
                     blendWithMaskFilter.inputImage = sourceImage
                     grayScaleFilter.inputImage = sourceImage
                     dotScreenFilter.inputImage = grayScaleFilter.outputImage

@@ -81,7 +81,7 @@ public final class MTIImage: Hashable, CustomStringConvertible {
     }
 
     // Identity semantics, matching the pointer-based `isEqual:`/`hash` MTIImage inherited from NSObject.
-    // `MultilayerCompositingFilter.Layer` and the render graph rely on this.
+    // The render graph relies on this.
     public static func == (lhs: MTIImage, rhs: MTIImage) -> Bool {
         lhs === rhs
     }

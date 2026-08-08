@@ -80,9 +80,9 @@ struct PublicInitializerTests {
         #expect(descriptor == descriptor)
         #expect(MTIFunctionDescriptor(name: "passthrough") == MTIFunctionDescriptor(name: "passthrough"))
         #expect(MTIVector(values: [1, 2, 3, 4] as [Float]) == MTIVector(values: [1, 2, 3, 4] as [Float]))
-        var layer = MultilayerCompositingFilter.Layer(content: image)
-        layer.opacity = 0.5
-        #expect(layer == layer)
+        let layer = MTILayer(content: image, opacity: 0.5)
+        #expect(layer.content == image)
+        #expect(layer.opacity == 0.5)
     }
 
     @Test func valueTypeSignaturesAreStableForConsumers() {

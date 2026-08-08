@@ -40,7 +40,7 @@ struct SketchBoardView: View {
         private var previousPreviousLocation: CGPoint?
         private var previousLocation: CGPoint?
         private var brushImage: MTIImage!
-        private var compositingFilter = MultilayerCompositingFilter()
+        private var compositingFilter = MTIMultilayerCompositingFilter()
         private let bitmapScale: CGFloat = {
             #if os(macOS)
             return NSScreen.main?.backingScaleFactor ?? 1.0
@@ -73,11 +73,12 @@ struct SketchBoardView: View {
                         height: max(backgroundImage.size.height, canvasSize.height)
                     )
                 )
-                let expandCanvasFilter = MultilayerCompositingFilter()
+                let expandCanvasFilter = MTIMultilayerCompositingFilter()
                 expandCanvasFilter.inputBackgroundImage = backgroundImage
-                expandCanvasFilter.layers = [MultilayerCompositingFilter.Layer(content: imageBuffer).frame(
-                    CGRect(x: 0, y: 0, width: imageBuffer.size.width, height: imageBuffer.size.height),
-                    layoutUnit: .pixel
+                expandCanvasFilter.layers = [MTILayer(
+                    content: imageBuffer,
+                    position: CGPoint(x: imageBuffer.size.width / 2, y: imageBuffer.size.height / 2),
+                    size: imageBuffer.size
                 )]
                 let outputImage = expandCanvasFilter.outputImage!.withCachePolicy(.persistent)
                 output(image: outputImage)
@@ -128,7 +129,7 @@ struct SketchBoardView: View {
 
         private func draw(at point: CGPoint) {
             let background: MTIImage = previousImageBuffer ?? backgroundImage
-            var brushLayers = [MultilayerCompositingFilter.Layer]()
+            var brushLayers = [MTILayer]()
             let previousPreviousLocation = previousPreviousLocation ?? point
             let previousLocation = previousLocation ?? point
             self.previousPreviousLocation = self.previousLocation
@@ -173,12 +174,11 @@ struct SketchBoardView: View {
                     case .eraser:
                         backgroundColor
                     }
-                    var brushLayer = MultilayerCompositingFilter.Layer(content: brushImage)
-                    brushLayer.position = p
-                    brushLayer.opacity = 1
-                    brushLayer.blendMode = .normal
-                    brushLayer.tintColor = tintColor
-                    brushLayers.append(brushLayer)
+                    brushLayers.append(MTILayer(content: brushImage,
+                                                position: p,
+                                                opacity: 1,
+                                                tintColor: tintColor,
+                                                blendMode: .normal))
                 }
             } else {
                 let tintColor: MTIColor = switch brushColor {
@@ -194,12 +194,11 @@ struct SketchBoardView: View {
                 case .eraser:
                     backgroundColor
                 }
-                var brushLayer = MultilayerCompositingFilter.Layer(content: brushImage)
-                brushLayer.position = point
-                brushLayer.opacity = 1
-                brushLayer.blendMode = .normal
-                brushLayer.tintColor = tintColor
-                brushLayers.append(brushLayer)
+                brushLayers.append(MTILayer(content: brushImage,
+                                            position: point,
+                                            opacity: 1,
+                                            tintColor: tintColor,
+                                            blendMode: .normal))
             }
             compositingFilter.inputBackgroundImage = background
             compositingFilter.layers = brushLayers

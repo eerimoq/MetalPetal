@@ -255,7 +255,7 @@ extension CapturePipeline.Effect {
             let filter = MTIColorLookupFilter()
             filter.inputColorLookupTable = DemoImages.colorLookupTable
             return filter
-        }, inputImage: \.inputImage)),
+        }, inputImage: \MTIColorLookupFilter.inputImage)),
         .init("RGB Tone Curve", makeFilter: applying({
             let filter = MTIRGBToneCurveFilter()
             filter.rgbCompositeControlPoints = [
@@ -264,7 +264,7 @@ extension CapturePipeline.Effect {
                 MTIVector(value: CGPoint(x: 1, y: 1)),
             ]
             return filter
-        }, inputImage: \.inputImage)),
+        }, inputImage: \MTIRGBToneCurveFilter.inputImage)),
         .init("CLAHE", makeFilter: applying {
             let filter = MTICLAHEFilter()
             filter.clipLimit = 2
@@ -344,10 +344,10 @@ extension CapturePipeline.Effect {
             filter.amount = 1
             filter.radius = 8
             return filter
-        }, inputImage: \.inputImage)),
+        }, inputImage: \MTIHighPassSkinSmoothingFilter.inputImage)),
         .init("CRT", makeFilter: applying({
             MTICrtFilter()
-        }, inputImage: \.inputImage)),
+        }, inputImage: \MTICrtFilter.inputImage)),
         .init("Color Halftone", makeFilter: applying {
             let filter = MTIColorHalftoneFilter()
             filter.scale = 16
@@ -453,7 +453,7 @@ extension CapturePipeline.Effect {
             }
         },
         .init("Multilayer Compositing") {
-            let filter = MultilayerCompositingFilter()
+            let filter = MTIMultilayerCompositingFilter()
             let overlayImage = makeImageProvider { size in
                 DemoImages.makeSymbolImage(
                     named: "sparkles",
@@ -464,14 +464,13 @@ extension CapturePipeline.Effect {
                 let overlay = overlayImage(image.size)
                 filter.inputBackgroundImage = image
                 filter.layers = [
-                    MultilayerCompositingFilter.Layer(content: overlay)
-                        .tintColor(MTIColor(red: 210 / 255.0, green: 180 / 255.0, blue: 40 / 255.0, alpha: 1))
-                        .frame(
-                            center: CGPoint(x: image.size.width / 2, y: image.size.height / 2),
-                            size: overlay.size,
-                            layoutUnit: .pixel
-                        )
-                        .blendMode(.hardLight),
+                    MTILayer(
+                        content: overlay,
+                        position: CGPoint(x: image.size.width / 2, y: image.size.height / 2),
+                        size: overlay.size,
+                        tintColor: MTIColor(red: 210 / 255.0, green: 180 / 255.0, blue: 40 / 255.0, alpha: 1),
+                        blendMode: .hardLight
+                    ),
                 ]
                 return filter.outputImage!
             }
@@ -490,7 +489,7 @@ extension CapturePipeline.Effect {
             let filter = MTICoreImageUnaryFilter()
             filter.filter = CIFilter(name: "CIPhotoEffectInstant")
             return filter
-        }, inputImage: \.inputImage)),
+        }, inputImage: \MTICoreImageUnaryFilter.inputImage)),
         .init("CIBloom") {
             { image in
                 MTICoreImageKernel.image(byProcessing: [image], using: { inputs in

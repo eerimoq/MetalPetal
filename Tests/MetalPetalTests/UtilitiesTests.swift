@@ -40,27 +40,6 @@ struct UtilitiesTests {
         #expect(weakValue == nil)
     }
 
-    @Test func mTILayerModel() {
-        // `MTILayer` is now a Swift class, so its stored properties are enumerated via `Mirror`
-        // rather than the Objective-C runtime. This still verifies that every `MTILayer` property
-        // has a matching field on `MultilayerCompositingFilter.Layer`.
-        let mtiLayer = MTILayer(
-            content: .white,
-            layoutUnit: .pixel,
-            position: .zero,
-            size: .zero,
-            rotation: 0,
-            opacity: 1,
-            blendMode: .normal
-        )
-        let mtiLayerMirror = Mirror(reflecting: mtiLayer)
-        let swiftLayerMirror = Mirror(reflecting: MultilayerCompositingFilter.Layer(content: .white))
-        for child in mtiLayerMirror.children {
-            guard let label = child.label else { continue }
-            #expect(swiftLayerMirror.children.contains { $0.label == label }, "Missing property: \(label)")
-        }
-    }
-
     @Test func directSIMDVectorSupport_float4() throws {
         var librarySource = Self.mtiShaderLibrarySource
         librarySource += """

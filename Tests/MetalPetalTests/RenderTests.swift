@@ -568,12 +568,13 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-            .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-            .opacity(1)]
+        filter.layers = [MTILayer(content: MTIImage.white,
+                                  position: CGPoint(x: 0.5, y: 0.5),
+                                  size: CGSize(width: 1, height: 1),
+                                  opacity: 1)]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -593,12 +594,13 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-            .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-            .opacity(0.5)]
+        filter.layers = [MTILayer(content: MTIImage.white,
+                                  position: CGPoint(x: 0.5, y: 0.5),
+                                  size: CGSize(width: 1, height: 1),
+                                  opacity: 0.5)]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -618,12 +620,13 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 4
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-            .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-            .opacity(0.5)]
+        filter.layers = [MTILayer(content: MTIImage.white,
+                                  position: CGPoint(x: 0.5, y: 0.5),
+                                  size: CGSize(width: 1, height: 1),
+                                  opacity: 0.5)]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -643,13 +646,14 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-            .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .tintColor(MTIColor(red: 1, green: 1, blue: 0, alpha: 1))]
+        filter.layers = [MTILayer(content: MTIImage.white,
+                                  position: CGPoint(x: 0.5, y: 0.5),
+                                  size: CGSize(width: 1, height: 1),
+                                  opacity: 1,
+                                  tintColor: MTIColor(red: 1, green: 1, blue: 0, alpha: 1))]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -705,13 +709,14 @@ struct RenderTests {
             [64, 64],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: clutImage)
-            .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(.colorLookup512x512)]
+        filter.layers = [MTILayer(content: clutImage,
+                                  position: CGPoint(x: 0.5, y: 0.5),
+                                  size: CGSize(width: 1, height: 1),
+                                  opacity: 1,
+                                  blendMode: .colorLookup512x512)]
         let outputImage = try #require(filter.outputImage)
 
         let context = try makeContext()
@@ -740,14 +745,15 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: layerContent)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(.normal)
-            .mask(MTIMask(content: mask))]
+        filter.layers = [MTILayer(content: layerContent,
+                                  mask: MTIMask(content: mask),
+                                  position: CGPoint(x: 1, y: 0.5),
+                                  size: CGSize(width: 2, height: 1),
+                                  opacity: 1,
+                                  blendMode: .normal)]
         let outputImage = try #require(filter.outputImage)
 
         let context = try makeContext()
@@ -773,14 +779,15 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: layerContent)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(.normal)
-            .compositingMask(MTIMask(content: compositingMask))]
+        filter.layers = [MTILayer(content: layerContent,
+                                  compositingMask: MTIMask(content: compositingMask),
+                                  position: CGPoint(x: 1, y: 0.5),
+                                  size: CGSize(width: 2, height: 1),
+                                  opacity: 1,
+                                  blendMode: .normal)]
         let outputImage = try #require(filter.outputImage)
 
         let context = try makeContext()
@@ -810,14 +817,15 @@ struct RenderTests {
             [255, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: clutImage)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(.colorLookup512x512)
-            .mask(MTIMask(content: mask))]
+        filter.layers = [MTILayer(content: clutImage,
+                                  mask: MTIMask(content: mask),
+                                  position: CGPoint(x: 1, y: 0.5),
+                                  size: CGSize(width: 2, height: 1),
+                                  opacity: 1,
+                                  blendMode: .colorLookup512x512)]
         let outputImage = try #require(filter.outputImage)
 
         let context = try makeContext()
@@ -835,14 +843,15 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
 
         try autoreleasepool {
-            filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-                .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-                .opacity(1)
-                .tintColor(MTIColor(red: 1, green: 1, blue: 0, alpha: 0.5))]
+            filter.layers = [MTILayer(content: MTIImage.white,
+                                      position: CGPoint(x: 0.5, y: 0.5),
+                                      size: CGSize(width: 1, height: 1),
+                                      opacity: 1,
+                                      tintColor: MTIColor(red: 1, green: 1, blue: 0, alpha: 0.5))]
             let outputImage = try #require(filter.outputImage)
             let outputCGImage = try context.makeCGImage(from: outputImage)
             PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -856,10 +865,11 @@ struct RenderTests {
         }
 
         try autoreleasepool {
-            filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-                .frame(center: CGPoint(x: 0.5, y: 0.5), size: CGSize(width: 1, height: 1), layoutUnit: .pixel)
-                .opacity(1)
-                .tintColor(MTIColor(red: 1, green: 1, blue: 0, alpha: 0))]
+            filter.layers = [MTILayer(content: MTIImage.white,
+                                      position: CGPoint(x: 0.5, y: 0.5),
+                                      size: CGSize(width: 1, height: 1),
+                                      opacity: 1,
+                                      tintColor: MTIColor(red: 1, green: 1, blue: 0, alpha: 0))]
             let outputImage = try #require(filter.outputImage)
             let outputCGImage = try context.makeCGImage(from: outputImage)
             PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -886,13 +896,14 @@ struct RenderTests {
             [0, 0],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: overlayImage)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 2), layoutUnit: .pixel)
-            .rotation(.pi / 2)
-            .opacity(1)]
+        filter.layers = [MTILayer(content: overlayImage,
+                                  position: CGPoint(x: 1, y: 1),
+                                  size: CGSize(width: 2, height: 2),
+                                  rotation: .pi / 2,
+                                  opacity: 1)]
         guard let outputImage = filter.outputImage else {
             Issue.record()
             return
@@ -915,19 +926,22 @@ struct RenderTests {
     }
 
     @Test func multilayerCompositing_outputOpaqueImage() throws {
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = MTIImage(
             color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
             sRGB: false,
             size: CGSize(width: 1, height: 1)
         )
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1
+        )]
         filter.outputAlphaType = .alphaIsOne
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
         #expect(outputImage.alphaType == .alphaIsOne)
@@ -940,19 +954,22 @@ struct RenderTests {
     }
 
     @Test func multilayerCompositing_outputNonPremultipliedAlpha() throws {
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = MTIImage(
             color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
             sRGB: false,
             size: CGSize(width: 1, height: 1)
         )
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1
+        )]
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
         #expect(outputImage.alphaType == .nonPremultiplied)
 
@@ -966,19 +983,22 @@ struct RenderTests {
     }
 
     @Test func multilayerCompositing_outputPremultipliedAlpha() throws {
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = MTIImage(
             color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
             sRGB: false,
             size: CGSize(width: 1, height: 1)
         )
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1
+        )]
         filter.outputAlphaType = .premultiplied
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
         #expect(outputImage.alphaType == .premultiplied)
@@ -993,19 +1013,22 @@ struct RenderTests {
     }
 
     @Test func blend_outputOpaqueImage() throws {
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = MTIImage(
             color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
             sRGB: false,
             size: CGSize(width: 1, height: 1)
         )
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1
+        )]
         filter.outputAlphaType = .alphaIsOne
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
         #expect(outputImage.alphaType == .alphaIsOne)
@@ -1091,19 +1114,22 @@ struct RenderTests {
     }
 
     @Test func multilayerCompositing_outputPremultipliedAlpha_msaa() throws {
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = MTIImage(
             color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
             sRGB: false,
             size: CGSize(width: 1, height: 1)
         )
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 1, green: 0, blue: 0, alpha: 0.5),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1
+        )]
         filter.rasterSampleCount = 4
         filter.outputAlphaType = .premultiplied
         let outputImage = try #require(filter.outputImage?.withCachePolicy(.persistent))
@@ -1124,12 +1150,13 @@ struct RenderTests {
         let image = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
             [0, 0],
         ]), isOpaque: true)
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
         filter.rasterSampleCount = 1
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage.white)
-            .frame(CGRect(x: 0, y: 0, width: 1.6, height: 1), layoutUnit: .pixel)
-            .opacity(1)]
+        filter.layers = [MTILayer(content: MTIImage.white,
+                                  position: CGPoint(x: 0.8, y: 0.5),
+                                  size: CGSize(width: 1.6, height: 1),
+                                  opacity: 1)]
         guard let outputImage = filter.outputImage else {
             Issue.record()
             return
@@ -1544,16 +1571,19 @@ struct RenderTests {
             [64, 64],
         ]), isOpaque: true)
 
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
-        filter.layers = [MultilayerCompositingFilter.Layer(content: MTIImage(
-            color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
-            sRGB: false,
-            size: CGSize(width: 1, height: 1)
-        ))
-        .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .pixel)
-        .opacity(1)
-        .blendMode(blendMode)]
+        filter.layers = [MTILayer(
+            content: MTIImage(
+                color: MTIColor(red: 64 / 255.0, green: 0, blue: 0, alpha: 0),
+                sRGB: false,
+                size: CGSize(width: 1, height: 1)
+            ),
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: 1,
+            blendMode: blendMode
+        )]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -1588,12 +1618,13 @@ struct RenderTests {
         let overlay = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
             [0, 32],
         ]), isOpaque: true)
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
-        filter.layers = [MultilayerCompositingFilter.Layer(content: overlay)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(blendMode)]
+        filter.layers = [MTILayer(content: overlay,
+                                  position: CGPoint(x: 1, y: 0.5),
+                                  size: CGSize(width: 2, height: 1),
+                                  opacity: 1,
+                                  blendMode: blendMode)]
         let outputImage = try #require(filter.outputImage)
         let outputCGImage = try context.makeCGImage(from: outputImage)
         PixelEnumerator.enumeratePixels(in: outputCGImage) { pixel, coord in
@@ -1617,12 +1648,13 @@ struct RenderTests {
         let overlay = try MTIImage(cgImage: ImageGenerator.makeMonochromeImage([
             [0, 32],
         ]), isOpaque: true)
-        let filter = MultilayerCompositingFilter()
+        let filter = MTIMultilayerCompositingFilter()
         filter.inputBackgroundImage = image
-        filter.layers = [MultilayerCompositingFilter.Layer(content: overlay)
-            .frame(CGRect(x: 0, y: 0, width: 2, height: 1), layoutUnit: .pixel)
-            .opacity(1)
-            .blendMode(blendMode)]
+        filter.layers = [MTILayer(content: overlay,
+                                  position: CGPoint(x: 1, y: 0.5),
+                                  size: CGSize(width: 2, height: 1),
+                                  opacity: 1,
+                                  blendMode: blendMode)]
         let outputImage = try #require(filter.outputImage)
         #expect(throws: (any Error).self) { try context.makeCGImage(from: outputImage) }
     }
@@ -2712,16 +2744,17 @@ struct RenderTests {
         roundCornerFilter.inputImage = image
         let roundImage = try #require(roundCornerFilter.outputImage)
 
-        let multilayerCompositingFilter = MultilayerCompositingFilter()
+        let multilayerCompositingFilter = MTIMultilayerCompositingFilter()
         multilayerCompositingFilter.inputBackgroundImage = MTIImage(
             color: .clear,
             sRGB: false,
             size: CGSize(width: 64, height: 64)
         )
-        multilayerCompositingFilter.layers = [MultilayerCompositingFilter.Layer(content: image).frame(
-            CGRect(x: 32, y: 32, width: 32, height: 32),
-            layoutUnit: .pixel
-        ).corner(radius: MTICornerRadius(16), curve: .circular)]
+        multilayerCompositingFilter.layers = [MTILayer(content: image,
+                                                       position: CGPoint(x: 48, y: 48),
+                                                       size: CGSize(width: 32, height: 32),
+                                                       cornerRadius: MTICornerRadius(16),
+                                                       cornerCurve: .circular)]
         let compositedImage = try #require(multilayerCompositingFilter.outputImage)
 
         let context = try makeContext()
@@ -2744,16 +2777,17 @@ struct RenderTests {
         roundCornerFilter.cornerCurve = .continuous
         roundCornerFilter.inputImage = image
         let roundImage = try #require(roundCornerFilter.outputImage)
-        let multilayerCompositingFilter = MultilayerCompositingFilter()
+        let multilayerCompositingFilter = MTIMultilayerCompositingFilter()
         multilayerCompositingFilter.inputBackgroundImage = MTIImage(
             color: .clear,
             sRGB: false,
             size: CGSize(width: 64, height: 64)
         )
-        multilayerCompositingFilter.layers = [MultilayerCompositingFilter.Layer(content: image).frame(
-            CGRect(x: 32, y: 32, width: 32, height: 32),
-            layoutUnit: .pixel
-        ).corner(radius: MTICornerRadius(8), curve: .continuous)]
+        multilayerCompositingFilter.layers = [MTILayer(content: image,
+                                                       position: CGPoint(x: 48, y: 48),
+                                                       size: CGSize(width: 32, height: 32),
+                                                       cornerRadius: MTICornerRadius(8),
+                                                       cornerCurve: .continuous)]
         let compositedImage = try #require(multilayerCompositingFilter.outputImage)
 
         let context = try makeContext()
@@ -2772,16 +2806,17 @@ struct RenderTests {
 
     @Test func multilayerCompositing_roundCorner_none() throws {
         let image = try #require(MTIImage.white.resized(to: CGSize(width: 32, height: 32)))
-        let multilayerCompositingFilter = MultilayerCompositingFilter()
+        let multilayerCompositingFilter = MTIMultilayerCompositingFilter()
         multilayerCompositingFilter.inputBackgroundImage = MTIImage(
             color: .clear,
             sRGB: false,
             size: CGSize(width: 64, height: 64)
         )
-        multilayerCompositingFilter.layers = [MultilayerCompositingFilter.Layer(content: image).frame(
-            CGRect(x: 32, y: 32, width: 32, height: 32),
-            layoutUnit: .pixel
-        ).corner(radius: MTICornerRadius(0), curve: .continuous)]
+        multilayerCompositingFilter.layers = [MTILayer(content: image,
+                                                       position: CGPoint(x: 48, y: 48),
+                                                       size: CGSize(width: 32, height: 32),
+                                                       cornerRadius: MTICornerRadius(0),
+                                                       cornerCurve: .continuous)]
         let compositedImage = try #require(multilayerCompositingFilter.outputImage)
         let context = try makeContext()
         let roundCornerFilterOutput = try context.makeCGImage(from: image)

@@ -23,116 +23,142 @@ struct MultilayerCompositingFilterView: View {
         return mode
     }()
 
+    // Index of the layers that are updated by the filter parameters below.
+    private static let sparklesLayerIndex = 4
+    private static let colorLookupLayerIndex = 5
+    private static let grayScaleLayerIndex = 6
+
+    private static let sparklesImage = DemoImages.makeSymbolImage(
+        named: "sparkles",
+        aspectFitIn: CGSize(width: 120, height: 120)
+    )
+
+    private static let dropImage = DemoImages.makeSymbolImage(
+        named: "drop.fill",
+        aspectFitIn: CGSize(width: 180, height: 180)
+    )
+
+    private static let colorLookupCompositingMask = MTIMask(
+        content: DemoImages.makeSymbolImage(named: "diamond.fill", aspectFitIn: CGSize(
+            width: 1080,
+            height: 1920
+        ), padding: 96),
+        component: .alpha,
+        mode: .normal
+    )
+
+    private static func makeTintedSymbolLayer(named name: String, column: Int, color: MTIColor) -> MTILayer {
+        MTILayer(
+            content: DemoImages.makeSymbolImage(named: name, aspectFitIn: CGSize(width: 120, height: 120)),
+            position: CGPoint(x: 16 + (120 + 16) * CGFloat(column) + 60, y: 16 + 60),
+            size: CGSize(width: 120, height: 120),
+            tintColor: color
+        )
+    }
+
+    private static func makeSparklesLayer(rotation: Float) -> MTILayer {
+        MTILayer(
+            content: sparklesImage,
+            position: CGPoint(x: 56 + 60, y: 1080 - 16 - 60),
+            size: CGSize(width: 120, height: 120),
+            rotation: rotation,
+            tintColor: MTIColor(red: 210 / 255.0, green: 180 / 255.0, blue: 40 / 255.0, alpha: 1),
+            blendMode: .hardLight
+        )
+    }
+
+    private static func makeColorLookupLayer(opacity: Float) -> MTILayer {
+        MTILayer(
+            content: DemoImages.colorLookupTable,
+            compositingMask: colorLookupCompositingMask,
+            layoutUnit: .fractionOfBackgroundSize,
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 1, height: 1),
+            opacity: opacity,
+            blendMode: .colorLookup512x512
+        )
+    }
+
+    private static func makeGrayScaleLayer(opacity: Float) -> MTILayer {
+        MTILayer(
+            content: dropImage,
+            layoutUnit: .fractionOfBackgroundSize,
+            position: CGPoint(x: 0.5, y: 0.5),
+            size: CGSize(width: 0.18, height: 0.32),
+            opacity: opacity,
+            blendMode: MultilayerCompositingFilterView.grayScaleBlendMode
+        )
+    }
+
     var body: some View {
-        ImageFilterView(filter: { () -> MultilayerCompositingFilter in
-            let filter = MultilayerCompositingFilter()
+        ImageFilterView(filter: { () -> MTIMultilayerCompositingFilter in
+            let filter = MTIMultilayerCompositingFilter()
             filter.layers = [
                 // layers with tint color
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
+                Self.makeTintedSymbolLayer(
                     named: "triangle.circle",
-                    aspectFitIn: CGSize(width: 120, height: 120)
-                ))
-                .tintColor(MTIColor(red: 54 / 255.0, green: 207 / 255.0, blue: 150 / 255.0, alpha: 1))
-                .frame(
-                    CGRect(x: 16 + (120 + 16) * 0, y: 16, width: 120, height: 120),
-                    layoutUnit: .pixel
+                    column: 0,
+                    color: MTIColor(red: 54 / 255.0, green: 207 / 255.0, blue: 150 / 255.0, alpha: 1)
                 ),
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
+                Self.makeTintedSymbolLayer(
                     named: "circle.circle",
-                    aspectFitIn: CGSize(width: 120, height: 120)
-                ))
-                .tintColor(MTIColor(red: 213 / 255.0, green: 50 / 255.0, blue: 50 / 255.0, alpha: 1))
-                .frame(
-                    CGRect(x: 16 + (120 + 16) * 1, y: 16, width: 120, height: 120),
-                    layoutUnit: .pixel
+                    column: 1,
+                    color: MTIColor(red: 213 / 255.0, green: 50 / 255.0, blue: 50 / 255.0, alpha: 1)
                 ),
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
+                Self.makeTintedSymbolLayer(
                     named: "xmark.circle",
-                    aspectFitIn: CGSize(width: 120, height: 120)
-                ))
-                .tintColor(MTIColor(red: 105 / 255.0, green: 133 / 255.0, blue: 197 / 255.0, alpha: 1))
-                .frame(
-                    CGRect(x: 16 + (120 + 16) * 2, y: 16, width: 120, height: 120),
-                    layoutUnit: .pixel
+                    column: 2,
+                    color: MTIColor(red: 105 / 255.0, green: 133 / 255.0, blue: 197 / 255.0, alpha: 1)
                 ),
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
+                Self.makeTintedSymbolLayer(
                     named: "square.circle",
-                    aspectFitIn: CGSize(width: 120, height: 120)
-                ))
-                .tintColor(MTIColor(red: 212 / 255.0, green: 104 / 255.0, blue: 190 / 255.0, alpha: 1))
-                .frame(
-                    CGRect(x: 16 + (120 + 16) * 3, y: 16, width: 120, height: 120),
-                    layoutUnit: .pixel
+                    column: 3,
+                    color: MTIColor(red: 212 / 255.0, green: 104 / 255.0, blue: 190 / 255.0, alpha: 1)
                 ),
                 // layer with blend mode
-                // index 4
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
-                    named: "sparkles",
-                    aspectFitIn: CGSize(width: 120, height: 120)
-                ))
-                .tintColor(MTIColor(red: 210 / 255.0, green: 180 / 255.0, blue: 40 / 255.0, alpha: 1))
-                .frame(CGRect(x: 56, y: 1080 - 16 - 120, width: 120, height: 120), layoutUnit: .pixel)
-                .blendMode(.hardLight),
-                // index 5
+                Self.makeSparklesLayer(rotation: 0),
                 // layer with compositing mask and color lookup blend mode
-                MultilayerCompositingFilter.Layer(content: DemoImages.colorLookupTable)
-                    .frame(CGRect(x: 0, y: 0, width: 1, height: 1), layoutUnit: .fractionOfBackgroundSize)
-                    .compositingMask(MTIMask(
-                        content: DemoImages.makeSymbolImage(named: "diamond.fill", aspectFitIn: CGSize(
-                            width: 1080,
-                            height: 1920
-                        ), padding: 96),
-                        component: .alpha,
-                        mode: .normal
-                    ))
-                    .blendMode(.colorLookup512x512),
-                // index 6
+                Self.makeColorLookupLayer(opacity: 1),
                 // layer with custom blend mode
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
-                    named: "drop.fill",
-                    aspectFitIn: CGSize(width: 180, height: 180)
-                ))
-                .frame(
-                    center: CGPoint(x: 0.5, y: 0.5),
-                    size: CGSize(width: 0.18, height: 0.32),
-                    layoutUnit: .fractionOfBackgroundSize
-                )
-                .blendMode(MultilayerCompositingFilterView.grayScaleBlendMode),
+                Self.makeGrayScaleLayer(opacity: 1),
                 // layer with content region and mask
-                MultilayerCompositingFilter.Layer(content: DemoImages.p1DepthMask)
-                    .contentRegion(MTIMakeRect(
+                MTILayer(
+                    content: DemoImages.p1DepthMask,
+                    contentRegion: MTIMakeRect(
                         aspectRatio: CGSize(width: 1, height: 1),
                         insideRect: DemoImages.p1DepthMask.extent
-                    ))
-                    .frame(CGRect(x: 1920 - 240 - 16, y: 16, width: 240, height: 240), layoutUnit: .pixel)
-                    .mask(MTIMask(
+                    ),
+                    mask: MTIMask(
                         content: DemoImages.makeSymbolImage(named: "hexagon.fill", aspectFitIn: CGSize(
                             width: 240,
                             height: 240
                         )),
                         component: .alpha,
                         mode: .normal
-                    )),
+                    ),
+                    position: CGPoint(x: 1920 - 16 - 120, y: 16 + 120),
+                    size: CGSize(width: 240, height: 240)
+                ),
                 // bottom right layers
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
-                    named: "capsule.fill",
-                    aspectFitIn: CGSize(width: 180, height: 120)
-                ))
-                .frame(
-                    CGRect(x: 1920 - 180 - 16, y: 1080 - 120 - 16, width: 180, height: 120),
-                    layoutUnit: .pixel
-                )
-                .tintColor(.white),
-                MultilayerCompositingFilter.Layer(content: DemoImages.makeSymbolImage(
-                    named: "leaf.fill",
-                    aspectFitIn: CGSize(width: 180, height: 120),
-                    padding: 32
-                ))
-                .frame(
-                    CGRect(x: 1920 - 180 - 16, y: 1080 - 120 - 16, width: 180, height: 120),
-                    layoutUnit: .pixel
-                )
-                .tintColor(MTIColor(red: 0.1, green: 0.9, blue: 0.1, alpha: 0.5)),
+                MTILayer(
+                    content: DemoImages.makeSymbolImage(
+                        named: "capsule.fill",
+                        aspectFitIn: CGSize(width: 180, height: 120)
+                    ),
+                    position: CGPoint(x: 1920 - 16 - 90, y: 1080 - 16 - 60),
+                    size: CGSize(width: 180, height: 120),
+                    tintColor: .white
+                ),
+                MTILayer(
+                    content: DemoImages.makeSymbolImage(
+                        named: "leaf.fill",
+                        aspectFitIn: CGSize(width: 180, height: 120),
+                        padding: 32
+                    ),
+                    position: CGPoint(x: 1920 - 16 - 90, y: 1080 - 16 - 60),
+                    size: CGSize(width: 180, height: 120),
+                    tintColor: MTIColor(red: 0.1, green: 0.9, blue: 0.1, alpha: 0.5)
+                ),
             ]
             return filter
         }(),
@@ -143,7 +169,7 @@ struct MultilayerCompositingFilterView: View {
                 defaultValue: 0,
                 sliderRange: 0 ... (.pi * 2),
                 updater: { filter, rotation in
-                    filter.layers[4] = filter.layers[4].rotation(rotation)
+                    filter.layers[Self.sparklesLayerIndex] = Self.makeSparklesLayer(rotation: rotation)
                 }
             ),
             FilterParameter(
@@ -151,7 +177,8 @@ struct MultilayerCompositingFilterView: View {
                 defaultValue: 1,
                 sliderRange: 0 ... 1,
                 updater: { filter, intensity in
-                    filter.layers[5] = filter.layers[5].opacity(intensity)
+                    filter.layers[Self.colorLookupLayerIndex] = Self
+                        .makeColorLookupLayer(opacity: intensity)
                 }
             ),
             FilterParameter(
@@ -159,7 +186,7 @@ struct MultilayerCompositingFilterView: View {
                 defaultValue: 1,
                 sliderRange: 0 ... 1,
                 updater: { filter, intensity in
-                    filter.layers[6] = filter.layers[6].opacity(intensity)
+                    filter.layers[Self.grayScaleLayerIndex] = Self.makeGrayScaleLayer(opacity: intensity)
                 }
             ),
         ],
