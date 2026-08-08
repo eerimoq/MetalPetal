@@ -10,7 +10,7 @@ import CoreImage
 import Foundation
 import Metal
 
-public final class MTICIImageRenderingOptions {
+public struct MTICIImageRenderingOptions {
     public let colorSpace: CGColorSpace?
     public let isFlipped: Bool
     public let destinationPixelFormat: MTLPixelFormat
@@ -28,7 +28,7 @@ public final class MTICIImageRenderingOptions {
         isFlipped = flipped
     }
 
-    public convenience init(
+    public init(
         destinationPixelFormat pixelFormat: MTLPixelFormat,
         colorSpace: CGColorSpace?,
         flipped: Bool
@@ -48,7 +48,7 @@ public final class MTICIImageRenderingOptions {
     )
 }
 
-public final class MTICIImageCreationOptions {
+public struct MTICIImageCreationOptions {
     public let colorSpace: CGColorSpace?
     public let isFlipped: Bool
 
