@@ -40,7 +40,7 @@ private func MTIMPSSupportsMTLDevice(_ device: MTLDevice) -> Bool {
 }
 
 /// Options for creating a MTIContext.
-public final class MTIContextOptions {
+public struct MTIContextOptions {
     public var coreImageContextOptions: [CIContextOption: Any]?
 
     /// Default pixel format for intermediate textures.

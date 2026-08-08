@@ -11,7 +11,7 @@ import os
 
 let maximumColorAttachmentCount = 8
 
-public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration, Hashable {
+public struct MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration, Hashable {
     private let pixelFormats: [MTLPixelFormat]
     public let colorAttachmentCount: Int
     public let depthAttachmentPixelFormat: MTLPixelFormat
@@ -36,7 +36,7 @@ public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration,
         self.rasterSampleCount = rasterSampleCount
     }
 
-    public convenience init(colorAttachmentPixelFormats: [MTLPixelFormat], count _: Int) {
+    public init(colorAttachmentPixelFormats: [MTLPixelFormat], count _: Int) {
         self.init(
             colorAttachmentPixelFormats: colorAttachmentPixelFormats,
             depthAttachmentPixelFormat: .invalid,
@@ -45,7 +45,7 @@ public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration,
         )
     }
 
-    public convenience init(colorAttachmentPixelFormat: MTLPixelFormat) {
+    public init(colorAttachmentPixelFormat: MTLPixelFormat) {
         self.init(
             colorAttachmentPixelFormats: [colorAttachmentPixelFormat],
             depthAttachmentPixelFormat: .invalid,
@@ -78,9 +78,6 @@ public final class MTIRenderPipelineKernelConfiguration: MTIKernelConfiguration,
         lhs: MTIRenderPipelineKernelConfiguration,
         rhs: MTIRenderPipelineKernelConfiguration
     ) -> Bool {
-        if lhs === rhs {
-            return true
-        }
         guard lhs.colorAttachmentCount == rhs.colorAttachmentCount,
               lhs.rasterSampleCount == rhs.rasterSampleCount,
               lhs.depthAttachmentPixelFormat == rhs.depthAttachmentPixelFormat,

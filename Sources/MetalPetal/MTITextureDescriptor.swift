@@ -9,7 +9,7 @@ import Foundation
 import Metal
 
 /// An immutable wrapper for MTLTextureDescriptor.
-public final class MTITextureDescriptor: Hashable {
+public struct MTITextureDescriptor: Hashable {
     private let metalTextureDescriptor: MTLTextureDescriptor
     private let cachedHashValue: Int
 
@@ -98,7 +98,7 @@ public final class MTITextureDescriptor: Hashable {
     }
 
     public static func == (lhs: MTITextureDescriptor, rhs: MTITextureDescriptor) -> Bool {
-        if lhs === rhs {
+        if lhs.metalTextureDescriptor === rhs.metalTextureDescriptor {
             return true
         }
         return lhs.metalTextureDescriptor.isEqual(rhs.metalTextureDescriptor)

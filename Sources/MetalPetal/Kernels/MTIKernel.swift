@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public protocol MTIKernelConfiguration: AnyObject {
+public protocol MTIKernelConfiguration {
     /// Identifies the configuration within a kernel's state cache. Configurations with equal identifiers
     /// share a cached kernel state, so this must incorporate everything `makeKernelState` depends on.
     var identifier: AnyHashable { get }

@@ -43,7 +43,7 @@ extension MTIAlphaType: CustomStringConvertible {
 public typealias MTIAlphaTypeHandlingOutputAlphaTypeRule = ([MTIAlphaType]) -> MTIAlphaType
 
 /// Describes how a image processing unit handles alpha types.
-public final class MTIAlphaTypeHandlingRule {
+public struct MTIAlphaTypeHandlingRule {
     /// Acceptable alpha types.
     public let acceptableAlphaTypes: [MTIAlphaType]
     private let outputAlphaTypeHandler: MTIAlphaTypeHandlingOutputAlphaTypeRule?
@@ -64,14 +64,7 @@ public final class MTIAlphaTypeHandlingRule {
         outputAlphaTypeValue = outputAlphaType
     }
 
-    public convenience init(
-        acceptableAlphaTypes: [MTIAlphaType],
-        _ handler: @escaping ([MTIAlphaType]) -> MTIAlphaType
-    ) {
-        self.init(acceptableAlphaTypes: acceptableAlphaTypes, outputAlphaTypeHandler: handler)
-    }
-
-    public convenience init(_ handler: @escaping ([MTIAlphaType]) -> MTIAlphaType) {
+    public init(_ handler: @escaping ([MTIAlphaType]) -> MTIAlphaType) {
         self.init(
             acceptableAlphaTypes: [.premultiplied, .nonPremultiplied, .alphaIsOne],
             outputAlphaTypeHandler: handler

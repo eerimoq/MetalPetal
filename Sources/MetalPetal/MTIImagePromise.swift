@@ -114,7 +114,7 @@ public final class MTILegacyCGImagePromise: MTIImagePromise {
     }
 }
 
-public final class MTICGImageLoadingOptions {
+public struct MTICGImageLoadingOptions {
     public let colorSpace: CGColorSpace?
     public let flipsVertically: Bool
     public let storageMode: MTLStorageMode
@@ -136,7 +136,7 @@ public final class MTICGImageLoadingOptions {
         self.cpuCacheMode = cpuCacheMode
     }
 
-    public convenience init(colorSpace: CGColorSpace?) {
+    public init(colorSpace: CGColorSpace?) {
         self.init(
             colorSpace: colorSpace,
             flipsVertically: false,
@@ -145,7 +145,7 @@ public final class MTICGImageLoadingOptions {
         )
     }
 
-    public convenience init(colorSpace: CGColorSpace?, flipsVertically: Bool) {
+    public init(colorSpace: CGColorSpace?, flipsVertically: Bool) {
         self.init(
             colorSpace: colorSpace,
             flipsVertically: flipsVertically,

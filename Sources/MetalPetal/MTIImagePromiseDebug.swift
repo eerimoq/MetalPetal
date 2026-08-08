@@ -28,7 +28,7 @@ public func MTIImagePromiseDebugIdentifierForObject(_ object: Any) -> String {
     return String(string.dropFirst(2))
 }
 
-public final class MTIImagePromiseDebugInfo {
+public struct MTIImagePromiseDebugInfo {
     public let identifier: String
     public let type: MTIImagePromiseType
     public let title: String

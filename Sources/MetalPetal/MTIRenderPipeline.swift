@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIRenderPipeline {
+public struct MTIRenderPipeline {
     public let state: MTLRenderPipelineState
     public let reflection: MTLRenderPipelineReflection
 

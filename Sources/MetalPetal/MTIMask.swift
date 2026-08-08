@@ -12,7 +12,7 @@ public enum MTIMaskMode: Int {
     case oneMinusMaskValue
 }
 
-public final class MTIMask: Hashable {
+public struct MTIMask: Hashable {
     public let content: MTIImage
     public let component: MTIColorComponent
     public let mode: MTIMaskMode
@@ -23,15 +23,7 @@ public final class MTIMask: Hashable {
         self.mode = mode
     }
 
-    public convenience init(content: MTIImage) {
+    public init(content: MTIImage) {
         self.init(content: content, component: .red, mode: .normal)
-    }
-
-    public static func == (lhs: MTIMask, rhs: MTIMask) -> Bool {
-        lhs === rhs
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(ObjectIdentifier(self))
     }
 }

@@ -12,14 +12,9 @@ import os
 import QuartzCore
 import simd
 
-private final class MTIMultilayerCompositeKernelConfiguration: MTIKernelConfiguration, Hashable {
+private struct MTIMultilayerCompositeKernelConfiguration: MTIKernelConfiguration, Hashable {
     let outputPixelFormat: MTLPixelFormat
     let rasterSampleCount: Int
-
-    init(outputPixelFormat: MTLPixelFormat, rasterSampleCount: Int) {
-        self.outputPixelFormat = outputPixelFormat
-        self.rasterSampleCount = rasterSampleCount
-    }
 
     var identifier: AnyHashable {
         self
@@ -29,20 +24,9 @@ private final class MTIMultilayerCompositeKernelConfiguration: MTIKernelConfigur
         hasher.combine(outputPixelFormat.rawValue)
         hasher.combine(rasterSampleCount)
     }
-
-    static func == (
-        lhs: MTIMultilayerCompositeKernelConfiguration,
-        rhs: MTIMultilayerCompositeKernelConfiguration
-    ) -> Bool {
-        if lhs === rhs {
-            return true
-        }
-        return lhs.outputPixelFormat == rhs.outputPixelFormat
-            && lhs.rasterSampleCount == rhs.rasterSampleCount
-    }
 }
 
-private final class MTILayerRenderPipelineKey: Hashable {
+private struct MTILayerRenderPipelineKey: Hashable {
     let blendMode: MTIBlendMode
     private let contentHasPremultipliedAlpha: Bool
     private let hasContentMask: Bool
@@ -68,15 +52,6 @@ private final class MTILayerRenderPipelineKey: Hashable {
             cornerCurveType = 0
         }
         self.cornerCurveType = cornerCurveType
-    }
-
-    static func == (lhs: MTILayerRenderPipelineKey, rhs: MTILayerRenderPipelineKey) -> Bool {
-        lhs.blendMode == rhs.blendMode &&
-            lhs.contentHasPremultipliedAlpha == rhs.contentHasPremultipliedAlpha &&
-            lhs.hasContentMask == rhs.hasContentMask &&
-            lhs.hasCompositingMask == rhs.hasCompositingMask &&
-            lhs.hasTintColor == rhs.hasTintColor &&
-            lhs.cornerCurveType == rhs.cornerCurveType
     }
 
     func hash(into hasher: inout Hasher) {

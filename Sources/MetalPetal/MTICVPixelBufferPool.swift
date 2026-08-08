@@ -28,7 +28,7 @@ private func MTICVPixelBufferPoolFourCharCodeToString(_ code: FourCharCode) -> S
     return string.trimmingCharacters(in: .whitespaces)
 }
 
-public final class MTICVPixelBufferPool {
+public struct MTICVPixelBufferPool {
     private let pool: CVPixelBufferPool
     public var internalPool: CVPixelBufferPool {
         pool
@@ -61,7 +61,7 @@ public final class MTICVPixelBufferPool {
         pixelFormatDescription = MTICVPixelBufferPoolFourCharCodeToString(pixelFormatType)
     }
 
-    public convenience init(
+    public init(
         poolAttributes: [AnyHashable: Any],
         pixelBufferAttributes: [AnyHashable: Any]
     ) throws {
@@ -78,7 +78,7 @@ public final class MTICVPixelBufferPool {
         self.init(cvPixelBufferPool: pool)
     }
 
-    public convenience init(
+    public init(
         pixelBufferWidth width: Int,
         pixelBufferHeight height: Int,
         pixelFormatType: OSType,

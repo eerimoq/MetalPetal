@@ -86,14 +86,9 @@ public final class MTICLAHEFilter: MTIUnaryFilter {
 
 private let MTICLAHEHistogramBinCount = 256
 
-private final class MTICLAHELUTKernelState {
+private struct MTICLAHELUTKernelState {
     let histogramKernel: MPSImageHistogram
     let lutGeneratingPipeline: MTIComputePipeline
-
-    init(histogramKernel: MPSImageHistogram, lutGeneratingPipeline: MTIComputePipeline) {
-        self.histogramKernel = histogramKernel
-        self.lutGeneratingPipeline = lutGeneratingPipeline
-    }
 }
 
 private final class MTICLAHELUTKernel: MTIKernel {

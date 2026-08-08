@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIRenderPassOutputDescriptor: Hashable {
+public struct MTIRenderPassOutputDescriptor: Hashable {
     public let dimensions: MTITextureDimensions
     public let pixelFormat: MTLPixelFormat
     public let loadAction: MTLLoadAction
@@ -29,11 +29,11 @@ public final class MTIRenderPassOutputDescriptor: Hashable {
         self.storeAction = storeAction
     }
 
-    public convenience init(dimensions: MTITextureDimensions, pixelFormat: MTLPixelFormat) {
+    public init(dimensions: MTITextureDimensions, pixelFormat: MTLPixelFormat) {
         self.init(dimensions: dimensions, pixelFormat: pixelFormat, loadAction: .dontCare)
     }
 
-    public convenience init(
+    public init(
         dimensions: MTITextureDimensions,
         pixelFormat: MTLPixelFormat,
         loadAction: MTLLoadAction
@@ -46,7 +46,7 @@ public final class MTIRenderPassOutputDescriptor: Hashable {
         )
     }
 
-    public convenience init(
+    public init(
         dimensions: MTITextureDimensions,
         pixelFormat: MTLPixelFormat,
         loadAction: MTLLoadAction,

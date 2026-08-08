@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIComputeFunctionDispatchOptions {
+public struct MTIComputeFunctionDispatchOptions {
     public typealias Generator = (_ pipelineState: MTLComputePipelineState) -> (
         threads: MTLSize,
         threadgroups: MTLSize,

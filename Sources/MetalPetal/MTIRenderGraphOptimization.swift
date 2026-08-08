@@ -17,7 +17,7 @@ public final class MTIRenderGraphNode {
     }
 }
 
-public final class MTIRenderGraphOptimizer {
+public struct MTIRenderGraphOptimizer {
     public init() {}
 
     private static func node(

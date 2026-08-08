@@ -8,12 +8,12 @@
 import Foundation
 import Metal
 
-public protocol MTIGeometryRenderingContext: AnyObject {
+public protocol MTIGeometryRenderingContext {
     var renderPipeline: MTIRenderPipeline { get }
     var device: MTLDevice { get }
 }
 
-public protocol MTIGeometry: AnyObject {
+public protocol MTIGeometry {
     func encodeDrawCall(
         with commandEncoder: MTLRenderCommandEncoder,
         context: MTIGeometryRenderingContext

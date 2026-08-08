@@ -7,7 +7,7 @@ import Foundation
 import Metal
 
 /// Represents a GPU render task - i.e., commands in a command buffer.
-public final class MTIRenderTask {
+public struct MTIRenderTask {
     private let commandBuffer: MTLCommandBuffer
 
     public init(commandBuffer: MTLCommandBuffer) {

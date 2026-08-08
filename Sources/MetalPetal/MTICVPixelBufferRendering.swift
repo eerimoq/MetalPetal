@@ -16,7 +16,7 @@ public extension MTICVPixelBufferRenderingAPI {
     static let `default` = MTICVPixelBufferRenderingAPI.metalPetal
 }
 
-public final class MTICVPixelBufferRenderingOptions {
+public struct MTICVPixelBufferRenderingOptions {
     public let renderingAPI: MTICVPixelBufferRenderingAPI
 
     // An option for treating the pixel buffer data as sRGB image data. Specifying whether to create

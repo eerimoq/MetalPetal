@@ -9,7 +9,7 @@ import Foundation
 import Metal
 
 /// An immutable wrapper for MTLSamplerDescriptor.
-public final class MTISamplerDescriptor: Hashable {
+public struct MTISamplerDescriptor: Hashable {
     private let metalSamplerDescriptor: MTLSamplerDescriptor
     private let cachedHashValue: Int
 
@@ -27,7 +27,7 @@ public final class MTISamplerDescriptor: Hashable {
     }
 
     public static func == (lhs: MTISamplerDescriptor, rhs: MTISamplerDescriptor) -> Bool {
-        if lhs === rhs {
+        if lhs.metalSamplerDescriptor === rhs.metalSamplerDescriptor {
             return true
         }
         return lhs.metalSamplerDescriptor.isEqual(rhs.metalSamplerDescriptor)

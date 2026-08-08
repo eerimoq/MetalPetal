@@ -8,7 +8,7 @@ import Foundation
 
 /// A MTILayer represents a compositing layer for MTIMultilayerCompositingFilter. MTILayers use a UIKit like
 /// coordinate system.
-public final class MTILayer {
+public struct MTILayer {
     public enum LayoutUnit: Int {
         case pixel
         case fractionOfBackgroundSize
@@ -77,7 +77,7 @@ public final class MTILayer {
         self.blendMode = blendMode
     }
 
-    public convenience init(
+    public init(
         content: MTIImage,
         layoutUnit: LayoutUnit,
         position: CGPoint,
@@ -100,7 +100,7 @@ public final class MTILayer {
         )
     }
 
-    public convenience init(
+    public init(
         content: MTIImage,
         contentRegion: CGRect,
         compositingMask: MTIMask?,
@@ -125,7 +125,7 @@ public final class MTILayer {
         )
     }
 
-    public convenience init(
+    public init(
         content: MTIImage,
         contentRegion: CGRect,
         contentFlipOptions: FlipOptions,
@@ -152,7 +152,7 @@ public final class MTILayer {
         )
     }
 
-    public convenience init(
+    public init(
         content: MTIImage,
         contentRegion: CGRect,
         contentFlipOptions: FlipOptions,
@@ -181,7 +181,7 @@ public final class MTILayer {
         )
     }
 
-    public convenience init(
+    public init(
         content: MTIImage,
         contentRegion: CGRect,
         contentFlipOptions: FlipOptions,

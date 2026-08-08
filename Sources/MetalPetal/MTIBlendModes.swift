@@ -21,45 +21,43 @@ public struct MTIBlendMode: RawRepresentable, Hashable {
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }
+
+    public static let normal = MTIBlendMode("Normal")
+
+    public static let darken = MTIBlendMode("Darken")
+    public static let multiply = MTIBlendMode("Multiply")
+    public static let colorBurn = MTIBlendMode("ColorBurn")
+    public static let linearBurn = MTIBlendMode("LinearBurn")
+    public static let darkerColor = MTIBlendMode("DarkerColor")
+
+    public static let lighten = MTIBlendMode("Lighten")
+    public static let screen = MTIBlendMode("Screen")
+    public static let colorDodge = MTIBlendMode("ColorDodge")
+    public static let add = MTIBlendMode("Add") // also LinearDodge
+    public static let lighterColor = MTIBlendMode("LighterColor")
+
+    public static let overlay = MTIBlendMode("Overlay")
+    public static let softLight = MTIBlendMode("SoftLight")
+    public static let hardLight = MTIBlendMode("HardLight")
+    public static let vividLight = MTIBlendMode("VividLight")
+    public static let linearLight = MTIBlendMode("LinearLight")
+    public static let pinLight = MTIBlendMode("PinLight")
+    public static let hardMix = MTIBlendMode("HardMix")
+
+    public static let difference = MTIBlendMode("Difference")
+    public static let exclusion = MTIBlendMode("Exclusion")
+    public static let subtract = MTIBlendMode("Subtract")
+    public static let divide = MTIBlendMode("Divide")
+
+    public static let hue = MTIBlendMode("Hue")
+    public static let saturation = MTIBlendMode("Saturation")
+    public static let color = MTIBlendMode("Color")
+    public static let luminosity = MTIBlendMode("Luminosity")
+
+    public static let colorLookup512x512 = MTIBlendMode("ColorLookup512x512")
 }
 
-public extension MTIBlendMode {
-    static let normal = MTIBlendMode("Normal")
-
-    static let darken = MTIBlendMode("Darken")
-    static let multiply = MTIBlendMode("Multiply")
-    static let colorBurn = MTIBlendMode("ColorBurn")
-    static let linearBurn = MTIBlendMode("LinearBurn")
-    static let darkerColor = MTIBlendMode("DarkerColor")
-
-    static let lighten = MTIBlendMode("Lighten")
-    static let screen = MTIBlendMode("Screen")
-    static let colorDodge = MTIBlendMode("ColorDodge")
-    static let add = MTIBlendMode("Add") // also LinearDodge
-    static let lighterColor = MTIBlendMode("LighterColor")
-
-    static let overlay = MTIBlendMode("Overlay")
-    static let softLight = MTIBlendMode("SoftLight")
-    static let hardLight = MTIBlendMode("HardLight")
-    static let vividLight = MTIBlendMode("VividLight")
-    static let linearLight = MTIBlendMode("LinearLight")
-    static let pinLight = MTIBlendMode("PinLight")
-    static let hardMix = MTIBlendMode("HardMix")
-
-    static let difference = MTIBlendMode("Difference")
-    static let exclusion = MTIBlendMode("Exclusion")
-    static let subtract = MTIBlendMode("Subtract")
-    static let divide = MTIBlendMode("Divide")
-
-    static let hue = MTIBlendMode("Hue")
-    static let saturation = MTIBlendMode("Saturation")
-    static let color = MTIBlendMode("Color")
-    static let luminosity = MTIBlendMode("Luminosity")
-
-    static let colorLookup512x512 = MTIBlendMode("ColorLookup512x512")
-}
-
-public final class MTIBlendFunctionDescriptors {
+public struct MTIBlendFunctionDescriptors {
     public let forBlendFilter: MTIFunctionDescriptor
     public let forMultilayerCompositingFilterWithProgrammableBlending: MTIFunctionDescriptor?
     public let forMultilayerCompositingFilterWithoutProgrammableBlending: MTIFunctionDescriptor?
@@ -82,7 +80,7 @@ public final class MTIBlendFunctionDescriptors {
     /// `float4`. The first argument represents the value of the backdrop pixel and the second represents
     /// the source pixel. The value returned by the function will be the new destination color. All colors
     /// should have unpremultiplied alpha component.
-    public convenience init(blendFormula formula: String) {
+    public init(blendFormula formula: String) {
         let compileOptions = MTLCompileOptions()
         let shaderLibraryURL = MTILibrarySourceRegistration.shared.registerLibrary(
             source: MTIBuildBlendFormulaShaderSource(formula),

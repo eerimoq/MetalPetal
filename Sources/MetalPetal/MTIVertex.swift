@@ -80,7 +80,7 @@ extension MTIDataBuffer: MTIVertexBufferStorage {
 
 /// A MTIGeometry implementation. A MTIVertices contains MTIVertex data structures. It is designed to handle a
 /// small amount of vertices. A MTIVertices bounds its contents to the vertex buffer with index of 0.
-public final class MTIVertices: MTIGeometry, Hashable {
+public struct MTIVertices: MTIGeometry, Hashable {
     public let vertexCount: Int
 
     public let indexCount: Int
@@ -134,9 +134,6 @@ public final class MTIVertices: MTIGeometry, Hashable {
     }
 
     public static func == (lhs: MTIVertices, rhs: MTIVertices) -> Bool {
-        if lhs === rhs {
-            return true
-        }
         guard lhs.vertexCount == rhs.vertexCount, lhs.indexCount == rhs.indexCount else {
             return false
         }
@@ -205,7 +202,7 @@ public final class MTIVertices: MTIGeometry, Hashable {
 }
 
 public extension MTIVertices {
-    convenience init(vertices: [MTIVertex], primitiveType: MTLPrimitiveType) {
+    init(vertices: [MTIVertex], primitiveType: MTLPrimitiveType) {
         self.init(vertices: vertices, count: vertices.count, primitiveType: primitiveType)
     }
 }

@@ -82,7 +82,7 @@ struct ContextTests {
 struct ContextOptionsTests {
     @Test func contextTexturePoolFactory() throws {
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.makeTexturePool = { MTIDeviceTexturePool(device: $0) }
             let context = try makeContext(options: options)
             #expect(context.texturePool is MTIDeviceTexturePool)
@@ -90,7 +90,7 @@ struct ContextOptionsTests {
         do {
             if #available(iOS 13.0, macOS 10.15, *) {
                 if let device = MTLCreateSystemDefaultDevice(), MTIHeapTexturePool.isSupported(on: device) {
-                    let options = MTIContextOptions()
+                    var options = MTIContextOptions()
                     options.makeTexturePool = { MTIHeapTexturePool(device: $0) }
                     let context = try makeContext(options: options)
                     #expect(context.texturePool is MTIHeapTexturePool)
@@ -101,13 +101,13 @@ struct ContextOptionsTests {
 
     @Test func coreVideoMetalTextureBridgeClass() throws {
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.makeCoreVideoMetalTextureBridge = { try MTICVMetalTextureCache(device: $0) }
             let context = try makeContext(options: options)
             #expect(context.coreVideoTextureBridge is MTICVMetalTextureCache)
         }
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.makeCoreVideoMetalTextureBridge = { MTICVMetalIOSurfaceBridge(device: $0) }
             let context = try makeContext(options: options)
             #expect(context.coreVideoTextureBridge is MTICVMetalIOSurfaceBridge)
@@ -121,7 +121,7 @@ struct ContextOptionsTests {
             #expect(context.workingPixelFormat == .bgra8Unorm)
         }
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.workingPixelFormat = .r16Float
             let context = try makeContext(options: options)
             #expect(context.workingPixelFormat == .r16Float)
@@ -135,7 +135,7 @@ struct ContextOptionsTests {
             #expect(context.label == MTIContextDefaultLabel)
         }
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.label = "test"
             let context = try makeContext(options: options)
             #expect(context.label == "test")
@@ -144,13 +144,13 @@ struct ContextOptionsTests {
 
     @Test func testCoreImageContextOptions() throws {
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             options.coreImageContextOptions = [CIContextOption.workingFormat: CIFormat.RGBA8]
             let context = try makeContext(options: options)
             #expect(context.coreImageContext.workingFormat == .RGBA8)
         }
         do {
-            let options = MTIContextOptions()
+            var options = MTIContextOptions()
             let colorspace = CGColorSpaceCreateDeviceRGB()
             options.coreImageContextOptions = [CIContextOption.workingColorSpace: colorspace]
             let context = try makeContext(options: options)

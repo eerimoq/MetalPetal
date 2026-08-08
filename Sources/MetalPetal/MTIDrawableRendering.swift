@@ -20,7 +20,7 @@ public enum MTIDrawableRenderingResizingMode {
     case aspectFill
 }
 
-public final class MTIDrawableRenderingRequest {
+public struct MTIDrawableRenderingRequest {
     public weak var drawableProvider: MTIDrawableProvider?
     public let resizingMode: MTIDrawableRenderingResizingMode
 

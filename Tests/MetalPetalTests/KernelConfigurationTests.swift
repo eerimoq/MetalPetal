@@ -29,7 +29,6 @@ struct KernelConfigurationTests {
     @Test func equalConfigurationsShareACacheKey() {
         let a = configuration()
         let b = configuration()
-        #expect(a !== b)
         #expect(a.identifier == b.identifier)
         #expect(a.identifier.hashValue == b.identifier.hashValue)
         var store: [AnyHashable: Int] = [:]

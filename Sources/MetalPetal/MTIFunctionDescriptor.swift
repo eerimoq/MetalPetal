@@ -8,7 +8,7 @@
 import Foundation
 import Metal
 
-public final class MTIFunctionDescriptor: Hashable, CustomStringConvertible {
+public struct MTIFunctionDescriptor: Hashable, CustomStringConvertible {
     public let libraryURL: URL?
     public let name: String
     public let constantValues: MTLFunctionConstantValues?
@@ -26,11 +26,11 @@ public final class MTIFunctionDescriptor: Hashable, CustomStringConvertible {
         cachedHashValue = hasher.finalize()
     }
 
-    public convenience init(name: String) {
+    public init(name: String) {
         self.init(name: name, constantValues: nil, libraryURL: nil)
     }
 
-    public convenience init(name: String, libraryURL: URL?) {
+    public init(name: String, libraryURL: URL?) {
         self.init(name: name, constantValues: nil, libraryURL: libraryURL)
     }
 
@@ -43,17 +43,14 @@ public final class MTIFunctionDescriptor: Hashable, CustomStringConvertible {
     }
 
     public static func == (lhs: MTIFunctionDescriptor, rhs: MTIFunctionDescriptor) -> Bool {
-        if lhs === rhs {
-            return true
-        }
-        return lhs.name == rhs.name
+        lhs.name == rhs.name
             && lhs.libraryURL == rhs.libraryURL
             && ((lhs.constantValues == nil && rhs.constantValues == nil)
                 || lhs.constantValues?.isEqual(rhs.constantValues) == true)
     }
 
     public var description: String {
-        "<\(type(of: self)): \(Unmanaged.passUnretained(self).toOpaque()); "
+        "<\(type(of: self)): "
             + "name = \(name); constantValues = \(String(describing: constantValues)); "
             + "libraryURL = \(String(describing: libraryURL))>"
     }
@@ -67,7 +64,7 @@ public extension MTIFunctionDescriptor {
 }
 
 public extension MTIFunctionDescriptor {
-    convenience init(name: String, constantValues: MTLFunctionConstantValues? = nil, in bundle: Bundle) {
+    init(name: String, constantValues: MTLFunctionConstantValues? = nil, in bundle: Bundle) {
         self.init(
             name: name,
             constantValues: constantValues,

@@ -42,7 +42,7 @@ struct ImageLoadingTests {
         }
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
         let image = MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .nonPremultiplied)
-        let options = MTIContextOptions()
+        var options = MTIContextOptions()
         options.makeCoreVideoMetalTextureBridge = { try MTICVMetalTextureCache(device: $0) }
         let context = try makeContext(options: options)
         let cgImage = try context.makeCGImage(from: image)
@@ -89,7 +89,7 @@ struct ImageLoadingTests {
         }
         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
         let image = MTIImage(cvPixelBuffer: pixelBuffer, alphaType: .nonPremultiplied)
-        let options = MTIContextOptions()
+        var options = MTIContextOptions()
         options.makeCoreVideoMetalTextureBridge = { MTICVMetalIOSurfaceBridge(device: $0) }
         let context = try makeContext(options: options)
         let cgImage = try context.makeCGImage(from: image)

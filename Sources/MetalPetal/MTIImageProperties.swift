@@ -9,7 +9,7 @@ import CoreGraphics
 import Foundation
 import ImageIO
 
-public final class MTIImageProperties {
+public struct MTIImageProperties {
     public let alphaInfo: CGImageAlphaInfo
     public let byteOrderInfo: CGImageByteOrderInfo
     public let floatComponents: Bool
@@ -100,11 +100,11 @@ public final class MTIImageProperties {
         displayHeight = displaySize.height
     }
 
-    public convenience init(cgImage image: CGImage) {
+    public init(cgImage image: CGImage) {
         self.init(cgImage: image, orientation: .up)
     }
 
-    public convenience init?(imageAt url: URL) {
+    public init?(imageAt url: URL) {
         let options = MTIImageProperties.imageSourceOptions as CFDictionary
         guard let source = CGImageSourceCreateWithURL(url as CFURL, options) else {
             return nil
