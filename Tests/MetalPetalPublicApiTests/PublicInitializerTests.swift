@@ -102,7 +102,7 @@ struct PublicInitializerTests {
             MTIVector(value: CGRect(x: 1, y: 2, width: 3, height: 4)).cgRectValue
                 == CGRect(x: 1, y: 2, width: 3, height: 4)
         )
-        #expect(MTIVector(value: SIMD2<Float>(5, 6)).float2Value == SIMD2<Float>(5, 6))
+        #expect(MTIVector(value: SIMD2<Float>(5, 6)).float2() == SIMD2<Float>(5, 6))
     }
 
     @Test func countsAndDimensionsAreIntForConsumers() throws {

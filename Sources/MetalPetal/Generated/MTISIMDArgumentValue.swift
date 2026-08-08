@@ -1,15 +1,11 @@
 //
-//  MTISIMDArgumentValue.swift
-//  MetalPetal
-//
-//  Auto-generated.
+// This is an auto-generated source file.
 //
 
 import Foundation
 import Metal
 import simd
 
-/// A SIMD vector or matrix value that can be encoded into a shader function argument.
 public enum MTISIMDArgumentValue {
     case float2(SIMD2<Float>)
     case float3(SIMD3<Float>)
@@ -45,7 +41,6 @@ public enum MTISIMDArgumentValue {
     case packedFloat3(MTLPackedFloat3)
     #endif
 
-    /// The data type a shader argument must be declared with to accept this value.
     public var dataType: MTLDataType {
         switch self {
         case .float2:

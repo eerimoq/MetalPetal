@@ -8,38 +8,6 @@
 import Foundation
 import SIMDType
 
-private let template: String = """
-//
-//  MTISIMDArgumentValue.swift
-//  MetalPetal
-//
-//  Auto-generated.
-//
-
-import Foundation
-import Metal
-import simd
-
-/// A SIMD vector or matrix value that can be encoded into a shader function argument.
-public enum MTISIMDArgumentValue {
-{MTI_SIMD_ARGUMENT_VALUE_CASES}
-
-    /// The data type a shader argument must be declared with to accept this value.
-    public var dataType: MTLDataType {
-        switch self {
-{MTI_SIMD_ARGUMENT_VALUE_DATA_TYPES}
-        }
-    }
-
-    public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
-        switch self {
-{MTI_SIMD_ARGUMENT_VALUE_BYTES}
-        }
-    }
-}
-
-"""
-
 public enum MTISIMDArgumentValueGenerator {
     private static func caseName(for simdType: SIMDType) -> String {
         let scalar = simdType.scalarType.description(capitalized: false)
@@ -89,10 +57,32 @@ public enum MTISIMDArgumentValueGenerator {
                 try Swift.withUnsafeBytes(of: value, body)
         #endif
         """)
-        let content = template
-            .replacingOccurrences(of: "{MTI_SIMD_ARGUMENT_VALUE_CASES}", with: cases)
-            .replacingOccurrences(of: "{MTI_SIMD_ARGUMENT_VALUE_DATA_TYPES}", with: dataTypes)
-            .replacingOccurrences(of: "{MTI_SIMD_ARGUMENT_VALUE_BYTES}", with: bytes)
-        return ["MTISIMDArgumentValue.swift": content]
+        let fileContent = """
+        //
+        // This is an auto-generated source file.
+        //
+
+        import Foundation
+        import Metal
+        import simd
+
+        public enum MTISIMDArgumentValue {
+        \(cases)
+
+            public var dataType: MTLDataType {
+                switch self {
+        \(dataTypes)
+                }
+            }
+
+            public func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+                switch self {
+        \(bytes)
+                }
+            }
+        }
+
+        """
+        return ["MTISIMDArgumentValue.swift": fileContent]
     }
 }

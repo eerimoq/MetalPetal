@@ -5,9 +5,9 @@ extension SIMDType {
     var getterForMTIVector: String {
         switch dimension {
         case let .vector(c):
-            "\(scalarType.description(capitalized: false))\(c)Value"
+            "\(scalarType.description(capitalized: false))\(c)"
         case let .matrix(c, r):
-            "\(scalarType.description(capitalized: false))\(c)x\(r)Value"
+            "\(scalarType.description(capitalized: false))\(c)x\(r)"
         }
     }
 
@@ -28,74 +28,51 @@ extension SIMDType {
 }
 
 public enum MTIVectorSIMDTypeSupportCodeGenerator {
-    struct SwiftTemplate {
-        private let template =
-            """
-            //
-            //  MTIVector+SIMD.swift
-            //  MetalPetal
-            //
-            //  Created by Yu Ao on 2018/6/30.
-            //
-            //  Auto generated.
-
-            import Foundation
-            import simd
-            // WARNING: MTIVector equality may not work for a MTIVector holding a simd_type3 or simd_typeNx3 value.
-
-            extension MTIVector {
-
-            {MTIVectorSIMDSupport}
-            }
-            """
-
-        private var lines: [String] = []
-
-        mutating func append(type: SIMDType) {
+    public static func generate() -> [String: String] {
+        var lines: [String] = []
+        for type in SIMDType.metalSupportedSIMDTypes {
             let swiftType = type.swiftSIMDTypeName
             let scalarType = type.scalarType.swiftTypeName
-            lines.append(
-                """
-                    public init(value: \(swiftType)) {
-                        var v = value
-                        let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
-                        let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(
-                            scalarType
-                        ).self)) }
-                        self.init(\(type.scalarValuesInitializerLabel): scalars, count: count)
+            lines.append("""
+            public init(value: \(swiftType)) {
+                var v = value
+                let count = MemoryLayout<\(swiftType)>.size / MemoryLayout<\(scalarType)>.size
+                let scalars = Swift.withUnsafeBytes(of: &v) { Array($0.bindMemory(to: \(
+                    scalarType
+                ).self)) }
+                self.init(\(type.scalarValuesInitializerLabel): scalars, count: count)
+            }
+
+            public func \(type.getterForMTIVector)() -> \(swiftType) {
+                var value = \(swiftType)()
+                if scalarType == .\(type
+                .scalarTypeCaseName) && byteLength == MemoryLayout<\(swiftType)>.size {
+                    withUnsafeBytes { source in
+                        _ = Swift.withUnsafeMutableBytes(of: &value) {
+                            memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<\(
+                                swiftType
+                            )>.size) }
                     }
-
-                    public var \(type.getterForMTIVector): \(swiftType) {
-                        var value = \(swiftType)()
-                        if scalarType == .\(type
-                    .scalarTypeCaseName) && byteLength == MemoryLayout<\(swiftType)>.size {
-                            withUnsafeBytes { source in
-                                _ = Swift.withUnsafeMutableBytes(of: &value) {
-                                    memcpy($0.baseAddress!, source.baseAddress!, MemoryLayout<\(
-                                        swiftType
-                                    )>.size) }
-                            }
-                        }
-                        return value
-                    }
-                """
-            )
+                }
+                return value
+            }
+            """)
         }
+        let fileContent = """
+        //
+        // This is an auto-generated source file.
+        //
 
-        func makeContent() -> String {
-            template.replacingOccurrences(of: "{MTIVectorSIMDSupport}", with: lines.reduce("") {
-                $0.count > 0 ? ($0 + "\n\n" + $1) : $1
-            })
-        }
-    }
+        import Foundation
+        import simd
 
-    public static func generate() -> [String: String] {
-        var swiftTemplate = SwiftTemplate()
-        for type in SIMDType.metalSupportedSIMDTypes {
-            swiftTemplate.append(type: type)
+        extension MTIVector {
+
+        \(lines.joined(separator: "\n\n"))
         }
+        """
         return [
-            "MTIVector+SIMD.swift": swiftTemplate.makeContent(),
+            "MTIVector+SIMD.swift": fileContent,
         ]
     }
 }

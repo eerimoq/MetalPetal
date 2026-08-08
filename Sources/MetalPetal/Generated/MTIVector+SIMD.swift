@@ -1,15 +1,9 @@
 //
-//  MTIVector+SIMD.swift
-//  MetalPetal
+// This is an auto-generated source file.
 //
-//  Created by Yu Ao on 2018/6/30.
-//
-//  Auto generated.
 
 import Foundation
 import simd
-
-// WARNING: MTIVector equality may not work for a MTIVector holding a simd_type3 or simd_typeNx3 value.
 
 public extension MTIVector {
     init(value: simd_float2) {
@@ -19,7 +13,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float2Value: simd_float2 {
+    func float2() -> simd_float2 {
         var value = simd_float2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2>.size {
             withUnsafeBytes { source in
@@ -38,7 +32,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float3Value: simd_float3 {
+    func float3() -> simd_float3 {
         var value = simd_float3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3>.size {
             withUnsafeBytes { source in
@@ -57,7 +51,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float4Value: simd_float4 {
+    func float4() -> simd_float4 {
         var value = simd_float4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4>.size {
             withUnsafeBytes { source in
@@ -76,7 +70,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float2x2Value: simd_float2x2 {
+    func float2x2() -> simd_float2x2 {
         var value = simd_float2x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x2>.size {
             withUnsafeBytes { source in
@@ -95,7 +89,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float2x3Value: simd_float2x3 {
+    func float2x3() -> simd_float2x3 {
         var value = simd_float2x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x3>.size {
             withUnsafeBytes { source in
@@ -114,7 +108,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float2x4Value: simd_float2x4 {
+    func float2x4() -> simd_float2x4 {
         var value = simd_float2x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float2x4>.size {
             withUnsafeBytes { source in
@@ -133,7 +127,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float3x2Value: simd_float3x2 {
+    func float3x2() -> simd_float3x2 {
         var value = simd_float3x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x2>.size {
             withUnsafeBytes { source in
@@ -152,7 +146,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float3x3Value: simd_float3x3 {
+    func float3x3() -> simd_float3x3 {
         var value = simd_float3x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x3>.size {
             withUnsafeBytes { source in
@@ -171,7 +165,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float3x4Value: simd_float3x4 {
+    func float3x4() -> simd_float3x4 {
         var value = simd_float3x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float3x4>.size {
             withUnsafeBytes { source in
@@ -190,7 +184,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float4x2Value: simd_float4x2 {
+    func float4x2() -> simd_float4x2 {
         var value = simd_float4x2()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x2>.size {
             withUnsafeBytes { source in
@@ -209,7 +203,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float4x3Value: simd_float4x3 {
+    func float4x3() -> simd_float4x3 {
         var value = simd_float4x3()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x3>.size {
             withUnsafeBytes { source in
@@ -228,7 +222,7 @@ public extension MTIVector {
         self.init(floatValues: scalars, count: count)
     }
 
-    var float4x4Value: simd_float4x4 {
+    func float4x4() -> simd_float4x4 {
         var value = simd_float4x4()
         if scalarType == .float, byteLength == MemoryLayout<simd_float4x4>.size {
             withUnsafeBytes { source in
@@ -247,7 +241,7 @@ public extension MTIVector {
         self.init(intValues: scalars, count: count)
     }
 
-    var int2Value: simd_int2 {
+    func int2() -> simd_int2 {
         var value = simd_int2()
         if scalarType == .int, byteLength == MemoryLayout<simd_int2>.size {
             withUnsafeBytes { source in
@@ -266,7 +260,7 @@ public extension MTIVector {
         self.init(intValues: scalars, count: count)
     }
 
-    var int3Value: simd_int3 {
+    func int3() -> simd_int3 {
         var value = simd_int3()
         if scalarType == .int, byteLength == MemoryLayout<simd_int3>.size {
             withUnsafeBytes { source in
@@ -285,7 +279,7 @@ public extension MTIVector {
         self.init(intValues: scalars, count: count)
     }
 
-    var int4Value: simd_int4 {
+    func int4() -> simd_int4 {
         var value = simd_int4()
         if scalarType == .int, byteLength == MemoryLayout<simd_int4>.size {
             withUnsafeBytes { source in
@@ -304,7 +298,7 @@ public extension MTIVector {
         self.init(uintValues: scalars, count: count)
     }
 
-    var uint2Value: simd_uint2 {
+    func uint2() -> simd_uint2 {
         var value = simd_uint2()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint2>.size {
             withUnsafeBytes { source in
@@ -323,7 +317,7 @@ public extension MTIVector {
         self.init(uintValues: scalars, count: count)
     }
 
-    var uint3Value: simd_uint3 {
+    func uint3() -> simd_uint3 {
         var value = simd_uint3()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint3>.size {
             withUnsafeBytes { source in
@@ -342,7 +336,7 @@ public extension MTIVector {
         self.init(uintValues: scalars, count: count)
     }
 
-    var uint4Value: simd_uint4 {
+    func uint4() -> simd_uint4 {
         var value = simd_uint4()
         if scalarType == .uint, byteLength == MemoryLayout<simd_uint4>.size {
             withUnsafeBytes { source in
@@ -361,7 +355,7 @@ public extension MTIVector {
         self.init(shortValues: scalars, count: count)
     }
 
-    var short2Value: simd_short2 {
+    func short2() -> simd_short2 {
         var value = simd_short2()
         if scalarType == .short, byteLength == MemoryLayout<simd_short2>.size {
             withUnsafeBytes { source in
@@ -380,7 +374,7 @@ public extension MTIVector {
         self.init(shortValues: scalars, count: count)
     }
 
-    var short3Value: simd_short3 {
+    func short3() -> simd_short3 {
         var value = simd_short3()
         if scalarType == .short, byteLength == MemoryLayout<simd_short3>.size {
             withUnsafeBytes { source in
@@ -399,7 +393,7 @@ public extension MTIVector {
         self.init(shortValues: scalars, count: count)
     }
 
-    var short4Value: simd_short4 {
+    func short4() -> simd_short4 {
         var value = simd_short4()
         if scalarType == .short, byteLength == MemoryLayout<simd_short4>.size {
             withUnsafeBytes { source in
@@ -418,7 +412,7 @@ public extension MTIVector {
         self.init(ushortValues: scalars, count: count)
     }
 
-    var ushort2Value: simd_ushort2 {
+    func ushort2() -> simd_ushort2 {
         var value = simd_ushort2()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort2>.size {
             withUnsafeBytes { source in
@@ -437,7 +431,7 @@ public extension MTIVector {
         self.init(ushortValues: scalars, count: count)
     }
 
-    var ushort3Value: simd_ushort3 {
+    func ushort3() -> simd_ushort3 {
         var value = simd_ushort3()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort3>.size {
             withUnsafeBytes { source in
@@ -456,7 +450,7 @@ public extension MTIVector {
         self.init(ushortValues: scalars, count: count)
     }
 
-    var ushort4Value: simd_ushort4 {
+    func ushort4() -> simd_ushort4 {
         var value = simd_ushort4()
         if scalarType == .ushort, byteLength == MemoryLayout<simd_ushort4>.size {
             withUnsafeBytes { source in
@@ -475,7 +469,7 @@ public extension MTIVector {
         self.init(charValues: scalars, count: count)
     }
 
-    var char2Value: simd_char2 {
+    func char2() -> simd_char2 {
         var value = simd_char2()
         if scalarType == .char, byteLength == MemoryLayout<simd_char2>.size {
             withUnsafeBytes { source in
@@ -494,7 +488,7 @@ public extension MTIVector {
         self.init(charValues: scalars, count: count)
     }
 
-    var char3Value: simd_char3 {
+    func char3() -> simd_char3 {
         var value = simd_char3()
         if scalarType == .char, byteLength == MemoryLayout<simd_char3>.size {
             withUnsafeBytes { source in
@@ -513,7 +507,7 @@ public extension MTIVector {
         self.init(charValues: scalars, count: count)
     }
 
-    var char4Value: simd_char4 {
+    func char4() -> simd_char4 {
         var value = simd_char4()
         if scalarType == .char, byteLength == MemoryLayout<simd_char4>.size {
             withUnsafeBytes { source in
@@ -532,7 +526,7 @@ public extension MTIVector {
         self.init(ucharValues: scalars, count: count)
     }
 
-    var uchar2Value: simd_uchar2 {
+    func uchar2() -> simd_uchar2 {
         var value = simd_uchar2()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar2>.size {
             withUnsafeBytes { source in
@@ -551,7 +545,7 @@ public extension MTIVector {
         self.init(ucharValues: scalars, count: count)
     }
 
-    var uchar3Value: simd_uchar3 {
+    func uchar3() -> simd_uchar3 {
         var value = simd_uchar3()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar3>.size {
             withUnsafeBytes { source in
@@ -570,7 +564,7 @@ public extension MTIVector {
         self.init(ucharValues: scalars, count: count)
     }
 
-    var uchar4Value: simd_uchar4 {
+    func uchar4() -> simd_uchar4 {
         var value = simd_uchar4()
         if scalarType == .uchar, byteLength == MemoryLayout<simd_uchar4>.size {
             withUnsafeBytes { source in

@@ -13,7 +13,7 @@ enum BlendFormulaSupport {
         let functionConstantsHeaderFile = sourceDirectory
             .appending(path: "Shaders/MTIShaderFunctionConstants.h")
         let functionConstantsContent = try String(contentsOf: functionConstantsHeaderFile, encoding: .utf8)
-        let imp = ##"""
+        let fileContent = ##"""
         //
         // This is an auto-generated source file.
         //
@@ -58,9 +58,8 @@ enum BlendFormulaSupport {
         }
 
         """##
-
         return [
-            "MTIBlendFormulaSupport.swift": imp,
+            "MTIBlendFormulaSupport.swift": fileContent,
         ]
     }
 }

@@ -183,8 +183,14 @@ public enum MetalPetalBlendingShadersCodeGenerator {
     }
 
     static func generateBlendingShaders(blendModes: [String]) -> [String: String] {
-        var fileContent = ""
-        fileContent += """
+        var functions = ""
+        for mode in blendModes {
+            functions += generateBlendFilterFragmentShader(
+                shaderFunctionName: mode.lowerCamelCased + "Blend",
+                blendFunctionName: mode.lowerCamelCased + "Blend"
+            )
+        }
+        let fileContent = """
         //
         // This is an auto-generated source file.
         //
@@ -198,16 +204,7 @@ public enum MetalPetalBlendingShadersCodeGenerator {
 
         namespace metalpetal {
 
-        """
-
-        for mode in blendModes {
-            fileContent += generateBlendFilterFragmentShader(
-                shaderFunctionName: mode.lowerCamelCased + "Blend",
-                blendFunctionName: mode.lowerCamelCased + "Blend"
-            )
-        }
-
-        fileContent += """
+        \(functions)
 
         }
 
@@ -216,7 +213,14 @@ public enum MetalPetalBlendingShadersCodeGenerator {
     }
 
     static func generateMultilayerCompositeShaders(blendModes: [String]) -> [String: String] {
-        var fileContent = """
+        var functions = ""
+        for mode in blendModes {
+            functions += generateMultilayerCompositeFilterFragmentShader(
+                shaderFunctionName: "multilayerComposite" + mode + "Blend",
+                blendFunctionName: mode.lowerCamelCased + "Blend"
+            )
+        }
+        let fileContent = """
         //
         // This is an auto-generated source file.
         //
@@ -249,17 +253,7 @@ public enum MetalPetalBlendingShadersCodeGenerator {
             return outVertex;
         }
 
-
-        """
-
-        for mode in blendModes {
-            fileContent += generateMultilayerCompositeFilterFragmentShader(
-                shaderFunctionName: "multilayerComposite" + mode + "Blend",
-                blendFunctionName: mode.lowerCamelCased + "Blend"
-            )
-        }
-
-        fileContent += """
+        \(functions)
 
         }
 
