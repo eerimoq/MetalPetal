@@ -11,7 +11,6 @@ import Foundation
 import Metal
 import MetalKit
 
-/// Abstract interface for texture loaders.
 public protocol MTITextureLoader: AnyObject {
     func newTexture(with cgImage: CGImage, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture
     func newTexture(withContentsOf url: URL, options: [MTKTextureLoader.Option: Any]?) throws -> MTLTexture

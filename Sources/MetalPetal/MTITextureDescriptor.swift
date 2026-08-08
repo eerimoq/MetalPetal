@@ -8,7 +8,6 @@
 import Foundation
 import Metal
 
-/// An immutable wrapper for MTLTextureDescriptor.
 public struct MTITextureDescriptor: Hashable {
     private let metalTextureDescriptor: MTLTextureDescriptor
     private let cachedHashValue: Int
