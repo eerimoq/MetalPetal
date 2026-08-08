@@ -6,7 +6,6 @@ import PackageDescription
 let package = Package(
     name: "Utilities",
     platforms: [.macOS(.v14)],
-    products: [],
     dependencies: [
         .package(url: "https://github.com/MetalPetal/SIMDType.git", from: "0.0.3"),
     ],

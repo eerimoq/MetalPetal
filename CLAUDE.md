@@ -49,16 +49,23 @@ The `xcodebuild` targets use `-workspace .` — that is the SwiftPM-generated
 
 `make generate` runs the separate SwiftPM package in `Utilities/` and overwrites:
 
-- `Sources/MetalPetal/MTIVector+SIMD.swift`
-- `Sources/MetalPetal/MTISIMDArgumentValue.swift`
-- `Sources/MetalPetal/MTIBlendFormulaSupport.swift`
+- `Sources/MetalPetal/Generated/MTIVector+SIMD.swift`
+- `Sources/MetalPetal/Generated/MTISIMDArgumentValue.swift`
+- `Sources/MetalPetal/Generated/MTIBlendFormulaSupport.swift`
 - `Sources/MetalPetal/Shaders/BlendingShaders.metal`
 - `Sources/MetalPetal/Shaders/MultilayerCompositeShaders.metal`
 
 Blend modes are driven by the `blendModes` array in
-`Utilities/Sources/main/MetalPetalBlendingShaders.swift`; blend-formula support is parsed
-out of `Shaders/MTIShaderLib.h` and `Shaders/MTIShaderFunctionConstants.h`. To change any of the
-above, change the generator (or the headers it reads) and re-run `make generate`.
+`Utilities/Sources/main/MetalPetalBlendingShaders.swift`; blend-formula support embeds
+`Shaders/MTIShaderLib.h` and `Shaders/MTIShaderFunctionConstants.h` verbatim, so an edit to either
+header lands in the generated file unfiltered. To change any of the above, change the generator (or
+the headers it reads) and re-run `make generate`.
+
+`make generate` runs `make style` afterwards, and that second step is load-bearing: swiftformat and
+clang-format re-derive the layout of the generated Swift and `.metal` files, so whitespace in the
+generator's templates is mostly inert. The exception is `MTIBlendFormulaSupport.swift`, which embeds
+shader source inside a Swift string that no formatter reaches — indentation there is preserved as
+written.
 
 ## Architecture
 
