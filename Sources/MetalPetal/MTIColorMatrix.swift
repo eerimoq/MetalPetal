@@ -38,10 +38,6 @@ public struct MTIColorMatrix: Equatable {
         bias: SIMD4<Float>(1, 1, 1, 0)
     )
 
-    var isIdentity: Bool {
-        self == .identity
-    }
-
     func concat(with other: MTIColorMatrix) -> MTIColorMatrix {
         var a = MTIColorMatrix.fillFloat5x5(self)
         var b = MTIColorMatrix.fillFloat5x5(other)

@@ -10,7 +10,6 @@ import Metal
 import MetalKit
 import MetalPerformanceShaders
 @testable import MetalPetal
-import MetalPetalTestHelpers
 import Testing
 
 func listMetalDevices() -> String {
